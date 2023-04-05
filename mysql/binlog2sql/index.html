@@ -1,0 +1,467 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="从MySQL binlog解析出你要的SQL。根据不同选项，你可以得到原始SQL、回滚SQL、去除主键的INSERT SQL等">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-Mysql工具之ibinlog2sql：基于Binlog对误操作恢复工具">
+<meta property="og:url" content="https://theme-next.js.org/mysql/binlog2sql/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="从MySQL binlog解析出你要的SQL。根据不同选项，你可以得到原始SQL、回滚SQL、去除主键的INSERT SQL等">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2023-03-29T03:18:25.000Z">
+<meta property="article:modified_time" content="2023-03-29T07:43:19.891Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta property="article:tag" content="innobd_ruby">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/binlog2sql/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/binlog2sql/","path":"mysql/binlog2sql/","title":"mysql学习笔记-Mysql工具之ibinlog2sql：基于Binlog对误操作恢复工具"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-Mysql工具之ibinlog2sql：基于Binlog对误操作恢复工具 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#binlog2sql"><span class="nav-number">1.</span> <span class="nav-text">binlog2sql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#my2sql"><span class="nav-number">2.</span> <span class="nav-text">my2sql</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%94%A8%E9%80%94"><span class="nav-number">3.</span> <span class="nav-text">用途</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%A1%B9%E7%9B%AE%E7%8A%B6%E6%80%81"><span class="nav-number">4.</span> <span class="nav-text">项目状态</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">5.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8"><span class="nav-number">6.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MySQL-server%E5%BF%85%E9%A1%BB%E8%AE%BE%E7%BD%AE%E4%BB%A5%E4%B8%8B%E5%8F%82%E6%95%B0"><span class="nav-number">6.1.</span> <span class="nav-text">MySQL server必须设置以下参数:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#user%E9%9C%80%E8%A6%81%E7%9A%84%E6%9C%80%E5%B0%8F%E6%9D%83%E9%99%90%E9%9B%86%E5%90%88%EF%BC%9A"><span class="nav-number">6.2.</span> <span class="nav-text">user需要的最小权限集合：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E7%94%A8%E6%B3%95"><span class="nav-number">6.3.</span> <span class="nav-text">基本用法</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%80%89%E9%A1%B9"><span class="nav-number">6.4.</span> <span class="nav-text">选项</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%BA%94%E7%94%A8%E6%A1%88%E4%BE%8B"><span class="nav-number">6.5.</span> <span class="nav-text">应用案例</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%AF%AF%E5%88%A0%E6%95%B4%E5%BC%A0%E8%A1%A8%E6%95%B0%E6%8D%AE%EF%BC%8C%E9%9C%80%E8%A6%81%E7%B4%A7%E6%80%A5%E5%9B%9E%E6%BB%9A"><span class="nav-number">6.5.1.</span> <span class="nav-text">误删整张表数据，需要紧急回滚</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%99%90%E5%88%B6%EF%BC%88%E5%AF%B9%E6%AF%94mysqlbinlog%EF%BC%89"><span class="nav-number">6.6.</span> <span class="nav-text">限制（对比mysqlbinlog）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BC%98%E7%82%B9%EF%BC%88%E5%AF%B9%E6%AF%94mysqlbinlog%EF%BC%89"><span class="nav-number">6.7.</span> <span class="nav-text">优点（对比mysqlbinlog）</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%B4%A1%E7%8C%AE%E8%80%85"><span class="nav-number">6.8.</span> <span class="nav-text">贡献者</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/binlog2sql/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-Mysql工具之ibinlog2sql：基于Binlog对误操作恢复工具 | 亦彤blog">
+      <meta itemprop="description" content="从MySQL binlog解析出你要的SQL。根据不同选项，你可以得到原始SQL、回滚SQL、去除主键的INSERT SQL等">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-Mysql工具之ibinlog2sql：基于Binlog对误操作恢复工具
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-29 11:18:25" itemprop="dateCreated datePublished" datetime="2023-03-29T11:18:25+08:00">2023-03-29</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">从MySQL binlog解析出你要的SQL。根据不同选项，你可以得到原始SQL、回滚SQL、去除主键的INSERT SQL等</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="binlog2sql"><a href="#binlog2sql" class="headerlink" title="binlog2sql"></a>binlog2sql</h2><p>从MySQL binlog解析出你要的SQL。根据不同选项，你可以得到原始SQL、回滚SQL、去除主键的INSERT SQL等。</p>
+<h2 id="my2sql"><a href="#my2sql" class="headerlink" title="my2sql"></a>my2sql</h2><p>go版MySQL binlog解析工具，通过解析MySQL binlog ，可以生成原始SQL、回滚SQL、去除主键的INSERT SQL等，也可以生成DML统计信息。类似工具有binlog2sql、MyFlash、my2fback等，本工具基于my2fback、binlog_rollback工具二次开发而来。</p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2xpdWhyL215MnNxbA==">https://github.com/liuhr/my2sql<i class="fa fa-external-link-alt"></i></span></p>
+<h2 id="用途"><a href="#用途" class="headerlink" title="用途"></a>用途</h2><ul>
+<li>数据快速回滚(闪回)</li>
+<li>主从切换后新master丢数据的修复</li>
+<li>从binlog生成标准SQL，带来的衍生功能</li>
+</ul>
+<h2 id="项目状态"><a href="#项目状态" class="headerlink" title="项目状态"></a>项目状态</h2><p>正常维护。应用于部分公司线上环境。</p>
+<ul>
+<li>已测试环境<ul>
+<li>Python 2.7, 3.4+</li>
+<li>MySQL 5.6, 5.7</li>
+</ul>
+</li>
+</ul>
+<h2 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; git clone https://github.com/danfengcao/binlog2sql.git &amp;&amp; cd binlog2sql</span><br><span class="line">shell&gt; pip install -r requirements.txt</span><br></pre></td></tr></table></figure>
+<p>git与pip的安装问题请自行搜索解决。</p>
+<h2 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h2><h3 id="MySQL-server必须设置以下参数"><a href="#MySQL-server必须设置以下参数" class="headerlink" title="MySQL server必须设置以下参数:"></a>MySQL server必须设置以下参数:</h3><pre><code>[mysqld]
+server_id = 1
+log_bin = /var/log/mysql/mysql-bin.log
+max_binlog_size = 1G
+binlog_format = row
+binlog_row_image = full
+</code></pre>
+<h3 id="user需要的最小权限集合："><a href="#user需要的最小权限集合：" class="headerlink" title="user需要的最小权限集合："></a>user需要的最小权限集合：</h3><pre><code>select, super/replication client, replication slave
+
+建议授权
+GRANT SELECT, REPLICATION SLAVE, REPLICATION CLIENT ON *.* TO 
+</code></pre>
+<p><strong>权限说明</strong></p>
+<ul>
+<li>select：需要读取server端information_schema.COLUMNS表，获取表结构的元信息，拼接成可视化的sql语句</li>
+<li>super&#x2F;replication client：两个权限都可以，需要执行&#39;SHOW MASTER STATUS&#39;, 获取server端的binlog列表</li>
+<li>replication slave：通过BINLOG_DUMP协议获取binlog内容的权限</li>
+</ul>
+<h3 id="基本用法"><a href="#基本用法" class="headerlink" title="基本用法"></a>基本用法</h3><p><strong>解析出标准SQL</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; python binlog2sql.py -h127.0.0.1 -P3306 -uadmin -p<span class="string">&#x27;admin&#x27;</span> -dtest -t test3 test4 --start-file=<span class="string">&#x27;mysql-bin.000002&#x27;</span></span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`test3`(`addtime`, `data`, `<span class="built_in">id</span>`) VALUES (<span class="string">&#x27;2016-12-10 13:03:38&#x27;</span>, <span class="string">&#x27;english&#x27;</span>, 4); <span class="comment">#start 570 end 736</span></span><br><span class="line">UPDATE `<span class="built_in">test</span>`.`test3` SET `addtime`=<span class="string">&#x27;2016-12-10 12:00:00&#x27;</span>, `data`=<span class="string">&#x27;中文&#x27;</span>, `<span class="built_in">id</span>`=3 WHERE `addtime`=<span class="string">&#x27;2016-12-10 13:03:22&#x27;</span> AND `data`=<span class="string">&#x27;中文&#x27;</span> AND `<span class="built_in">id</span>`=3 LIMIT 1; <span class="comment">#start 763 end 954</span></span><br><span class="line">DELETE FROM `<span class="built_in">test</span>`.`test3` WHERE `addtime`=<span class="string">&#x27;2016-12-10 13:03:38&#x27;</span> AND `data`=<span class="string">&#x27;english&#x27;</span> AND `<span class="built_in">id</span>`=4 LIMIT 1; <span class="comment">#start 981 end 1147</span></span><br></pre></td></tr></table></figure>
+
+<p><strong>解析出回滚SQL</strong></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line">shell&gt; python binlog2sql.py --flashback -h127.0.0.1 -P3306 -uadmin -p<span class="string">&#x27;admin&#x27;</span> -dtest -ttest3 --start-file=<span class="string">&#x27;mysql-bin.000002&#x27;</span> --start-position=763 --stop-position=1147</span><br><span class="line"></span><br><span class="line">输出：</span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`test3`(`addtime`, `data`, `<span class="built_in">id</span>`) VALUES (<span class="string">&#x27;2016-12-10 13:03:38&#x27;</span>, <span class="string">&#x27;english&#x27;</span>, 4); <span class="comment">#start 981 end 1147</span></span><br><span class="line">UPDATE `<span class="built_in">test</span>`.`test3` SET `addtime`=<span class="string">&#x27;2016-12-10 13:03:22&#x27;</span>, `data`=<span class="string">&#x27;中文&#x27;</span>, `<span class="built_in">id</span>`=3 WHERE `addtime`=<span class="string">&#x27;2016-12-10 12:00:00&#x27;</span> AND `data`=<span class="string">&#x27;中文&#x27;</span> AND `<span class="built_in">id</span>`=3 LIMIT 1; <span class="comment">#start 763 end 954</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="选项"><a href="#选项" class="headerlink" title="选项"></a>选项</h3><p><strong>mysql连接配置</strong></p>
+<p>-h host; -P port; -u user; -p password</p>
+<p><strong>解析模式</strong></p>
+<p>--stop-never 持续解析binlog。可选。默认False，同步至执行命令时最新的binlog位置。</p>
+<p>-K, --no-primary-key 对INSERT语句去除主键。可选。默认False</p>
+<p>-B, --flashback 生成回滚SQL，可解析大文件，不受内存限制。可选。默认False。与stop-never或no-primary-key不能同时添加。</p>
+<p>--back-interval -B模式下，每打印一千行回滚SQL，加一句SLEEP多少秒，如不想加SLEEP，请设为0。可选。默认1.0。</p>
+<p><strong>解析范围控制</strong></p>
+<p>--start-file 起始解析文件，只需文件名，无需全路径 。必须。</p>
+<p>--start-position&#x2F;--start-pos 起始解析位置。可选。默认为start-file的起始位置。</p>
+<p>--stop-file&#x2F;--end-file 终止解析文件。可选。默认为start-file同一个文件。若解析模式为stop-never，此选项失效。</p>
+<p>--stop-position&#x2F;--end-pos 终止解析位置。可选。默认为stop-file的最末位置；若解析模式为stop-never，此选项失效。</p>
+<p>--start-datetime 起始解析时间，格式&#39;%Y-%m-%d %H:%M:%S&#39;。可选。默认不过滤。</p>
+<p>--stop-datetime 终止解析时间，格式&#39;%Y-%m-%d %H:%M:%S&#39;。可选。默认不过滤。</p>
+<p><strong>对象过滤</strong></p>
+<p>-d, --databases 只解析目标db的sql，多个库用空格隔开，如-d db1 db2。可选。默认为空。</p>
+<p>-t, --tables 只解析目标table的sql，多张表用空格隔开，如-t tbl1 tbl2。可选。默认为空。</p>
+<p>--only-dml 只解析dml，忽略ddl。可选。默认False。</p>
+<p>--sql-type 只解析指定类型，支持INSERT, UPDATE, DELETE。多个类型用空格隔开，如--sql-type INSERT DELETE。可选。默认为增删改都解析。用了此参数但没填任何类型，则三者都不解析。</p>
+<h3 id="应用案例"><a href="#应用案例" class="headerlink" title="应用案例"></a>应用案例</h3><h4 id="误删整张表数据，需要紧急回滚"><a href="#误删整张表数据，需要紧急回滚" class="headerlink" title="误删整张表数据，需要紧急回滚"></a><strong>误删整张表数据，需要紧急回滚</strong></h4><p>闪回详细介绍可参见example目录下《闪回原理与实战》<a href="./example/mysql-flashback-priciple-and-practice.md">example&#x2F;mysql-flashback-priciple-and-practice.md</a></p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">test</span>库tbl表原有数据</span><br><span class="line">mysql&gt; select * from tbl;</span><br><span class="line">+----+--------+---------------------+</span><br><span class="line">| <span class="built_in">id</span> | name   | addtime             |</span><br><span class="line">+----+--------+---------------------+</span><br><span class="line">|  1 | 小赵   | 2016-12-10 00:04:33 |</span><br><span class="line">|  2 | 小钱   | 2016-12-10 00:04:48 |</span><br><span class="line">|  3 | 小孙   | 2016-12-13 20:25:00 |</span><br><span class="line">|  4 | 小李   | 2016-12-12 00:00:00 |</span><br><span class="line">+----+--------+---------------------+</span><br><span class="line">4 rows <span class="keyword">in</span> <span class="built_in">set</span> (0.00 sec)</span><br><span class="line"></span><br><span class="line">mysql&gt; delete from tbl;</span><br><span class="line">Query OK, 4 rows affected (0.00 sec)</span><br><span class="line"></span><br><span class="line">20:28时，tbl表误操作被清空</span><br><span class="line">mysql&gt; select * from tbl;</span><br><span class="line">Empty <span class="built_in">set</span> (0.00 sec)</span><br></pre></td></tr></table></figure>
+
+<p><strong>恢复数据步骤</strong>：</p>
+<ol>
+<li><p>登录mysql，查看目前的binlog文件</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show master status;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| Log_name         | File_size |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| mysql-bin.000051 |       967 |</span><br><span class="line">| mysql-bin.000052 |       965 |</span><br><span class="line">+------------------+-----------+</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>最新的binlog文件是mysql-bin.000052，我们再定位误操作SQL的binlog位置。误操作人只能知道大致的误操作时间，我们根据大致时间过滤数据。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; python binlog2sql/binlog2sql.py -h127.0.0.1 -P3306 -uadmin -p<span class="string">&#x27;admin&#x27;</span> -dtest -ttbl --start-file=<span class="string">&#x27;mysql-bin.000052&#x27;</span> --start-datetime=<span class="string">&#x27;2016-12-13 20:25:00&#x27;</span> --stop-datetime=<span class="string">&#x27;2016-12-13 20:30:00&#x27;</span></span><br><span class="line">输出：</span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`tbl`(`addtime`, `<span class="built_in">id</span>`, `name`) VALUES (<span class="string">&#x27;2016-12-13 20:26:00&#x27;</span>, 4, <span class="string">&#x27;小李&#x27;</span>); <span class="comment">#start 317 end 487 time 2016-12-13 20:26:26</span></span><br><span class="line">UPDATE `<span class="built_in">test</span>`.`tbl` SET `addtime`=<span class="string">&#x27;2016-12-12 00:00:00&#x27;</span>, `<span class="built_in">id</span>`=4, `name`=<span class="string">&#x27;小李&#x27;</span> WHERE `addtime`=<span class="string">&#x27;2016-12-13 20:26:00&#x27;</span> AND `<span class="built_in">id</span>`=4 AND `name`=<span class="string">&#x27;小李&#x27;</span> LIMIT 1; <span class="comment">#start 514 end 701 time 2016-12-13 20:27:07</span></span><br><span class="line">DELETE FROM `<span class="built_in">test</span>`.`tbl` WHERE `addtime`=<span class="string">&#x27;2016-12-10 00:04:33&#x27;</span> AND `<span class="built_in">id</span>`=1 AND `name`=<span class="string">&#x27;小赵&#x27;</span> LIMIT 1; <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br><span class="line">DELETE FROM `<span class="built_in">test</span>`.`tbl` WHERE `addtime`=<span class="string">&#x27;2016-12-10 00:04:48&#x27;</span> AND `<span class="built_in">id</span>`=2 AND `name`=<span class="string">&#x27;小钱&#x27;</span> LIMIT 1; <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br><span class="line">DELETE FROM `<span class="built_in">test</span>`.`tbl` WHERE `addtime`=<span class="string">&#x27;2016-12-13 20:25:00&#x27;</span> AND `<span class="built_in">id</span>`=3 AND `name`=<span class="string">&#x27;小孙&#x27;</span> LIMIT 1; <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br><span class="line">DELETE FROM `<span class="built_in">test</span>`.`tbl` WHERE `addtime`=<span class="string">&#x27;2016-12-12 00:00:00&#x27;</span> AND `<span class="built_in">id</span>`=4 AND `name`=<span class="string">&#x27;小李&#x27;</span> LIMIT 1; <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>我们得到了误操作sql的准确位置在728-938之间，再根据位置进一步过滤，使用flashback模式生成回滚sql，检查回滚sql是否正确(注：真实环境下，此步经常会进一步筛选出需要的sql。结合grep、编辑器等)</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; python binlog2sql/binlog2sql.py -h127.0.0.1 -P3306 -uadmin -p<span class="string">&#x27;admin&#x27;</span> -dtest -ttbl --start-file=<span class="string">&#x27;mysql-bin.000052&#x27;</span> --start-position=3346 --stop-position=3556 -B &gt; rollback.sql | <span class="built_in">cat</span></span><br><span class="line">输出：</span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`tbl`(`addtime`, `<span class="built_in">id</span>`, `name`) VALUES (<span class="string">&#x27;2016-12-12 00:00:00&#x27;</span>, 4, <span class="string">&#x27;小李&#x27;</span>); <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`tbl`(`addtime`, `<span class="built_in">id</span>`, `name`) VALUES (<span class="string">&#x27;2016-12-13 20:25:00&#x27;</span>, 3, <span class="string">&#x27;小孙&#x27;</span>); <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`tbl`(`addtime`, `<span class="built_in">id</span>`, `name`) VALUES (<span class="string">&#x27;2016-12-10 00:04:48&#x27;</span>, 2, <span class="string">&#x27;小钱&#x27;</span>); <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br><span class="line">INSERT INTO `<span class="built_in">test</span>`.`tbl`(`addtime`, `<span class="built_in">id</span>`, `name`) VALUES (<span class="string">&#x27;2016-12-10 00:04:33&#x27;</span>, 1, <span class="string">&#x27;小赵&#x27;</span>); <span class="comment">#start 728 end 938 time 2016-12-13 20:28:05</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>确认回滚sql正确，执行回滚语句。登录mysql确认，数据回滚成功。</p>
+ <figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">shell&gt; mysql -h127.0.0.1 -P3306 -uadmin -p<span class="string">&#x27;admin&#x27;</span> &lt; rollback.sql</span><br><span class="line"></span><br><span class="line">mysql&gt; select * from tbl;</span><br><span class="line">+----+--------+---------------------+</span><br><span class="line">| <span class="built_in">id</span> | name   | addtime             |</span><br><span class="line">+----+--------+---------------------+</span><br><span class="line">|  1 | 小赵   | 2016-12-10 00:04:33 |</span><br><span class="line">|  2 | 小钱   | 2016-12-10 00:04:48 |</span><br><span class="line">|  3 | 小孙   | 2016-12-13 20:25:00 |</span><br><span class="line">|  4 | 小李   | 2016-12-12 00:00:00 |</span><br><span class="line">+----+--------+---------------------+</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h3 id="限制（对比mysqlbinlog）"><a href="#限制（对比mysqlbinlog）" class="headerlink" title="限制（对比mysqlbinlog）"></a>限制（对比mysqlbinlog）</h3><ul>
+<li>mysql server必须开启，离线模式下不能解析</li>
+<li>参数 <em>binlog_row_image</em> 必须为FULL，暂不支持MINIMAL</li>
+<li>解析速度不如mysqlbinlog</li>
+</ul>
+<h3 id="优点（对比mysqlbinlog）"><a href="#优点（对比mysqlbinlog）" class="headerlink" title="优点（对比mysqlbinlog）"></a>优点（对比mysqlbinlog）</h3><ul>
+<li>纯Python开发，安装与使用都很简单</li>
+<li>自带flashback、no-primary-key解析模式，无需再装补丁</li>
+<li>flashback模式下，更适合<a href="./example/mysql-flashback-priciple-and-practice.md">闪回实战</a></li>
+<li>解析为标准SQL，方便理解、筛选</li>
+<li>代码容易改造，可以支持更多个性化解析</li>
+</ul>
+<h3 id="贡献者"><a href="#贡献者" class="headerlink" title="贡献者"></a>贡献者</h3><ul>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhbmZlbmdjYW8=">danfengcao<i class="fa fa-external-link-alt"></i></span> 作者，维护者 [<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2RhbmZlbmdjYW9d">https://github.com/danfengcao]<i class="fa fa-external-link-alt"></i></span></li>
+<li>大众点评DBA团队 想法交流，使用体验</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2ltemN5MTk4Nw==">赵承勇<i class="fa fa-external-link-alt"></i></span> pymysqlreplication权限bug #2</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2JpbmdsdWNoZW4=">陈路炳<i class="fa fa-external-link-alt"></i></span> bug报告(字段值为空时的处理)，使用体验</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL0RCQS1qYW5l">dba-jane<i class="fa fa-external-link-alt"></i></span> pymysqlreplication时间字段浮点数bug #29</li>
+<li><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2x1amlua2U=">lujinke<i class="fa fa-external-link-alt"></i></span> bug报告(set字段的处理 #32)</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+              <a href="/tags/innobd-ruby/" rel="tag"># innobd_ruby</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-021/" rel="prev" title="mysql学习笔记-Mysql工具之innodb_ruby：探究InnoDB存储结构的利器">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-Mysql工具之innodb_ruby：探究InnoDB存储结构的利器
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-022/" rel="next" title="mysql学习笔记-MySQL知识点总结">
+                  mysql学习笔记-MySQL知识点总结 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="MySQL 之 InnoDB 表空间">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-MySQL 之 InnoDB 表空间">
+<meta property="og:url" content="https://theme-next.js.org/mysql/learn-mysql-020/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="MySQL 之 InnoDB 表空间">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_3580f8ea-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_358ada72-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_359c1918-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35a60e64-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35b25408-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35bbd62c-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35c5d0dc-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35d42ae2-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35e0acb8-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_35ee0c8c-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_36004dc0-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_360a4898-33a4-11ec-aead-38f9d3cd240d.png">
+<meta property="article:published_time" content="2023-03-25T08:29:58.000Z">
+<meta property="article:modified_time" content="2023-03-25T08:32:46.341Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://theme-next.js.org/mysql/learn-mysql-020/modb_20211023_3580f8ea-33a4-11ec-aead-38f9d3cd240d.png">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/learn-mysql-020/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/learn-mysql-020/","path":"mysql/learn-mysql-020/","title":"mysql学习笔记-MySQL 之 InnoDB 表空间"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-MySQL 之 InnoDB 表空间 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-overview-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/learn-mysql-020/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-MySQL 之 InnoDB 表空间 | 亦彤blog">
+      <meta itemprop="description" content="MySQL 之 InnoDB 表空间">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-MySQL 之 InnoDB 表空间
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-25 16:29:58" itemprop="dateCreated datePublished" datetime="2023-03-25T16:29:58+08:00">2023-03-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">MySQL 之 InnoDB 表空间</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>MySQL 之 InnoDB 表空间，介绍 MySQL 的 InnoDB 存储引擎表空间结构。</p>
+</blockquote>
+<p>InnoDB 支持许多种类型的表空间，本文重点关注独立表空间和系统表空间的结构。它们的结构比较相似，但是由于系统表空间中额外包含了一些关于整个系统的信息，所以我们先挑简单一点的独立表空间来介绍，稍后再说系统表空间的结构。</p>
+<p>区（Extent）的概念</p>
+<hr>
+<p>表空间中的页实在是太多了，为了更好的管理这些页面，InnoDB 提出了区（英文名：extent）的概念。对于 <strong>16KB 的页</strong>来说，<strong>连续的 64 个页就是一个区</strong>，也就是说<strong>一个区默认占用 1MB 空间大小</strong>。不论是系统表空间还是独立表空间，都可以看成是由若干个区组成的，<strong>每 256 个区被划分成一组</strong>。画个图表示就是这样：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_3580f8ea-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>其中 extent 0 ~ extent 255 这 256 个区算是第一个组，extent 256 ~ extent 511 这 256 个区算是第二个组，extent 512 ~ extent 767 这 256 个区算是第三个组（上图中并未画全第三个组全部的区，请自行脑补），依此类推可以划分更多的组。这些组的头几个页面的类型都是类似的，就像这样：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_358ada72-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>从上图中我们能得到如下信息：</p>
+<ul>
+<li><p>第一个组最开始的 3 个页面的类型是固定的，也就是说 extent 0 这个区最开始的 3 个页面的类型是固定的，分别是：</p>
+</li>
+<li><p><strong>FSP_HDR 类型：这个类型的页面是用来登记整个表空间的一些整体属性以及本组所有的区，也就是 extent 0 ~ extent 255 这 256 个区的属性。需要注意的一点是，<strong><strong>整个</strong></strong>表空间只有一个 FSP_HDR 类型的页面</strong>。</p>
+</li>
+<li><p><strong>IBUF_BITMAP 类型：这个类型的页面是存储本组所有的区的所有页面关于 INSERT BUFFER 的信息</strong>。</p>
+</li>
+<li><p><strong>INODE 类型：这个类型的页面存储了许多称为 INODE 的数据结构</strong>。</p>
+</li>
+<li><p>其余各组最开始的 2 个页面的类型是固定的，也就是说 extent 256、extent 512 这些区最开始的 2 个页面的类型是固定的，分别是：</p>
+</li>
+<li><p><strong>XDES 类型：全称是 extent descriptor，用来登记本组 256 个区的属性，也就是说对于在 extent 256 区中的该类型页面存储的就是 extent 256 ~ extent 511 这些区的属性，对于在 extent 512 区中的该类型页面存储的就是 extent 512 ~ extent 767 这些区的属性</strong>。上边介绍的 <strong>FSP_HDR 类型的页面其实和 XDES 类型的页面的作用类似，只不过 FSP_HDR 类型的页面还会额外存储一些表空间的属性</strong>。</p>
+</li>
+<li><p>IBUF_BITMAP 类型：同上，不再赘述。</p>
+</li>
+</ul>
+<p>宏观的结构就是这样了，里边儿的名词大家也不用记清楚，只要大致记得：表空间被划分为许多连续的区，每个区默认由 64 个页组成，每 256 个区划分为一组，每个组的最开始的几个页面类型是固定的就好了。</p>
+<p>段（Segment）的概念</p>
+<hr>
+<p>如果我们表中数据量很少的话，比如说你的表中只有几十条、几百条数据的话，的确用不到区的概念，因为简单的几个页就能把对应的数据存储起来，但是你架不住表里的记录越来越多呀。从理论上说，不引入区的概念只使用页的概念对存储引擎的运行并没啥影响，但是我们来考虑一下下边这个场景：</p>
+<ul>
+<li>我们每向表中插入一条记录，本质上就是向该表的聚簇索引以及所有二级索引代表的 B + 树的节点中插入数据。而 B + 树的每一层中的页都会形成一个双向链表，如果是以页为单位来分配存储空间的话，双向链表相邻的两个页之间的物理位置可能离得非常远。我们介绍 B + 树索引的适用场景的时候特别提到范围查询只需要定位到最左边的记录和最右边的记录，然后沿着双向链表一直扫描就可以了，而如果链表中相邻的两个页物理位置离得非常远，就是所谓的随机 I&#x2F;O。再一次强调，磁盘的速度和内存的速度差了好几个数量级，随机 I&#x2F;O 是非常慢的，所以我们应该尽量让链表中相邻的页的物理位置也相邻，这样进行范围查询的时候才可以使用所谓的顺序 I&#x2F;O。</li>
+</ul>
+<p>所以才引入了区（extent）的概念，一个区就是在物理位置上连续的 64 个页。在表中数据量大的时候，为某个索引分配空间的时候就不再按照页为单位分配了，而是按照区为单位分配，甚至在表中的数据十分非常特别多的时候，可以一次性分配多个连续的区。虽然可能造成一点点空间的浪费（数据不足填充满整个区），但是从性能角度看，可以消除很多的随机 I&#x2F;O，功大于过。</p>
+<p>我们提到的范围查询，其实是对 B + 树叶子节点中的记录进行顺序扫描，而如果不区分叶子节点和非叶子节点，统统把节点代表的页面放到申请到的区中的话，进行范围扫描的效果就大打折扣了。所以 <strong>InnoDB 对 B + 树的叶子节点和非叶子节点进行了区别对待，也就是说叶子节点有自己独有的区，非叶子节点也有自己独有的区。存放叶子节点的区的集合就算是一个段（segment），存放非叶子节点的区的集合也算是一个段。也就是说一个索引会生成 2 个段，一个叶子节点段，一个非叶子节点段</strong>。</p>
+<p><strong>默认情况下一个使用 InnoDB 存储引擎的表只有一个聚簇索引，一个索引会生成 2 个段，而段是以区为单位申请存储空间的</strong>，一个区默认占用 1M 存储空间，所以默认情况下一个只存了几条记录的小表也需要 2M 的存储空间么？以后每次添加一个索引都要多申请 2M 的存储空间么？这对于存储记录比较少的表简直是天大的浪费。InnoDB 挺节俭的，当然也考虑到了这种情况。这个问题的症结在于到现在为止我们介绍的区都是非常纯粹的，也就是一个区被整个分配给某一个段，或者说区中的所有页面都是为了存储同一个段的数据而存在的，即使段的数据填不满区中所有的页面，那余下的页面也不能挪作他用。<strong>现在为了考虑以完整的区为单位分配给某个段对于数据量较小的表太浪费存储空间的这种情况，InnoDB 提出了一个碎片（fragment）区的概念，也就是在一个碎片区中，并不是所有的页都是为了存储同一个段的数据而存在的，而是碎片区中的页可以用于不同的目的，比如有些页用于段 A，有些页用于段 B，有些页甚至哪个段都不属于。****碎片区直属于表空间，并不属于任何一个段。</strong>所以此后<strong>为某个段分配存储空间的策略</strong>是这样的：</p>
+<ul>
+<li><p><strong>在刚开始向表中插入数据的时候，段是从某个碎片区以单个页面为单位来分配存储空间的</strong>。</p>
+</li>
+<li><p><strong>当某个段已经占用了 32 个碎片区页面之后，就会以完整的区为单位来分配存储空间</strong>。</p>
+</li>
+</ul>
+<p><strong>所以现在****段不能仅定义为是某些区的集合，更精确的应该是某些零散的页面以及一些完整的区的集合</strong>。除了索引的叶子节点段和非叶子节点段之外，InnoDB 中还有为存储一些特殊的数据而定义的段，比如回滚段，当然我们现在并不关心别的类型的段，现在只需要知道段是一些零散的页面以及一些完整的区的集合就好了。</p>
+<p>区的分类</p>
+<hr>
+<p>表空间的是由若干个区组成的，这些区大体上可以分为 4 种类型：</p>
+<ul>
+<li><p><strong>空闲的区：现在还没有用到这个区中的任何页面</strong>。</p>
+</li>
+<li><p><strong>有剩余空间的碎片区：表示碎片区中还有可用的页面</strong>。</p>
+</li>
+<li><p><strong>没有剩余空间的碎片区：表示碎片区中的所有页面都被使用，没有空闲页面</strong>。</p>
+</li>
+<li><p><strong>附属于某个段的区。每一个索引都可以分为叶子节点段和非叶子节点段，除此之外 InnoDB 还会另外定义一些特殊作用的段，****在这些段中的数据量很大时将使用区来作为基本的分配单位</strong>。</p>
+</li>
+</ul>
+<p>这 4 种类型的区也可以被称为区的 4 种状态（State），InnoDB 为这 4 种状态的区定义了特定的名词：</p>
+<table><tbody><tr><th>状态名</th><th>含义</th></tr></tbody><tbody><tr><td>FREE</td><td>空闲的区</td></tr><tr><td>FREE_FRAG</td><td>有剩余空间的碎片区</td></tr><tr><td>FULL_FRAG</td><td>没有剩余空间的碎片区</td></tr><tr><td>FSEG</td><td>附属于某个段的区</td></tr></tbody></table>
+
+<p><strong>需要再次强调一遍的是，处于 FREE、FREE_FRAG 以及 FULL_FRAG 这三种状态的区都是独立的，算是直属于表空间；而处于 FSEG 状态的区是附属于某个段的。</strong></p>
+<p>小提示</p>
+<p><strong>如果把表空间比作是国家，段就相当于省，区就相当于市。一般的市都是属于某个省，就像 FSEG 状态的区全部属于某个段。而 FREE、FREE_FRAG、FULL_FRAG 这三种状态的区却直接隶属于表空间，就像北京市、天津市、上海市是直接属于国家管理一样。</strong></p>
+<p><strong>为了方便管理这些区，InnoDB 设计了一个称为 XDES Entry 的结构（全称就是 Extent Descriptor Entry），每一个区都对应着一个 XDES Entry 结构，这个结构记录了对应的区的一些属性</strong>。我们先看图来对这个结构有个大致的了解：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_359c1918-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>从图中我们可以看出，XDES Entry 是一个 40 个字节的结构，大致分为 4 个部分，各个部分的释义如下：</p>
+<ul>
+<li><strong>Segment ID（8 字节）</strong></li>
+</ul>
+<p>每一个段都有一个唯一的编号，用 ID 表示，此处的 Segment ID 字段表示就是该区所在的段。当然前提是该区已经被分配给某个段了，不然的话该字段的值没啥意义。</p>
+<ul>
+<li><strong>List Node（12 字节）</strong></li>
+</ul>
+<p>这个部分可以将若干个 XDES Entry 结构串联成一个链表，大家看一下这个 List Node 的结构：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35a60e64-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>如果我们想定位表空间内的某一个位置的话，只需指定页号以及该位置在指定页号中的页内偏移量即可。所以：</p>
+<ul>
+<li><p>Prev Node Page Number 和 Prev Node Offset 的组合就是指向前一个 XDES Entry 的指针</p>
+</li>
+<li><p>Next Node Page Number 和 Next Node Offset 的组合就是指向后一个 XDES Entry 的指针。</p>
+</li>
+<li><p><strong>State（4 字节）</strong></p>
+</li>
+</ul>
+<p>这个字段表明区的状态。可选的值就是我们前边说过的那 4 个，分别是：FREE、FREE_FRAG、FULL_FRAG 和 FSEG。</p>
+<ul>
+<li><strong>Page State Bitmap（16 字节）</strong></li>
+</ul>
+<p><strong>这个部分共占用 16 个字节，也就是 128 个比特位。我们说一个区默认有 64 个页，这 128 个比特位被划分为 64 个部分，每个部分 2 个比特位，对应区中的一个页。</strong>比如 Page State Bitmap 部分的第 1 和第 2 个比特位对应着区中的第 1 个页面，第 3 和第 4 个比特位对应着区中的第 2 个页面，依此类推，Page State Bitmap 部分的第 127 和 128 个比特位对应着区中的第 64 个页面。<strong>这两个比特位的第一个位表示对应的页是否是空闲的，第二个比特位还没有用</strong>。</p>
+<p>XDES Entry 链表</p>
+<hr>
+<p>到现在为止，我们已经提出了区、段、碎片区、附属于段的区、XDES Entry 等概念，我们把事情搞这么麻烦的初心仅仅是想提高向表插入数据的效率又不至于数据量少的表浪费空间。现在我们知道向表中插入数据本质上就是向表中各个索引的叶子节点段、非叶子节点段插入数据，也知道了不同的区有不同的状态，再回到最初的起点，捋一捋向某个段中插入数据的过程：</p>
+<ul>
+<li><strong>当段中数据较少的时候，首先会查看表空间中是否有状态为 FREE_FRAG 的区，也就是找还有空闲空间的碎片区，如果找到了，那么从该区中取一些零散的页把数据插进去；否则到表空间下申请一个状态为 FREE 的区，也就是空闲的区，把该区的状态变为 FREE_FRAG，然后从该新申请的区中取一些零散的页把数据插进去。之后不同的段使用零散页的时候都会从该区中取，直到该区中没有空闲空间，然后该区的状态就变成了 FULL_FRAG</strong>。</li>
+</ul>
+<p>现在的问题是你怎么知道表空间里的哪些区是 FREE 的，哪些区的状态是 FREE_FRAG 的，哪些区是 FULL_FRAG 的？要知道表空间的大小是可以不断增大的，当增长到 GB 级别的时候，区的数量也就上千了，我们总不能每次都遍历这些区对应的 XDES Entry 结构吧？这时候就是 <strong>XDES Entry 中的 List Node</strong> 部分发挥奇效的时候了，我们可以通过 List Node 中的指针，做这么三件事：</p>
+<ul>
+<li><p><strong>把状态为 FREE 的区对应的 XDES Entry 结构通过 List Node 来连接成一个链表，这个链表我们就称之为 FREE 链表</strong>。</p>
+</li>
+<li><p><strong>把状态为 FREE_FRAG 的区对应的 XDES Entry 结构通过 List Node 来连接成一个链表，这个链表我们就称之为 FREE_FRAG 链表</strong>。</p>
+</li>
+<li><p><strong>把状态为 FULL_FRAG 的区对应的 XDES Entry 结构通过 List Node 来连接成一个链表，这个链表我们就称之为 FULL_FRAG 链表</strong>。</p>
+</li>
+</ul>
+<p>这样每当我们想找一个 FREE_FRAG 状态的区时，就直接把 FREE_FRAG 链表的头节点拿出来，从这个节点中取一些零散的页来插入数据，当这个节点对应的区用完时，就修改一下这个节点的 State 字段的值，然后从 FREE_FRAG 链表中移到 FULL_FRAG 链表中。同理，如果 FREE_FRAG 链表中一个节点都没有，那么就直接从 FREE 链表中取一个节点移动到 FREE_FRAG 链表的状态，并修改该节点的 STATE 字段值为 FREE_FRAG，然后从这个节点对应的区中获取零散的页就好了。</p>
+<ul>
+<li>当段中数据已经占满了 32 个零散的页后，就直接申请完整的区来插入数据了。</li>
+</ul>
+<p>还是那个问题，我们怎么知道哪些区属于哪个段的呢？再遍历各个 XDES Entry 结构？遍历是不可能遍历的，这辈子都不可能遍历的，有链表还遍历个毛线啊。所以我们把状态为 FSEG 的区对应的 XDES Entry 结构都加入到一个链表喽？傻呀，不同的段哪能共用一个区呢？你想把索引 a 的叶子节点段和索引 b 的叶子节点段都存储到一个区中么？显然我们想要每个段都有它独立的链表，所以可以根据段号（也就是 Segment ID）来建立链表，有多少个段就建多少个链表？好像也有点问题，因为一个段中可以有好多个区，有的区是完全空闲的，有的区还有一些页面可以用，有的区已经没有空闲页面可以用了，所以我们有必要继续细分，InnoDB 为每个段中的区对应的 XDES Entry 结构建立了三个链表：</p>
+<ul>
+<li><p><strong>FREE 链表：同一个段中，所有页面都是空闲的区对应的 XDES Entry 结构会被加入到这个链表。注意和直属于表空间的 FREE 链表区别开了，此处的 FREE 链表是附属于某个段的</strong>。</p>
+</li>
+<li><p><strong>NOT_FULL 链表：同一个段中，仍有空闲空间的区对应的 XDES Entry 结构会被加入到这个链表</strong>。</p>
+</li>
+<li><p><strong>FULL 链表：同一个段中，已经没有空闲空间的区对应的 XDES Entry 结构会被加入到这个链表</strong>。</p>
+</li>
+</ul>
+<p>强调一遍，每一个索引都对应两个段，每个段都会维护上述的 3 个链表。</p>
+<p>举个栗子🌰，比如下边这个表：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">CREATE TABLE t (  c1 INT NOT NULL AUTO_INCREMENT,  c2 VARCHAR(100),  c3 VARCHAR(100),  PRIMARY KEY (c1),  KEY idx_c2 (c2))ENGINE=InnoDB;</span><br></pre></td></tr></table></figure>
+
+<p><strong>这个表 t 共有两个索引，一个聚簇索引，一个二级索引 idx_c2，所以这个表共有 4 个段，每个段都会维护上述 3 个链表，总共是 12 个链表，加上我们上边说过的直属于表空间的 3 个链表，整个独立表空间共需要维护 15 个链表。所以段在数据量比较大时插入数据的话，会先获取 NOT_FULL 链表的头节点，直接把数据插入这个头节点对应的区中即可，如果该区的空间已经被用完，就把该节点移到 FULL 链表中</strong>。</p>
+<p>链表基节点</p>
+<hr>
+<p>上边介绍了很多链表，怎么找到这些链表呢，或者说怎么找到某个链表的头节点或者尾节点在表空间中的位置呢？InnoDB 当然考虑了这个问题，设计了一个叫 List Base Node 的结构，翻译成中文就是<strong>链表的基节点</strong>。这个结构中包含了链表的头节点和尾节点的指针以及这个链表中包含了多少节点的信息，我们画图看一下这个结构的示意图：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35b25408-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>我们上边介绍的每个链表都对应这么一个 List Base Node 结构，其中：</p>
+<ul>
+<li><p><strong>List Length 表明该链表一共有多少节点</strong>。</p>
+</li>
+<li><p><strong>First Node Page Number 和 First Node Offset 表明该链表的头节点在表空间中的位置</strong>。</p>
+</li>
+<li><p><strong>Last Node Page Number 和 Last Node Offset 表明该链表的尾节点在表空间中的位置</strong>。</p>
+</li>
+</ul>
+<p>一般我们把某个链表对应的 List Base Node 结构放置在表空间中固定的位置，这样想找定位某个链表就变得非常简单啦。</p>
+<p>链表小结</p>
+<hr>
+<p><strong>综上所述，表空间是由若干个区组成的，每个区都对应一个 XDES Entry 的结构，直属于表空间的区对应的 XDES Entry 结构可以分成 FREE、FREE_FRAG 和 FULL_FRAG 这 3 个链表；每个段可以附属若干个区，每个段中的区对应的 XDES Entry 结构可以分成 FREE、NOT_FULL 和 FULL 这 3 个链表。</strong>每个链表都对应一个 List Base Node 的结构，这个结构里记录了链表的头、尾节点的位置以及该链表中包含的节点数。正是因为这些链表的存在，管理这些区才变成了一件非常简单的事情。</p>
+<p>段的结构</p>
+<hr>
+<p>我们前边说过，段其实不对应表空间中某一个连续的物理区域，而是一个逻辑上的概念，由若干个零散的页面以及一些完整的区组成。像每个区都有对应的 XDES Entry 来记录这个区中的属性一样，InnoDB 为每个段都定义了一个 INODE Entry 结构来记录一下段中的属性。大家看一下示意图：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35bbd62c-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>它的各个部分释义如下：</p>
+<ul>
+<li><strong>Segment ID</strong></li>
+</ul>
+<p>就是指这个 INODE Entry 结构对应的段的编号（ID）。</p>
+<ul>
+<li><strong>NOT_FULL_N_USED</strong></li>
+</ul>
+<p>这个字段指的是在 NOT_FULL 链表中已经使用了多少个页面。</p>
+<ul>
+<li><strong>3 个 List Base Node</strong></li>
+</ul>
+<p>分别为段的 FREE 链表、NOT_FULL 链表、FULL 链表定义了 List Base Node，这样我们想查找某个段的某个链表的头节点和尾节点的时候，就可以直接到这个部分找到对应链表的 List Base Node。so easy!</p>
+<ul>
+<li><strong>Magic Number</strong></li>
+</ul>
+<p>这个值是用来标记这个 INODE Entry 是否已经被初始化了（初始化的意思就是把各个字段的值都填进去了）。如果这个数字是值的 97937874，表明该 INODE Entry 已经初始化，否则没有被初始化。（不用纠结这个值有啥特殊含义，规定）。</p>
+<ul>
+<li><strong>Fragment Array Entry</strong></li>
+</ul>
+<p>段是一些零散页面和一些完整的区的集合，每个 Fragment Array Entry 结构都对应着一个零散的页面，这个结构一共 4 个字节，表示一个零散页面的页号。</p>
+<p>结合着这个 INODE Entry 结构，大家可能对段是一些零散页面和一些完整的区的集合的理解再次深刻一些。</p>
+<p>各类型页面详细情况</p>
+<hr>
+<p>FSP_HDR 类型</p>
+<hr>
+<p>表空间的第一个页面，页号为 0。这个页面的类型是 FSP_HDR，它存储了表空间的一些整体属性以及第一个组内 256 个区的对应的 XDES Entry 结构，直接看这个类型的页面的示意图：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35c5d0dc-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>一个完整的 FSP_HDR 类型的页面大致由 5 个部分组成，各个部分的具体释义如下表：</p>
+<table><tbody><tr><th>名称</th><th>中文名</th><th>占用空间大小</th><th>简单描述</th></tr></tbody><tbody><tr><td>File Header</td><td>文件头部</td><td>38 字节</td><td>页的一些通用信息</td></tr><tr><td>File Space Header</td><td>表空间头部</td><td>112 字节</td><td>表空间的一些整体属性信息</td></tr><tr><td>XDES Entry</td><td>区描述信息</td><td>10240 字节</td><td>存储本组 256 个区对应的属性信息</td></tr><tr><td>Empty Space</td><td>尚未使用空间</td><td>5986 字节</td><td>用于页结构的填充，没啥实际意义</td></tr><tr><td>File Trailer</td><td>文件尾部</td><td>8 字节</td><td>校验页是否完整</td></tr></tbody></table>
+
+<p>File Header 和 File Trailer 就不再强调了，另外的几个部分中，Empty Space 是尚未使用的空间，我们不用管它，重点来看看 File Space Header 和 XDES Entry 这两个部分。</p>
+<p>File Space Header 部分</p>
+<hr>
+<p>这个部分是用来存储表空间的一些整体属性信息的，详看下图：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35d42ae2-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>下面是各个属性的简单描述：</p>
+<table><tbody><tr><th>名称</th><th>占用空间大小</th><th>描述</th></tr></tbody><tbody><tr><td>Space ID</td><td>4 字节</td><td>表空间的 ID</td></tr><tr><td>Not Used</td><td>4 字节</td><td>这 4 个字节未被使用，可以忽略</td></tr><tr><td>Size</td><td>4 字节</td><td>当前表空间占有的页面数</td></tr><tr><td>FREE Limit</td><td>4 字节</td><td>尚未被初始化的最小页号，大于或等于这个页号的区对应的 XDES Entry 结构都没有被加入 FREE 链表</td></tr><tr><td>Space Flags</td><td>4 字节</td><td>表空间的一些占用存储空间比较小的属性</td></tr><tr><td>FRAG_N_USED</td><td>4 字节</td><td>FREE_FRAG 链表中已使用的页面数量</td></tr><tr><td>List Base Node for FREE List</td><td>16 字节</td><td>FREE 链表的基节点</td></tr><tr><td>List Base Node for FREE_FRAG List</td><td>16 字节</td><td>FREE_FRAG 链表的基节点</td></tr><tr><td>List Base Node for FULL_FRAG List</td><td>16 字节</td><td>FULL_FRAG 链表的基节点</td></tr><tr><td>Next Unused Segment ID</td><td>8 字节</td><td>当前表空间中下一个未使用的 Segment ID</td></tr><tr><td>List Base Node for SEG_INODES_FULL List</td><td>16 字节</td><td>SEG_INODES_FULL 链表的基节点</td></tr><tr><td>List Base Node for SEG_INODES_FREE List</td><td>16 字节</td><td>SEG_INODES_FREE 链表的基节点</td></tr></tbody></table>
+
+<p>这里头的 Space ID、Not Used、Size 这三个字段大家肯定一看就懂，其他的字段我们再详细看一下：</p>
+<ul>
+<li><strong>List Base Node for FREE List、List Base Node for FREE_FRAG List、List Base Node for FULL_FRAG List</strong></li>
+</ul>
+<p>这三个大家看着太亲切了，分别是直属于表空间的 FREE 链表的基节点、FREE_FRAG 链表的基节点、FULL_FRAG 链表的基节点，这三个链表的基节点在表空间的位置是固定的，就是在表空间的第一个页面（也就是 FSP_HDR 类型的页面）的 File Space Header 部分。所以之后定位这几个链表就很简单啦。</p>
+<ul>
+<li><strong>FRAG_N_USED</strong></li>
+</ul>
+<p>这个字段表明在 FREE_FRAG 链表中已经使用的页面数量。</p>
+<ul>
+<li><strong>FREE Limit</strong></li>
+</ul>
+<p>我们知道表空间都对应着具体的磁盘文件，一开始我们创建表空间的时候对应的磁盘文件中都没有数据，所以我们需要对表空间完成一个初始化操作，包括为表空间中的区建立 XDES Entry 结构，为各个段建立 INODE Entry 结构，建立各种链表吧啦吧啦的各种操作。我们可以一开始就为表空间申请一个特别大的空间，但是实际上有绝大部分的区是空闲的，我们可以选择把所有的这些空闲区对应的 XDES Entry 结构加入 FREE 链表，也可以选择只把一部分的空闲区加入 FREE 链表，等啥时候空闲链表中的 XDES Entry 结构对应的区不够使了，再把之前没有加入 FREE 链表的空闲区对应的 XDES Entry 结构加入 FREE 链表，中心思想就是啥时候用到啥时候初始化，InnoDB 采用的就是后者，他们为表空间定义了 FREE Limit 这个字段，在该字段表示的页号之前的区都被初始化了，之后的区尚未被初始化。</p>
+<ul>
+<li><strong>Next Unused Segment ID</strong></li>
+</ul>
+<p>表中每个索引都对应 2 个段，每个段都有一个唯一的 ID，那当我们为某个表新创建一个索引的时候，就意味着要创建两个新的段。那怎么为这个新创建的段找一个唯一的 ID 呢？去遍历现在表空间中所有的段么？我们说过，遍历是不可能遍历的，这辈子都不可能遍历，InnoDB 提出了这个名叫 Next Unused Segment ID 的字段，该字段表明当前表空间中最大的段 ID 的下一个 ID，这样在创建新段的时候赋予新段一个唯一的 ID 值就 so easy 啦，直接使用这个字段的值就好了。</p>
+<ul>
+<li><strong>Space Flags</strong></li>
+</ul>
+<p>表空间对于一些布尔类型的属性，或者只需要寥寥几个比特位搞定的属性都放在了这个 Space Flags 中存储，虽然它只有 4 个字节，32 个比特位大小，却存储了好多表空间的属性，详细情况如下表：</p>
+<table><tbody><tr><th>标志名称</th><th>占用空间（单位：bit）</th><th>描述</th></tr></tbody><tbody><tr><td>POST_ANTELOPE</td><td>1</td><td>表示文件格式是否大于 ANTELOPE</td></tr><tr><td>ZIP_SSIZE</td><td>4</td><td>表示压缩页面的大小</td></tr><tr><td>ATOMIC_BLOBS</td><td>1</td><td>表示是否自动把值非常长的字段放到 BLOB 页里</td></tr><tr><td>PAGE_SIZE</td><td>4</td><td>页面大小</td></tr><tr><td>DATA_DIR</td><td>1</td><td>表示表空间是否是从默认的数据目录中获取的</td></tr><tr><td>SHARED</td><td>1</td><td>是否为共享表空间</td></tr><tr><td>TEMPORARY</td><td>1</td><td>是否为临时表空间</td></tr><tr><td>ENCRYPTION</td><td>1</td><td>表空间是否加密</td></tr><tr><td>UNUSED</td><td>18</td><td>没有使用到的比特位</td></tr></tbody></table>
+
+<ul>
+<li><strong>List Base Node for SEG_INODES_FULL List 和 List Base Node for SEG_INODES_FREE List</strong></li>
+</ul>
+<p>每个段对应的 INODE Entry 结构会集中存放到一个类型为 <strong>INODE</strong> 的页中，如果表空间中的段特别多，则会有多个 INODE Entry 结构，可能一个页放不下，这些 INODE 类型的页会组成两种列表：</p>
+<ul>
+<li><p>SEG_INODES_FULL 链表，该链表中的 INODE 类型的页面都已经被 INODE Entry 结构填充满了，没空闲空间存放额外的 INODE Entry 了。</p>
+</li>
+<li><p>SEG_INODES_FREE 链表，该链表中的 INODE 类型的页面仍有空闲空间来存放 INODE Entry 结构。</p>
+</li>
+</ul>
+<p>由于我们现在还没有详细介绍 INODE 类型页，所以等会说过 INODE 类型的页之后再回过头来看着两个链表。</p>
+<p>XDES Entry 部分</p>
+<hr>
+<p>紧接着 File Space Header 部分的就是 XDES Entry 部分了，我们嘴上说过无数次，却从没见过真身的 XDES Entry 就是在表空间的第一个页面中保存的。我们知道一个 XDES Entry 结构的大小是 40 字节，但是一个页面的大小有限，只能存放有限个 XDES Entry 结构，所以我们才把 256 个区划分成一组，在每组的第一个页面中存放 256 个 XDES Entry 结构。大家回看那个 FSP_HDR 类型页面的示意图，XDES Entry 0 就对应着 extent 0，XDES Entry 1 就对应着 extent 1... 依此类推，XDES Entry255 就对应着 extent 255。</p>
+<p>因为每个区对应的 XDES Entry 结构的地址是固定的，所以我们访问这些结构就非常简单啦。</p>
+<p>XDES 类型</p>
+<hr>
+<p>每一个 XDES Entry 结构对应表空间的一个区，虽然一个 XDES Entry 结构只占用 40 字节，但你抵不住表空间的区的数量也多啊。在区的数量非常多时，一个单独的页可能就不够存放足够多的 XDES Entry 结构，所以我们把表空间的区分为了若干个组，每组开头的一个页面记录着本组内所有的区对应的 XDES Entry 结构。由于第一个组的第一个页面有些特殊，因为它也是整个表空间的第一个页面，所以除了记录本组中的所有区对应的 XDES Entry 结构以外，还记录着表空间的一些整体属性，这个页面的类型就是我们刚刚说完的 FSP_HDR 类型，整个表空间里只有一个这个类型的页面。除去第一个分组以外，之后的每个分组的第一个页面只需要记录本组内所有的区对应的 XDES Entry 结构即可，不需要再记录表空间的属性了，为了和 FSP_HDR 类型做区别，我们把之后每个分组的第一个页面的类型定义为 XDES，它的结构和 FSP_HDR 类型是非常相似的：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35e0acb8-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p><strong>与 FSP_HDR 类型的页面对比，除了少了 File Space Header 部分之外，也就是除了少了记录表空间整体属性的部分之外，其余的部分是一样一样的</strong>。</p>
+<p>IBUF_BITMAP 类型</p>
+<hr>
+<p>每个分组的第二个页面的类型都是 IBUF_BITMAP，这种类型的页里边记录了一些有关 Change Buffer 的信息。</p>
+<p>INODE 类型</p>
+<hr>
+<p>再次对比前边介绍表空间的图，第一个分组的第三个页面的类型是 INODE。我们前边说过 InnoDB 为每个索引定义了两个段，而且为某些特殊功能定义了些特殊的段。为了方便管理，他们又为每个段设计了一个 INODE Entry 结构，这个结构中记录了关于这个段的相关属性。而我们这会儿要介绍的这个 INODE 类型的页就是为了存储 INODE Entry 结构而存在的。</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_35ee0c8c-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>一个 INODE 类型的页面是由这几部分构成的：</p>
+<table><tbody><tr><th>名称</th><th>中文名</th><th>占用空间大小</th><th>简单描述</th></tr></tbody><tbody><tr><td>File Header</td><td>文件头部</td><td>38 字节</td><td>页的一些通用信息</td></tr><tr><td>List Node for INODE Page List</td><td>通用链表节点</td><td>12 字节</td><td>存储上一个 INODE 页面和下一个 INODE 页面的指针</td></tr><tr><td>INODE Entry</td><td>段描述信息</td><td>16320 字节</td><td>存储段描述信息</td></tr><tr><td>Empty Space</td><td>尚未使用空间</td><td>6 字节</td><td>用于页结构的填充，没啥实际意义</td></tr><tr><td>File Trailer</td><td>文件尾部</td><td>8 字节</td><td>校验页是否完整</td></tr></tbody></table>
+
+<p>除了 File Header、Empty Space、File Trailer 这几个老朋友外，我们重点关注 List Node for INODE Page List 和 INODE Entry 这两个部分。</p>
+<p>首先看 INODE Entry 部分，我们前边已经详细介绍过这个结构的组成了，主要包括对应的段内零散页面的地址以及附属于该段的 FREE、NOT_FULL 和 FULL 链表的基节点。每个 INODE Entry 结构占用 192 字节，一个页面里可以存储 85 个这样的结构。</p>
+<p>重点看一下 List Node for INODE Page List，因为一个表空间中可能存在超过 85 个段，所以可能一个 INODE 类型的页面不足以存储所有的段对应的 INODE Entry 结构，所以就需要额外的 INODE 类型的页面来存储这些结构。还是为了方便管理这些 INODE 类型的页面，InnoDB 将这些 INODE 类型的页面串联成两个不同的链表：</p>
+<ul>
+<li><p><strong>SEG_INODES_FULL 链表：该链表中的 INODE 类型的页面中已经没有空闲空间来存储额外的 INODE Entry 结构了</strong>。</p>
+</li>
+<li><p><strong>SEG_INODES_FREE 链表：该链表中的 INODE 类型的页面中还有空闲空间来存储额外的 INODE Entry 结构了</strong>。</p>
+</li>
+</ul>
+<p>想必大家已经认出这两个链表了，我们前边提到过这两个链表的基节点就存储在 File Space Header 里边，也就是说这两个链表的基节点的位置是固定的，所以我们可以很轻松的访问到这两个链表。以后每当我们新创建一个段（创建索引时就会创建段）时，都会创建一个 INODE Entry 结构与之对应，存储 INODE Entry 的大致过程就是这样的：</p>
+<ul>
+<li><p><strong>先看看 SEG_INODES_FREE 链表是否为空，如果不为空，直接从该链表中获取一个节点，也就相当于获取到一个仍有空闲空间的 INODE 类型的页面，然后把该 INODE Entry 结构放到该页面中。当该页面中无剩余空间时，就把该页放到 SEG_INODES_FULL 链表中</strong>。</p>
+</li>
+<li><p><strong>如果 SEG_INODES_FREE 链表为空，则需要从表空间的 FREE_FRAG 链表中申请一个页面，修改该页面的类型为 INODE，把该页面放到 SEG_INODES_FREE 链表中，与此同时把该 INODE Entry 结构放入该页面</strong>。</p>
+</li>
+</ul>
+<p>Segment Header 结构的运用</p>
+<hr>
+<p>我们知道一个索引会产生两个段，分别是叶子节点段和非叶子节点段，而每个段都会对应一个 INODE Entry 结构，那我们怎么知道某个段对应哪个 INODE Entry 结构呢？所以得找个地方记下来这个对应关系。记得之前学习过的数据页 MySQL 之数据页结构，也就是 INDEX 类型的页有一个 Page Header 部分，所以把 Page Header 部分粘一下：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_36004dc0-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>其中的 PAGE_BTR_SEG_LEAF 和 PAGE_BTR_SEG_TOP 都占用 10 个字节，它们其实对应一个叫 Segment Header 的结构，该结构图示如下：</p>
+<p><img src="/mysql/learn-mysql-020/modb_20211023_360a4898-33a4-11ec-aead-38f9d3cd240d.png" loading="lazy"></p>
+<p>各个部分的具体释义如下：</p>
+<table><tbody><tr><th>名称</th><th>占用空间大小</th><th>描述</th></tr></tbody><tbody><tr><td>Space ID of the INODE Entry</td><td>4 字节</td><td>INODE Entry 结构所在的表空间 ID</td></tr><tr><td>Page Number of the INODE Entry</td><td>4 字节</td><td>INODE Entry 结构所在的页面页号</td></tr><tr><td>Byte Offset of the INODE Entry</td><td>2 字节</td><td>INODE Entry 结构在该页面中的偏移量</td></tr></tbody></table>
+
+<p>这样子就很清晰了，<strong>PAGE_BTR_SEG_LEAF 记录着叶子节点段对应的 INODE Entry 结构的地址是哪个表空间的哪个页面的哪个偏移量，PAGE_BTR_SEG_TOP 记录着非叶子节点段对应的 INODE Entry 结构的地址是哪个表空间的哪个页面的哪个偏移量。这样子<strong><strong>索引和其对应的段的关系就建立起来</strong></strong>了。不过需要注意的一点是，****因为一个索引只对应两个段，所以只需要在索引的根页面中记录这两个结构即可</strong>。</p>
+<p>真实表空间对应的文件大小</p>
+<hr>
+<p>Q：上边的这些概念已经压的快喘不过气了。不过独立表空间有那么大么？我到数据目录里看了，一个新建的表对应的. ibd 文件只占用了 96K，才 6 个页面大小，上边的说了那么多概念，那么大的空间占用，为什么只有 96KB 大小？</p>
+<p>A：一开始表空间占用的空间自然是很小，因为表里边都没有数据。.ibd 文件是自扩展的，随着表中数据的增多，表空间对应的文件也逐渐增大。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-019/" rel="prev" title="mysql学习笔记-如何学习 MySQL">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-如何学习 MySQL
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-021/" rel="next" title="mysql学习笔记-Mysql工具之innodb_ruby：探究InnoDB存储结构的利器">
+                  mysql学习笔记-Mysql工具之innodb_ruby：探究InnoDB存储结构的利器 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

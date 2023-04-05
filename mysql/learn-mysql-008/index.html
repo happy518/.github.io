@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="介绍mysql视图的创建，union和触发器的使用">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-视图，union和触发器">
+<meta property="og:url" content="https://theme-next.js.org/mysql/learn-mysql-008/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="介绍mysql视图的创建，union和触发器的使用">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2022-03-20T07:53:41.000Z">
+<meta property="article:modified_time" content="2022-03-22T16:18:32.712Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/learn-mysql-008/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/learn-mysql-008/","path":"mysql/learn-mysql-008/","title":"mysql学习笔记-视图，union和触发器"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-视图，union和触发器 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%86%E5%9B%BE"><span class="nav-number">1.</span> <span class="nav-text">视图</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#union"><span class="nav-number">2.</span> <span class="nav-text">union</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%A7%A6%E5%8F%91%E5%99%A8"><span class="nav-number">3.</span> <span class="nav-text">触发器</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#tips"><span class="nav-number">4.</span> <span class="nav-text">tips</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/learn-mysql-008/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-视图，union和触发器 | 亦彤blog">
+      <meta itemprop="description" content="介绍mysql视图的创建，union和触发器的使用">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-视图，union和触发器
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2022-03-20 15:53:41" itemprop="dateCreated datePublished" datetime="2022-03-20T15:53:41+08:00">2022-03-20</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">介绍mysql视图的创建，union和触发器的使用</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h2><ol>
+<li><p>创建视图</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建视图</span></span><br><span class="line">MySQL hadoop<span class="variable">@localhost</span>:db_test<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">view</span> view_rank <span class="keyword">as</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test_rank;</span><br><span class="line"><span class="comment">-- 查看创建视图表结构</span></span><br><span class="line">MySQL hadoop<span class="variable">@localhost</span>:db_test<span class="operator">&gt;</span> <span class="keyword">show</span> <span class="keyword">create</span> <span class="keyword">table</span> view_rank;</span><br><span class="line"><span class="comment">-- 删除视图</span></span><br><span class="line">MySQL hadoop<span class="variable">@localhost</span>:db_test<span class="operator">&gt;</span> <span class="keyword">drop</span> <span class="keyword">view</span> view_rank;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>视图的作用是，可以对开发人员是透明的，可以隐藏部分关键的列</p>
+<p>视图中mysql是虚拟表</p>
+<p>不要创建select * from的视图，因为mysql会把*逐个解析成列</p>
+<p>当原来的表结构发生变化时，视图的表结构时不会发生变化的，因为视图中创建的瞬间，便已经确定好了结构。</p>
+</blockquote>
+<p>注意：mysql中的视图都是虚拟表。每次查询视图，实际上还是去查询原来的表，只是查询的规则是在视图创建时定义好的。</p>
+</li>
+<li><p>视图的算法</p>
+<p>视图的算法有三种：</p>
+<ul>
+<li><p>UNDEFINED：默认方式，由mysql来判断使用下面的哪种方式</p>
+</li>
+<li><p>MERGE：每次通过物理表查询得到结果，把结果merge起来返回</p>
+</li>
+<li><p>TEMPTABLE：产生一张临时表，把数据放入临时表后，客户端再去临时表读取数据</p>
+</li>
+</ul>
+<blockquote>
+<p>TEMPTABLE特点：即使访问条件一样，第二次查询还是去读取物理表中的内容，并重新生成一张临时表，并不会取缓存之前的表。(临时表时memory存储引擎，默认放内存，超过配置大小放入磁盘)，当查询有一个较大的结果集时，使用TEMPTABLE可以快速结束对该物理表的访问，从而可以快速释放这张物理表上占有的资源，然后客户端可以对临时表上的数据进行一些耗时的操作，而不影响原来的物理表。</p>
+</blockquote>
+</li>
+</ol>
+<h2 id="union"><a href="#union" class="headerlink" title="union"></a>union</h2><ol>
+<li><p>union的作用是将两个查询的结果集进行合并</p>
+</li>
+<li><p>union必须由两条或者两条以上的select语句组成，语句之间用关键字union分隔。</p>
+</li>
+<li><p>union中的每个查询必须包含相同的列(类型相同或可以隐式转换)， 表达式或聚集函数。</p>
+</li>
+</ol>
+<blockquote>
+<p>如果数据本身具有唯一性，没有重复，建议使用union all，因为union会去重，性能低于union all。</p>
+</blockquote>
+<h2 id="触发器"><a href="#触发器" class="headerlink" title="触发器"></a>触发器</h2><ol>
+<li><p>定义</p>
+<p>触发器的对象是表，当表上出现特定的事件时触发该程序的执行</p>
+</li>
+<li><p>触发器的类型</p>
+<ul>
+<li><p>update： update操作</p>
+</li>
+<li><p>delete：delete操作，replace操作</p>
+<blockquote>
+<p>注意：drop, truncate等DDL操作，不会触发delete</p>
+</blockquote>
+</li>
+<li><p>insert：insert操作，load data操作，replace操作</p>
+</li>
+</ul>
+<blockquote>
+<p>注意：replace操作会触发两次，一次时update类型的触发器，一次时insert类型的触发器</p>
+<p>mysql 5.6版本同一个类型的触发器针对一个表只能由一个</p>
+<p>mysql 5.7也许有多个统一类型的触发器</p>
+</blockquote>
+<p><strong>注意：触发器只触发DML操作，不会触发DDL操作</strong></p>
+</li>
+<li><p>创建触发器</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span></span><br><span class="line">[DEFINER <span class="operator">=</span> &#123; <span class="keyword">user</span> <span class="operator">|</span> <span class="built_in">CURRENT_USER</span> &#125;]</span><br><span class="line"><span class="keyword">TRIGGER</span> trigger_name <span class="comment">-- 触发器名字 </span></span><br><span class="line">trigger_time trigger_event <span class="comment">-- 触发时间和事件 ON tbl_name FOR EACH ROW</span></span><br><span class="line">[trigger_order]</span><br><span class="line">trigger_body</span><br><span class="line"></span><br><span class="line">trigger_time: &#123; BEFORE <span class="operator">|</span> AFTER &#125; <span class="comment">-- 事件之前还是之后触发 </span></span><br><span class="line">trigger_event: &#123; <span class="keyword">INSERT</span> <span class="operator">|</span> <span class="keyword">UPDATE</span> <span class="operator">|</span> <span class="keyword">DELETE</span> &#125; <span class="comment">-- 三个类型 </span></span><br><span class="line">trigger_order: &#123; FOLLOWS <span class="operator">|</span> <span class="keyword">PRECEDES</span> &#125; other_trigger_name</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">MySQL hadoop<span class="variable">@localhost</span>:db_test_trigger<span class="operator">&gt;</span> delimiter <span class="operator">/</span><span class="operator">/</span></span><br><span class="line">Missing required argument, delimiter</span><br><span class="line"><span class="type">Time</span>: <span class="number">0.000</span>s</span><br><span class="line"><span class="comment">-- new.col:表示的是更新以后的值</span></span><br><span class="line"><span class="comment">-- old.col:表示的是更新以前的值，只读</span></span><br><span class="line">MySQL hadoop<span class="variable">@localhost</span>:db_test_trigger<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">trigger</span> trg_update_score</span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> before <span class="keyword">update</span> <span class="keyword">on</span> test_trigger</span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">for</span> <span class="keyword">each</span> <span class="type">row</span></span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">begin</span></span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> if new.score <span class="operator">&lt;</span> <span class="number">0</span> <span class="keyword">then</span></span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span>  <span class="keyword">set</span> new.score <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> elseif new.score <span class="operator">&gt;</span> <span class="number">100</span> <span class="keyword">then</span></span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span>  <span class="keyword">set</span> new.score <span class="operator">=</span> <span class="number">100</span>;</span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span></span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">end</span> if;</span><br><span class="line">                                     <span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">end</span>; <span class="operator">/</span><span class="operator">/</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>触发器总结</p>
+<ul>
+<li><p>触发器对性能有损耗，应当非常慎重使用</p>
+</li>
+<li><p>对于物理表，触发器执行失败则整个语句回滚</p>
+</li>
+<li><p>row格式主从复制，触发器不会在从库上执行</p>
+<blockquote>
+<p>因为从库复制的肯定是主库已经提交过的数据，既然已经提交了说明触发器已经被触发过了，所以从库不会执行。</p>
+</blockquote>
+</li>
+<li><p>使用触发器时应当避免递归执行</p>
+</li>
+</ul>
+</li>
+<li><p>触发器模拟物化视图</p>
+<ul>
+<li><p>物化视图的概念</p>
+<ul>
+<li><p>不是基于基表的虚表</p>
+</li>
+<li><p>根据基表实际存在的实表</p>
+</li>
+<li><p>预先计算并保存耗时较多的sql操作结果</p>
+</li>
+</ul>
+</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建Orders表</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> Orders</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> (order_id <span class="type">int</span> unsigned <span class="keyword">not</span> <span class="keyword">null</span> auto_increment, </span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> product_name <span class="type">varchar</span>(<span class="number">30</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> price <span class="type">decimal</span>(<span class="number">8</span>,<span class="number">2</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> amount <span class="type">smallint</span> <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">primary</span> key(order_id));</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.13</span> sec) </span><br><span class="line"></span><br><span class="line"><span class="comment">-- -- 插入测试数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> Orders <span class="keyword">values</span> </span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">null</span>, <span class="string">&#x27;cpu&#x27;</span>, <span class="number">135.5</span> ,<span class="number">1</span>), </span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">null</span>, <span class="string">&#x27;memory&#x27;</span>, <span class="number">48.2</span>, <span class="number">3</span>), </span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">null</span>, <span class="string">&#x27;cpu&#x27;</span>, <span class="number">125.6</span>, <span class="number">3</span>), </span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> (<span class="keyword">null</span>, <span class="string">&#x27;cpu&#x27;</span>, <span class="number">105.3</span>, <span class="number">4</span>);</span><br><span class="line">Records: <span class="number">4</span> Duplicates: <span class="number">0</span> Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> Orders; </span><br><span class="line"><span class="operator">+</span><span class="comment">----------+--------------+--------+--------+ </span></span><br><span class="line"><span class="operator">|</span> order_id <span class="operator">|</span> product_name <span class="operator">|</span> price <span class="operator">|</span> amount <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----------+--------------+--------+--------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span> <span class="operator">|</span> cpu <span class="operator">|</span> <span class="number">135.50</span> <span class="operator">|</span> <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> memory <span class="operator">|</span>  <span class="number">48.20</span> <span class="operator">|</span> <span class="number">3</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">3</span> <span class="operator">|</span> cpu <span class="operator">|</span> <span class="number">125.60</span> <span class="operator">|</span> <span class="number">3</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">4</span> <span class="operator">|</span> cpu <span class="operator">|</span> <span class="number">105.30</span> <span class="operator">|</span> <span class="number">4</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+--------------+--------+--------+ </span></span><br><span class="line"><span class="number">4</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 建立一个模拟物化视图的表(即用这张表来模拟物化视图) </span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> Orders_MV</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> ( product_name <span class="type">varchar</span>(<span class="number">30</span>) <span class="keyword">not</span> <span class="keyword">null</span>, </span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> price_sum <span class="type">decimal</span>(<span class="number">8</span>,<span class="number">2</span>) <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> amount_sum <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> price_avg <span class="type">float</span> <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> orders_cnt <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span>,</span><br><span class="line"> <span class="operator">-</span><span class="operator">&gt;</span>  <span class="keyword">unique</span> index (product_name));</span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.14</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 通过Orders表的数据，将测试数据初始化到Orders_MV表中 </span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> Orders_MV</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">select</span> product_name, <span class="built_in">sum</span>(price),</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> <span class="built_in">sum</span>(amount), <span class="built_in">avg</span>(price), <span class="built_in">count</span>(<span class="operator">*</span>)</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span>     <span class="keyword">from</span> Orders</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span>     <span class="keyword">group</span> <span class="keyword">by</span> product_name;</span><br><span class="line">Query OK, <span class="number">2</span> <span class="keyword">rows</span> affected (<span class="number">0.07</span> sec) </span><br><span class="line">Records: <span class="number">2</span> Duplicates: <span class="number">0</span> Warnings: <span class="number">0</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> Orders_MV; </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------+-----------+------------+-----------+------------+ </span></span><br><span class="line"><span class="operator">|</span> product_name <span class="operator">|</span> price_sum <span class="operator">|</span> amount_sum <span class="operator">|</span> price_avg <span class="operator">|</span> orders_cnt <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------+-----------+------------+-----------+------------+ </span></span><br><span class="line"><span class="operator">|</span> cpu <span class="operator">|</span> <span class="number">366.40</span> <span class="operator">|</span> <span class="number">8</span> <span class="operator">|</span> <span class="number">122.133</span> <span class="operator">|</span> <span class="number">3</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">|</span> memory <span class="operator">|</span> <span class="number">48.20</span> <span class="operator">|</span> <span class="number">3</span> <span class="operator">|</span> <span class="number">48.2</span> <span class="operator">|</span> <span class="number">1</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------+-----------+------------+-----------+------------+ </span></span><br><span class="line"><span class="number">2</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">delimiter <span class="operator">/</span><span class="operator">/</span></span><br><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TRIGGER</span> tgr_Orders_insert <span class="comment">-- 创建触发器为tgr_Orders_insert </span></span><br><span class="line">AFTER <span class="keyword">INSERT</span> <span class="keyword">ON</span> Orders <span class="comment">-- 触发器是INSERT类型的，且作用于Orders表 </span></span><br><span class="line"><span class="keyword">FOR</span> <span class="keyword">EACH</span> <span class="type">ROW</span></span><br><span class="line"><span class="keyword">BEGIN</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@old</span>_price_sum :<span class="operator">=</span> <span class="number">0</span>; <span class="comment">-- 设置临时存放Orders_MV表(模拟物化视图)的字段的变量</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@old</span>_amount_sum :<span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@old</span>_price_avg :<span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@old</span>_orders_cnt :<span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line"><span class="keyword">SELECT</span> <span class="comment">-- select ... into ... 在更新Orders_MV之前，将Orders_MV中对应某个产品的信息写入临时变量</span></span><br><span class="line">        IFNULL(price_sum, <span class="number">0</span>),</span><br><span class="line">        IFNULL(amount_sum, <span class="number">0</span>),</span><br><span class="line">        IFNULL(price_avg, <span class="number">0</span>),</span><br><span class="line">        IFNULL(orders_cnt, <span class="number">0</span>)</span><br><span class="line"><span class="keyword">FROM</span></span><br><span class="line">Orders_MV</span><br><span class="line"><span class="keyword">WHERE</span></span><br><span class="line">product_name <span class="operator">=</span> NEW.product_name <span class="keyword">INTO</span> <span class="variable">@old</span>_price_sum , <span class="variable">@old</span>_amount_sum , <span class="variable">@old</span>_price_avg , <span class="variable">@old</span>_orders_cnt;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@new</span>_price_sum <span class="operator">=</span> <span class="variable">@old</span>_price_sum <span class="operator">+</span> NEW.price; <span class="comment">-- 累加新的值 SET @new_amount_sum = @old_amount_sum + NEW.amount;</span></span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@new</span>_orders_cnt <span class="operator">=</span> <span class="variable">@old</span>_orders_cnt <span class="operator">+</span> <span class="number">1</span>;</span><br><span class="line"><span class="keyword">SET</span> <span class="variable">@new</span>_price_avg <span class="operator">=</span> <span class="variable">@new</span>_price_sum <span class="operator">/</span> <span class="variable">@new</span>_orders_cnt ;</span><br><span class="line">REPLACE <span class="keyword">INTO</span> Orders_MV</span><br><span class="line"><span class="keyword">VALUES</span>(NEW.product_name, <span class="variable">@new</span>_price_sum,</span><br><span class="line"><span class="variable">@new</span>_amount_sum, <span class="variable">@new</span>_price_avg, <span class="variable">@new</span>_orders_cnt );</span><br><span class="line"><span class="comment">-- REPLACE 将对应的物品(唯一索引)的字段值替换new_xxx的值 </span></span><br><span class="line"><span class="keyword">END</span>;<span class="operator">/</span><span class="operator">/</span></span><br><span class="line">delimiter ;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> Orders <span class="keyword">values</span> (<span class="keyword">null</span>, <span class="string">&#x27;ssd&#x27;</span>, <span class="number">299</span>, <span class="number">3</span>); </span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.03</span> sec)</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> Orders <span class="keyword">values</span> (<span class="keyword">null</span>, <span class="string">&#x27;memory&#x27;</span>, <span class="number">47.9</span>, <span class="number">5</span>); </span><br><span class="line">Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.05</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> Orders_MV;</span><br></pre></td></tr></table></figure></li>
+</ol>
+<h2 id="tips"><a href="#tips" class="headerlink" title="tips"></a>tips</h2><ol>
+<li><p>ifnull函数</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 如果test为NULL，则ifnull返回100</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> ifnull(<span class="variable">@test</span>, <span class="number">100</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+</span></span><br><span class="line"><span class="operator">|</span> ifnull(<span class="variable">@test</span>, <span class="number">100</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">100</span> <span class="operator">|</span> <span class="comment">-- ifnull函数return的值是100 </span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="variable">@test</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="variable">@test</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span> <span class="comment">-- 但是test还是NULL </span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 给test变􏰃赋值为200</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">set</span> <span class="variable">@test</span>:<span class="operator">=</span><span class="number">200</span>;  </span><br><span class="line">Query OK, <span class="number">0</span> <span class="keyword">rows</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 再次ifnull判断，此时test不为null，则返回test变量的值 </span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> ifnull(<span class="variable">@test</span>, <span class="number">100</span>); </span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+</span></span><br><span class="line"><span class="operator">|</span> ifnull(<span class="variable">@test</span>, <span class="number">100</span>) <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">200</span> <span class="operator">|</span> <span class="comment">-- test不为null。返回test的值200</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+ </span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>select into用法</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="variable">@id</span>_1; </span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="variable">@id</span>_1 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">NULL</span> <span class="operator">|</span> <span class="comment">-- 当前变􏰃id_1为null </span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="variable">@score</span>_1;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="variable">@score</span>_1 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="keyword">NULL</span><span class="operator">|</span> <span class="comment">-- 当前变􏰃score_1为null </span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test_rank_2;</span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+</span></span><br><span class="line"><span class="operator">|</span> id   <span class="operator">|</span> score <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span> <span class="operator">|</span> <span class="number">10</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">20</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">3</span> <span class="operator">|</span> <span class="number">30</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">4</span> <span class="operator">|</span> <span class="number">30</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">5</span> <span class="operator">|</span> <span class="number">40</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">6</span> <span class="operator">|</span> <span class="number">40</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">------+-------+</span></span><br><span class="line"><span class="number">6</span> <span class="keyword">rows</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 选择id=1的记录，将对应的id和score赋值给变量 id_1 和 score_1</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> test_rank_2</span><br><span class="line"><span class="operator">-</span><span class="operator">&gt;</span> <span class="keyword">where</span> id<span class="operator">=</span><span class="number">1</span> <span class="keyword">into</span> <span class="variable">@id</span>_1, <span class="variable">@score</span>_1;</span><br><span class="line"> Query OK, <span class="number">1</span> <span class="type">row</span> affected (<span class="number">0.00</span> sec)</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="variable">@id</span>_1;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="variable">@id</span>_1 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="variable">@score</span>_1;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="variable">@score</span>_1 <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">10</span> <span class="operator">|</span> </span><br><span class="line"><span class="operator">+</span><span class="comment">----------+</span></span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-007/" rel="prev" title="mysql学习笔记-select介绍">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-select介绍
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-009/" rel="next" title="mysql学习笔记-存储过程和自定义函数">
+                  mysql学习笔记-存储过程和自定义函数 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

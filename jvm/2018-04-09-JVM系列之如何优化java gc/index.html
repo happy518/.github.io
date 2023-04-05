@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="从前面的内容，我们了解到不同的GC算法的执行过程，GC的工作原理，新生代和老年代的概念，JDK7中你需要了解的5种GC类型以及每一种GC对性能的影响。这篇文章基于实际生产环境中的案例，介绍几个GC优化的最佳参数设置。 GC优化是必要的吗?或者更准确的说，GC优化对java基础服务来说是必要的吗？答案是否定的，事实上GC优化对java基础服务来说在有些场合是可以省去的，但前提是这些正在运行的java">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM系列之如何优化java gc">
+<meta property="og:url" content="https://theme-next.js.org/jvm/2018-04-09-JVM%E7%B3%BB%E5%88%97%E4%B9%8B%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96java%20gc/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="从前面的内容，我们了解到不同的GC算法的执行过程，GC的工作原理，新生代和老年代的概念，JDK7中你需要了解的5种GC类型以及每一种GC对性能的影响。这篇文章基于实际生产环境中的案例，介绍几个GC优化的最佳参数设置。 GC优化是必要的吗?或者更准确的说，GC优化对java基础服务来说是必要的吗？答案是否定的，事实上GC优化对java基础服务来说在有些场合是可以省去的，但前提是这些正在运行的java">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://pic.yupoo.com/crowhawk/ebb4b181/a24f4e9b.png">
+<meta property="og:image" content="https://pic.yupoo.com/crowhawk/026cb5ec/dd3bdbb9.png">
+<meta property="article:published_time" content="2018-04-08T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-10T05:47:07.240Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="JVM">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://pic.yupoo.com/crowhawk/ebb4b181/a24f4e9b.png">
+
+
+<link rel="canonical" href="https://theme-next.js.org/jvm/2018-04-09-JVM%E7%B3%BB%E5%88%97%E4%B9%8B%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96java%20gc/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/jvm/2018-04-09-JVM%E7%B3%BB%E5%88%97%E4%B9%8B%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96java%20gc/","path":"jvm/2018-04-09-JVM系列之如何优化java gc/","title":"JVM系列之如何优化java gc"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>JVM系列之如何优化java gc | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#GC%E4%BC%98%E5%8C%96%E6%98%AF%E5%BF%85%E8%A6%81%E7%9A%84%E5%90%97"><span class="nav-number">1.</span> <span class="nav-text">GC优化是必要的吗?</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E5%B0%86%E8%BF%9B%E5%85%A5%E8%80%81%E5%B9%B4%E4%BB%A3%E7%9A%84%E5%AF%B9%E8%B1%A1%E6%95%B0%E9%87%8F%E9%99%8D%E5%88%B0%E6%9C%80%E4%BD%8E"><span class="nav-number">1.1.</span> <span class="nav-text">将进入老年代的对象数量降到最低</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%99%8D%E4%BD%8EFull-GC%E7%9A%84%E6%97%B6%E9%97%B4"><span class="nav-number">1.2.</span> <span class="nav-text">降低Full GC的时间</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%BD%B1%E5%93%8DGC%E6%80%A7%E8%83%BD%E7%9A%84%E5%8F%82%E6%95%B0"><span class="nav-number">2.</span> <span class="nav-text">影响GC性能的参数</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GC%E4%BC%98%E5%8C%96%E7%9A%84%E8%BF%87%E7%A8%8B"><span class="nav-number">3.</span> <span class="nav-text">GC优化的过程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E7%9B%91%E6%8E%A7GC%E7%8A%B6%E6%80%81%E5%B9%B6%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%9C"><span class="nav-number">4.</span> <span class="nav-text">监控GC状态并分析结果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEGC%E7%B1%BB%E5%9E%8B-x2F-%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F"><span class="nav-number">5.</span> <span class="nav-text">设置GC类型&#x2F;内存大小</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AEGC%E7%B1%BB%E5%9E%8B"><span class="nav-number">5.1.</span> <span class="nav-text">设置GC类型</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E8%AE%BE%E7%BD%AE%E5%86%85%E5%AD%98%E5%A4%A7%E5%B0%8F"><span class="nav-number">5.2.</span> <span class="nav-text">设置内存大小</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E5%88%86%E6%9E%90GC%E4%BC%98%E5%8C%96%E7%9A%84%E7%BB%93%E6%9E%9C"><span class="nav-number">6.</span> <span class="nav-text">分析GC优化的结果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E4%BC%98%E5%8C%96%E6%A1%88%E4%BE%8B"><span class="nav-number">7.</span> <span class="nav-text">优化案例</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B1"><span class="nav-number">7.1.</span> <span class="nav-text">示例1</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A4%BA%E4%BE%8B2"><span class="nav-number">7.2.</span> <span class="nav-text">示例2</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#%E6%80%BB%E7%BB%93"><span class="nav-number">8.</span> <span class="nav-text">总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-09-JVM%E7%B3%BB%E5%88%97%E4%B9%8B%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96java%20gc/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="JVM系列之如何优化java gc | 亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          JVM系列之如何优化java gc
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-04-09 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-09T00:00:00+08:00">2018-04-09</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/JVM/" itemprop="url" rel="index"><span itemprop="name">JVM</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>从前面的内容，我们了解到不同的GC算法的执行过程，GC的工作原理，新生代和老年代的概念，JDK7中你需要了解的5种GC类型以及每一种GC对性能的影响。这篇文章基于实际生产环境中的案例，介绍几个GC优化的最佳参数设置。</p>
+<h1 id="GC优化是必要的吗"><a href="#GC优化是必要的吗" class="headerlink" title="GC优化是必要的吗?"></a>GC优化是必要的吗?</h1><p>或者更准确的说，GC优化对java基础服务来说是必要的吗？答案是否定的，事实上GC优化对java基础服务来说在有些场合是可以省去的，但前提是这些正在运行的java系统，必须包含以下参数或者行为：</p>
+<ul>
+<li>内存大小已经通过-Xms和-Xmx参数指定过。</li>
+<li>运行在server模式下(使用-server参数)</li>
+<li>系统中没有残留超时日志之类的错误日志。</li>
+</ul>
+<p>换句话说，如果你在运行时没有手动设置内存大小并且打印出了过多的超时日志，那你就需要对系统进行GC优化。</p>
+<p>不过你需要时刻谨记一句话：GC tuning is the last task to be done</p>
+<p>现在来想一想GC优化的最根本原因，垃圾收集器的工作原理就是清除java创建的对象，垃圾收集器需要清理的对象数量以及要执行的gc数量均取决于已创建的对象数量，因此，为了使你的系统在gc上表现良好，首先需要减少创建对象的数量。</p>
+<p>俗话说&quot;冰冻三尺非一日之寒&quot;, 我们在编码时要首先把下面这些小细节做好，否则一些琐碎的不良代码累积起来将gc的工作变得繁重而难于管理：</p>
+<ul>
+<li>使用StringBuilder或者StringBuffer来代替Stirng</li>
+<li>尽量少输出日志</li>
+</ul>
+<p>尽管如此，仍然会有我们束手无策的情况，xmlh和json解析过程往往占用了最多的内存，即使我们已经尽可能得减少用String，少输出日志，仍然会有大量的临时内存(大约10-100MB)被用来解析xml和json文件，但我们有很难弃用xml和json，在此只需要知道这一过程会占用大量内存即可。</p>
+<p>如果在经过几次重复的优化后应用程序的内存占用情况有所改善，那么就可以启动GC优化了</p>
+<p>GC优化的两个目的：</p>
+<ul>
+<li><ol>
+<li>进入老年代的对象数量降到最低</li>
+</ol>
+</li>
+<li><ol start="2">
+<li>减少Full的执行时间</li>
+</ol>
+</li>
+</ul>
+<h2 id="将进入老年代的对象数量降到最低"><a href="#将进入老年代的对象数量降到最低" class="headerlink" title="将进入老年代的对象数量降到最低"></a>将进入老年代的对象数量降到最低</h2><p>除了可以在JDK7以及更高版本中使用G1收集器以外，其他分代GC都是有Oracle JVM提供的，关于分代GC，就是对象在Eden区被创建，随后被转移到Survivor区，在此之后剩余的对象会被转入到老年代，也有一些对象由于占用内存过大，在Eden区被创建后直接被传入老年代，老年代GC相对来说比新生代GC更耗时，因此，减少进入老年代的对象数量可以显著降低Full GC的频率，你可能以为减少进入老年代的对象数量意味着把它们留在新生代，事实正好相反，新生代内存的大小是可以调节的。</p>
+<h2 id="降低Full-GC的时间"><a href="#降低Full-GC的时间" class="headerlink" title="降低Full GC的时间"></a>降低Full GC的时间</h2><p>Full GC的执行时间比Minor GC要长的多，因此，如果在Full GC上花费过多的时间(超过1s)，将可能出现超时错误。</p>
+<ul>
+<li>如果通过减少老年代内存来减少Full GC时间，可能会引起OutOfMemoryError或者导致Full GC的频率升高。</li>
+<li>另外，如果通过增加老年代内存来降低Full GC的频率，Full GC的时间可能因此增加。</li>
+</ul>
+<p>因此，你需要把老年代的大小设置成一个合适的值。</p>
+<h1 id="影响GC性能的参数"><a href="#影响GC性能的参数" class="headerlink" title="影响GC性能的参数"></a>影响GC性能的参数</h1><p>不要幻想着&quot;如果有人用他设置的GC参数获取了不错的性能，我们为什么不复制他的参数设置呢？&quot;，因为对于不同的web服务，他们创建对象的大小和生命周期都不相同。</p>
+<p>举一个简单的例子：如果一个任务的执行条件是A、B、C、D和E，另外一个完全相同的任务执行条件只有A和B，那么那一个任务执行速度更快呢，作为常识来讲，答案很明显是后者。</p>
+<p>Java GC参数的设置也是这个道理，设置好几个参数并不会提升GC的执行速度，反而会是它变得更慢，GC优化的基本原则就是将不同的GC参数应用到两个及以上的服务器上然后比较它们的性能，然后将那些被证明可以提高性能或者减少GC执行时间的参数应用到最终的工作服务器上。</p>
+<p>下面这张表展示了内存大小相关且会影响GC性能的GC参数</p>
+<table>
+<thead>
+<tr>
+<th align="right">类型</th>
+<th align="right">参数</th>
+<th>描述</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="right">堆内存大小</td>
+<td align="right">-Xms</td>
+<td>启动JVM时堆内存的大小</td>
+</tr>
+<tr>
+<td align="right"></td>
+<td align="right">-Xmx</td>
+<td>堆内存的最大限制</td>
+</tr>
+<tr>
+<td align="right">新生代空间大小</td>
+<td align="right">-XX:NewRatio</td>
+<td>新生代和老年代的内存比</td>
+</tr>
+<tr>
+<td align="right"></td>
+<td align="right">-XX:NewSize</td>
+<td>新生代内存大小</td>
+</tr>
+<tr>
+<td align="right"></td>
+<td align="right">-XX:SurvivorRatio</td>
+<td>Eden区和Survivor区的内存比</td>
+</tr>
+</tbody></table>
+<p>在进行GC优化时最常用的参数是-Xms，-Xmx和-XX:NewRatio. -Xms和-Xmx参数通常是必须的。所以NewRatio的值将对GC性能产生重要的影响。</p>
+<p>有些人可能会问如何设置永久代内存大小，你可以用-XX:PermSize和-XX:MaxPermSize参数来进行设置，但是要记住，只有当出现OutOfMemoryError错误时你才需要去设置永久代内存。</p>
+<p>还有一个会影响GC性能的因素是垃圾收集器的类型，下面展示了关于GC类型的可选参数(基于JDK 6.0)</p>
+<table>
+<thead>
+<tr>
+<th align="left">GC类型</th>
+<th align="left">参数</th>
+<th align="left">备注</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Serial GC</td>
+<td align="left">-XX:+UseSerialGC</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">Parallel GC</td>
+<td align="left">-XX:+UseParallel  -XX:ParallelGCThreads&#x3D;value</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">Parallel Compacting GC</td>
+<td align="left">-XX:+UseParallelOldGC</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">CMS GC</td>
+<td align="left">-XX:+UseConcMarkSweepGC  -XX:+UseParNewGC  -XX:+CMSParallelRemarkEnabled  -XX:CMSInitiatingOccupancyFraction&#x3D;value  -XX:+UseCMSInitiatingOccupancyOnly</td>
+<td align="left"></td>
+</tr>
+<tr>
+<td align="left">G1</td>
+<td align="left">-XX:+UnlockExperimentalVMOptions   -XX:+UseG1GC</td>
+<td align="left">在JDK6中这两个参数必须配合使用</td>
+</tr>
+</tbody></table>
+<p>除了G1收集器外，可以通过设置上表中每种类型第一行的参数来切换GC类型，最常见的非侵入式GC就是Serial GC，它针对客户端系统进行了特别的优化。</p>
+<p>会影响GC性能的参数还有很多，但是上面的参数会带来最显著的效果，请切记，设置太多的参数并不一定会提升GC的性能。</p>
+<h1 id="GC优化的过程"><a href="#GC优化的过程" class="headerlink" title="GC优化的过程"></a>GC优化的过程</h1><p>GC优化过程和大多数常见的提升性能的过程类似，下面是使用的流程：</p>
+<ol>
+<li>监控GC状态</li>
+</ol>
+<p>你需要监控GC从而检查系统中运行的GC的各种状态。</p>
+<ol start="2">
+<li>分析监控结果后决定是否需要优化GC</li>
+</ol>
+<p>在检查GC状态后，你需要分析监控结果并决定是否需要进行GC优化，如果分析结果显示运行GC的时间只要0.1-0.3秒，那么就不需要把时间浪费在GC优化上，但如果运行GC的时间达到1-3秒，甚至大于10秒，那么GC优化将是很有必要的。</p>
+<p>但是，如果你已经分配了大约10G内存给java，并且这些内存无法省下，那么就无法进行GC优化了，在进行GC优化之前，你需要考虑为什么你需要分配这么大的内存空间，如果你分配了1G或者2G大小的内存并且出现了OutOfMemoryError，那你就应该执行堆转储(heap dump)来消除导致异常的原因。</p>
+<blockquote>
+<p>注意：<br>堆转储(heap dump)是一个用来检查java内存中的对象和数据的内存文件。该文件可以通过通过执行JDK中的jmap命令来创建，在创建文件的过程中，所有java程序都将暂停，因此，不要再系统执行过程中创建该文件.</p>
+</blockquote>
+<ol start="3">
+<li>设置GC类型&#x2F;内存大小</li>
+</ol>
+<p>如果你决定要进行GC优化，那么你需要选择一个GC类型并且为它设置内存大小，此时如果你有多个服务器，请如上文提到的那样，在每台服务器上设置不同的GC参数并分析它们的区别。</p>
+<ol start="4">
+<li>分析结果</li>
+</ol>
+<p>在设置完GC参数后就可以开始收集数据，请在收集至少24小时后再进行结果分析，如果你足够幸运，你可能会找到系统的最佳GC参数，如若不然，你还需要分析输出日志并检查分配的内存，然后需要通过不断GC类型&#x2F;内存大小来找到系统的最佳参数。</p>
+<ol start="5">
+<li>如果结果令人满意，将参数应用到所有服务器上并结束GC优化</li>
+</ol>
+<p>如果GC优化的结果令人满意，就可以将参数应用到所有服务器上，并停止GC优化。</p>
+<p>下面详细阐述每一步所做的具体工作。</p>
+<h1 id="监控GC状态并分析结果"><a href="#监控GC状态并分析结果" class="headerlink" title="监控GC状态并分析结果"></a>监控GC状态并分析结果</h1><p>在运行中的web应用服务器，上查看GC状态的最佳方式就是使用jstat命令。前面已经介绍过jstat命令，</p>
+<p>下面的例子展示了某个还没有执行GC优化的jvm的状态(虽然它并不是运行服务器)</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ jstat -gcutil 21719 1s</span><br><span class="line">S0    S1    E    O    P    YGC    YGCT    FGC    FGCT GCT</span><br><span class="line">48.66 0.00 48.10 49.70 77.45 3428 172.623 3 59.050 231.673</span><br><span class="line">48.66 0.00 48.10 49.70 77.45 3428 172.623 3 59.050 231.673</span><br></pre></td></tr></table></figure>
+<p>我们先看一下YGC(从应用程序启动到采样时发生Young GC的次数)和YGCT(从应用程序启动采样时Young GC所用的时间(单位秒)), 计算YGCT&#x2F;YGC会得出，平均每次新生代的GC耗时50ms, 这是一个很小的数字，通过这个结果可以看出，我们大可不必关注新生代GC对GC性能的影响。</p>
+<p>现在来看一下FGC(从应用程序启动到采样时发生Full GC的次数)和FGCT(从应用程序启动到采样时Full GC所用的时间(单位秒))，计算FGCT&#x2F;FGC会得出，平均每次老年代的GC耗时19.86s，有可能是执行了三次Full GC，每次耗时19.68s，也可能是有两次只花了1s，另外花了58s。不管是哪一种情况，GC优化都是很有必要的。</p>
+<p>使用jstat命令可以很容易地查看GC状态，但是分析GC的最佳方式是加上 -verbosegc参数来生成日志。在之前的文章中笔者已经解释了如何分析这些日志。HPJmeter是比较常用的的用于分析-verbosegc生成的日志的工具，它简单易用，使用HPJmeter可以很容易地查看GC执行时间以及GC发生频率。</p>
+<p>此外，如果GC执行时间满足下列所有条件，就没有必要进行GC优化了：</p>
+<ul>
+<li>Minor GC执行非常迅速(50ms以内)</li>
+<li>Minor GC没有频繁执行(大约10s执行一次)</li>
+<li>Full GC执行非常迅速(1s以内)</li>
+<li>Full GC没有频繁执行(大约10min执行一次)</li>
+</ul>
+<p>括号中的数字并不是绝对的，他们也随着服务的状态而变化。有些服务可能要求一次Full GC在0.9s以内，而有些则会放得更宽一些，因此，对于不同的服务。需要按照不同的标准考虑是否需要执行GC优化。</p>
+<p>当检测GC状态时，不能只查看Minor GC和Full GC的时间，还必须要关注GC执行的次数，如果新生代空间太小，Minor GC会非常频繁地执行(有时每秒执行一次，甚至更多)，此外。传入老年代的对象数目也会上升，从而导致Full GC的频率升高，因此，在执行jstat命令时，请使用gccapacity参数来查看具体占用了多少空间。</p>
+<h1 id="设置GC类型-x2F-内存大小"><a href="#设置GC类型-x2F-内存大小" class="headerlink" title="设置GC类型&#x2F;内存大小"></a>设置GC类型&#x2F;内存大小</h1><h2 id="设置GC类型"><a href="#设置GC类型" class="headerlink" title="设置GC类型"></a>设置GC类型</h2><p>JVM有5种垃圾收集器，但是在JDK7以前的版本中，你只能在Parallel GC，Parallel Compacting GC和CMS GC之中选择。至于具体选择哪个，则没有具体的的原则和规则。</p>
+<p>既然这样的话，我们如何来选择GC呢？最好的方法是把三种都用上，但是有一点必须明确CMS GC通常比其他并行(Parallel) GC都要快(这是因为CMS GC是并发的GC)，如果确实如此，那只选择CMS GC优化就可以了，不过CMS GC也总是更快，当出现Concurrent mode failure时，CMS GC就会比并行GC更慢了。</p>
+<ul>
+<li>Concurrent mode failure</li>
+</ul>
+<p>现在我们来深入地了解一下concurrent mode failure。</p>
+<p>并行GC和CMS GC的最大的区别在于并行GC采用&quot;标记-整理&quot;(Mark-Compact)算法而CMS GC采用&quot;标记-清除&quot;(Mark-Sweep)算法，compact步骤就是通过移动内存来消除内存碎片，从而消除分配内存的内存之间的空白区域。</p>
+<p>对于并行GC来说，无论何时执行Full GC。都会进行Compact工作，这消耗了太多时间，不过在执行完Full GC后，下次分配内存将会变得更快(因为执行顺序分配相邻的内存)。</p>
+<p>相反，CMS GC没有compact的过程，因此CMS GC运行速度更快，但是也是由于没有整理内存，在进行磁盘清理之前，内存中会存在很多零碎的空白区域，这也导致没有足够的空间分配给大对象，例如，在老年代还有300M可用的空间，但是连一个10M的对象都没有办法被顺序存储在老年代中，在这种情况下，会报出&quot;concurrent mode failure&quot;的warning，然后系统执行compact操作，但是CMS GC在这种情况下执行的compact操作耗时要比并行GC高很多，并且还会导致另外一个问题，关于“concurrent mode failure”的详细说明，可用参考Oracle工程师撰写的 <span class="exturl" data-url="aHR0cHM6Ly9ibG9ncy5vcmFjbGUuY29tL3Bvb25hbS91bmRlcnN0YW5kaW5nLWNtcy1nYy1sb2dz">Understanding CMS GC Logs<i class="fa fa-external-link-alt"></i></span></p>
+<p>综上所述，你需要根据你的系统情况为其选择一个最合适的GC类型。</p>
+<p>每个系统都有最合适它的GC类型等着你去寻找，如果你有6台服务器，我建议你每两台服务器设置相同的参数，然后加上-verbosegc参数再分析结果。</p>
+<h2 id="设置内存大小"><a href="#设置内存大小" class="headerlink" title="设置内存大小"></a>设置内存大小</h2><p>下面展示了内存大小，GC运行次数和GC运行时间之间的关系；</p>
+<ul>
+<li>大内存空间</li>
+</ul>
+<ol>
+<li>减少GC的次数</li>
+<li>提高了GC的运行时间</li>
+</ol>
+<ul>
+<li>小内存空间</li>
+</ul>
+<ol>
+<li>增多了GC的次数</li>
+<li>降低了GC的运行时间</li>
+</ol>
+<p>关于如何设置内存的大小，没有一个标准的答案，如果服务器资源充足并且Full GC能在1s内完成，把内存设置为10GB也是可以的，但是大部分服务器并不处于这种状态中，当内存设置为10G时，Full GC会耗时10-30s，具体的时间自然与对象的大小有关。</p>
+<p>既然如此，我们该如何设置内存大小呢，通常我推荐设为500M，这里不是说你要通过-Xms500M和-Xmx500M参数来设置WAS内存，根据GC优化之前的状态，如果Full GC后还剩余300M的空间，那么把内存设置为1G是一个不错的选择(300M(默认程序占用) + 500M(老年代最小空间) + 200M(空闲内存))。这意味着你需要为老年代设置至少500M空间，因此如果你有三个运行服务器，你可以把它们的内存分别设置为1G，1.5G，2G，然后检查结果。</p>
+<p>理论上来说，GC执行速度应该遵循1G &gt; 1.5G &gt; 2G，1G内存时GC执行速度更快，然而，理论上的1G内存Full GC消耗1s。2G内存Full GC消耗2s在实际情况中是无法保证的，实际的运行时间还依赖于服务器的性能和对象大小，因此，最好的方法是创建尽可能多的的测量数据并监视它们。</p>
+<p>在设置内存空间大小时，你还需要设置一个参数：NewRatio。NewRatio的值是新生代和老年代空间大小的比例，如果-XX:NewRatio&#x3D;1, 则新生代空间:老年代空间&#x3D;1:1，如果堆内存为1G。则新生代:老年代&#x3D;500M:500M，如果NewRation&#x3D;2，这新生代:老年代&#x3D;1:2, 因此，NewRation的值越大，则老年代空间越大，新生代空间越小。</p>
+<p>你可能会认为NewRatio为1会是做好的选择，然而事实并非如此，根据经验知道，当NewRatio设置为2或者3时，整个GC的状态表现最好。</p>
+<p>完成GC优化最快的方式是什么？答案是比较性能测试结果，为了给每台服务器设置不同的的参数并监控它们，最好查看的是一天或者两天的数据，当通过性能测试来进行GC优化时，你需要在不同的测试时保证它们有相同的负载和运行环境，然而，即使是专业的性能测试人员，想精确的控制负载也很困难，并且需要大量的时间准备，因此，更加方便容易的方法是直接设置参数来运行，然后等待运行结果。</p>
+<h1 id="分析GC优化的结果"><a href="#分析GC优化的结果" class="headerlink" title="分析GC优化的结果"></a>分析GC优化的结果</h1><p>在设置了GC参数和-verbosegc参数后，可以使用tail命令确保日志被正确的生成，如果参数设置的不正确或者日志为生成，那你的时间就被白白浪费了，如果日志收集没有时间的话，在收集一天或者两天数据后在检查结果，最简单的方法是把日志从服务器下载到本地，然后用HPJmeter分析数据。</p>
+<p>在分析结果时，请关注下列几点(这个优先级是根据自己的经验定的，我认为选取GC参数时应该考虑的最重要的因素是Full GC的运行时间)：</p>
+<ul>
+<li>单次Full GC的运行时间</li>
+<li>单次Minor GC的运行时间</li>
+<li>Full GC运行间隔</li>
+<li>Minor GC运行间隔</li>
+<li>整个Full GC的运行时间</li>
+<li>整个Minor GC的运行时间</li>
+<li>整个GC的运行时间</li>
+<li>Full GC的执行次数</li>
+<li>Minor GC的执行次数</li>
+</ul>
+<p>找到最佳的GC参数是件非常幸运的，然而在大多数时候，我们并不幸运，在进行GC优化时一定要小心谨慎，因为当你试图一次完成所有的优化工作时，可能会出现OutOfMemoryError错误。</p>
+<h1 id="优化案例"><a href="#优化案例" class="headerlink" title="优化案例"></a>优化案例</h1><p>到目前为止，我们一直在从理论上介绍GC优化，现在是时候将这些理论付诸实践的时候了，我们通过几个例子来很深入地理解GC优化。</p>
+<h2 id="示例1"><a href="#示例1" class="headerlink" title="示例1"></a>示例1</h2><p>下面这个例子是Service S的优化，对于最近刚开发的的Service S，执行Full GC需要消耗过多的时间。</p>
+<p>现在看一下执行jstat -gcutil的结果</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S0 S1 E O P YGC YGCT FGC FGCT GCT</span><br><span class="line">12.16 0.00 5.18 63.78 20.32 54 2.047 5 6.946 8.993</span><br></pre></td></tr></table></figure>
+<p>左边的Perm区值对于最初的GC优化并不重要，而YGC参数的值更加对于这次优化更为重要。</p>
+<p>平均执行一次Minor GC和Full GC消耗的时间如下表所示：</p>
+<ul>
+<li>Service S的Minor GC和Full GC的平均执行时间</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th align="left">GC类型</th>
+<th align="left">GC执行次数</th>
+<th align="left">GC执行时间</th>
+<th align="left">平均值</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Minor GC</td>
+<td align="left">54</td>
+<td align="left">2.047s</td>
+<td align="left">37ms</td>
+</tr>
+<tr>
+<td align="left">Full GC</td>
+<td align="left">5</td>
+<td align="left">6.946s</td>
+<td align="left">1.389s</td>
+</tr>
+</tbody></table>
+<p>37ms对于Minor GC来说性能还可以，但1.389s对于Full GC来说意味着当Full GC发生时数据库Timeout设置为1s的系统中时，可能会频繁出现超时的情况。</p>
+<p>首先，你需要检查开始GC优化之前内存的使用情况，使用jstat -gccapacity命令可以检查内存使用情况，在笔者的服务器上查看的结果如下：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NGCMN NGCMX NGC S0C S1C EC OGCMN OGCMX OGC OC PGCMN PGCMX PGC PC YGC FGC</span><br><span class="line">212992.0 212992.0 212992.0 21248.0 21248.0 170496.0 1884160.0 1884160.0 1884160.0 1884160.0 262144.0 262144.0 262144.0 262144.0 54 5</span><br></pre></td></tr></table></figure>
+
+<p>其中的关键值如下:</p>
+<ul>
+<li>新生代内存使用量: 212,992k</li>
+<li>老年代内存使用量: 1,884,160k</li>
+</ul>
+<p>因此，除了永久代以外，被分配的内存空间加起来有2G, 并且新生代:老年代&#x3D;1:9， 为了得到比使用jstat更细致的结果，还需要加上-verbosegc参数获取日志，并把三台服务器安装如下方式设置(除此外没有使用任何其他参数)</p>
+<ul>
+<li>NewRatio&#x3D;2</li>
+<li>NewRatio&#x3D;3</li>
+<li>NewRatio&#x3D;4</li>
+</ul>
+<p>一天后我得到了系统的GC log，幸运的是，在设置完NewRatio后系统没有发生任何Full GC。</p>
+<p>这是为什么呢？ 这是因为大部分对象在创建之后很快被回收了，所有这些对象没有被传入老年代，而是在新生代就被销毁回收了。</p>
+<p>在这种情况下，就没有必要去改变其他的参数值了，只要选择一个最合适的NewRatio值即可，那么，如何确定最佳的NewRatio的值呢？为此，我们分析一下每种NewRatio值下Minor GC的平均响应时间。</p>
+<p>在每种参数下Minor GC的平均响应时间如下：</p>
+<ul>
+<li>NewRatio&#x3D;2 45ms</li>
+<li>NewRatio&#x3D;3 34ms</li>
+<li>NewRatio&#x3D;4 30ms</li>
+</ul>
+<p>我们可以根据GC时间的长短得出NewRatio&#x3D;4是最佳的参数值(尽管NewRatio&#x3D;4时新生代空间是最小的)。在设置完GC参数之后，服务器没有发生Full GC。</p>
+<p>为了说明这个问题，下面是服务执行一段时间后执行jstat -gcutil的结果：</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S0 S1 E O P YGC YGCT FGC FGCT GCT</span><br><span class="line">8.61 0.00 30.67 24.62 22.38 2424 30.219 0 0.000 30.219</span><br></pre></td></tr></table></figure>
+
+<p>你可能会认为是服务器接受的请求比较少才使得GC发生的频率比较低，实际上，虽然Full GC没有执行过，但Minor GC被执行了2424次。</p>
+<h2 id="示例2"><a href="#示例2" class="headerlink" title="示例2"></a>示例2</h2><p>这是一个Service A的例子，我们提供公司内部的应用性能管理系统(APM)发现JVM暂停了相当长的时间(超过了8s)，因此我们进行了GC优化，我们努力寻找JVM暂停的原因，后来发现是因为Full GC执行时间过长，因此我们决定进行GC优化。</p>
+<p>在GC优化的开始阶段，我们加上了-verbosegc参数，结果如下图所示：</p>
+<ul>
+<li>进行GC优化之前STW的时间</li>
+</ul>
+<p><img src="https://pic.yupoo.com/crowhawk/ebb4b181/a24f4e9b.png" alt="进行GC优化之前STW的时间" loading="lazy"></p>
+<p>上图是由HPJmeter生成的图片之一，横坐标表示JVM执行的时间，纵坐标表示每次GC的时间，CMS为绿点，表示Full GC的结果，而Parallel Scavenge为难点，表示Minor GC的结果。</p>
+<p>之前我说过CMS GC是最快的GC，但是上面的结果显示在一些时候CMS耗时达到了15s，是什么原因导致了这一结果呢？请记住我之前说的：CMS在执行compact操作时会显著变慢，此外，服务的内存通过-Xms1g和-Xmx4g设置了，而分配的内存只有4G。</p>
+<p>因此笔者将GC类型从CMS GC改为了Parallel GC，把内存大小设置为2G，并把NewRatio设为3，在执行jstat -gcutil几小时之后的结果如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S0 S1 E O P YGC YGCT FGC FGCT GCT</span><br><span class="line">0.00 30.48 3.31 26.54 37.01 226 11.131 4 11.758 22.890</span><br></pre></td></tr></table></figure>
+
+<p>Full GC的时间缩短了，变成了每次3s，跟15s比有了显著提升，但是3s依然不够快，为此，笔者创建了下面6种情况：</p>
+<ul>
+<li>case 1：-XX:UseParallelGC -Xms1536m   -Xmx1536m   -XX:NewRatio&#x3D;2</li>
+<li>case 2: -XX:UseParallelGC -Xms1536m   -Xmx1536m   -XX:NewRatio&#x3D;3</li>
+<li>case 3: -XX:UseParallelGC -Xms1g      -Xmx1g      -XX:NewRatio&#x3D;3</li>
+<li>case 4: -XX:UseParallelOldGC -Xms1536m -Xmx1536m  -XX:NewRatio&#x3D;2</li>
+<li>case 5: -XX:UseParallelOldGC -Xms1536m -Xmx1536m  -XX:NewRatio&#x3D;3</li>
+<li>case 6: -XX:UseParallelOldGC -Xms1g    -Xmx1g     -XX:NewRatio&#x3D;3</li>
+</ul>
+<p>上面哪一种情况最快？结果显示，内存空间越小，运行结果最少，下面展示了性能最好的case 6的结果图，它的最慢响应时间只有1.7s，并且响应时间的平均值已经被控制到了1s以内。</p>
+<ul>
+<li>case 6的持续时间图</li>
+</ul>
+<p><img src="https://pic.yupoo.com/crowhawk/026cb5ec/dd3bdbb9.png" loading="lazy"></p>
+<p>基于上图的结果，按照case 6调整了GC参数，但这却导致了每晚都会发生OutOfMemoryError。很难解释发生异常的具体原因。简单的说，应该是批处理程序导致了内存泄漏，我们正在解决相关的问题。</p>
+<p>如果只对GC日志做一些短时间的分析就将相关参数部署到所有服务器行来执行GC优化，这是非常危险的，切记，只有当你同时仔细分析服务的执行情况和GC日志后，才能保证GC优化没有错误地执行。</p>
+<p>在上文中，我们通过两个GC优化的例子来说明GC优化是怎样执行的，正如上文中提到的，例子中设置了GC参数可以设置在相同的服务器之上，但前提是它们具有相同的CPU，操作系统，JDK版本并且运行这相同的服务，此外，不要把我使用的参数照搬到你的应用上，它们可能在你的服务器上并不能起到同样良好的效果。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>笔者没有执行heap dump并分析内存的详细情况，而是通过自己的经验进行GC优化，精确的分析内存可以得到更好的优化效果，不过这种分析一般只适用于内存使用量相对固定的场景，如果服务器严重过载并占有了大量的内存，则建议你根据之前的经验进行GC优化。</p>
+<p>笔者已经在一些服务器上设置了G1 GC参数并进行了性能测试，但还没有应用到生成环境，G1 GC的速度快于任何其他的GC类型，但是你必须升级到JDK7，此外，暂时还无法保证它的稳定性，没有人知道运行时是否会出现致命的错误，因此，G1 GC暂时还不适合投入应用。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/JVM/" rel="tag"># JVM</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/jvm/2018-04-08-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E8%A7%88/" rel="prev" title="JVM系列之jvm知识点总览">
+                  <i class="fa fa-chevron-left"></i> JVM系列之jvm知识点总览
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/2018-04-11%E7%BE%8E%E5%9B%A2%E9%9D%A2%E8%AF%95%E7%9C%9F%E9%A2%98%E4%B9%8B%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8BOOM%EF%BC%8C%E8%BF%9B%E7%A8%8B%E9%87%8C%E7%9A%84%E5%85%B6%E4%BB%96%E7%BA%BF%E7%A8%8B%E8%BF%98%E8%83%BD%E8%BF%90%E8%A1%8C%E5%90%97%EF%BC%9F/" rel="next" title="美团面试真题之一个线程OOM，进程里的其他线程还能运行吗？">
+                  美团面试真题之一个线程OOM，进程里的其他线程还能运行吗？ <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

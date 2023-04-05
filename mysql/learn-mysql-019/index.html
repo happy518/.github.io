@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="如何学习 MySQL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-如何学习 MySQL">
+<meta property="og:url" content="https://theme-next.js.org/mysql/learn-mysql-019/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="如何学习 MySQL">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-019/20230324-ec9159d6-1f25-4460-b143-bb534f05c885.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-019/20230324-9befc5e3-c74b-41a6-87fb-4ff5e2e05f66.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-019/20230324-0ba735dd-342d-49ac-b88d-16df2ebf1452.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-019/20230324-a2d40815-db16-4347-9b89-22c99c28aa68.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-019/20230324-020bd002-ff53-47f4-a901-49f7db40ac91.png">
+<meta property="article:published_time" content="2023-03-25T08:07:32.000Z">
+<meta property="article:modified_time" content="2023-03-25T08:11:33.283Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://theme-next.js.org/mysql/learn-mysql-019/20230324-ec9159d6-1f25-4460-b143-bb534f05c885.png">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/learn-mysql-019/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/learn-mysql-019/","path":"mysql/learn-mysql-019/","title":"mysql学习笔记-如何学习 MySQL"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-如何学习 MySQL | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E9%98%BF%E9%87%8C%E4%BA%91%E7%9A%84%E6%95%B0%E6%8D%AE%E5%BA%93%E4%B8%93%E5%AE%B6-Yangyidba"><span class="nav-number">1.</span> <span class="nav-text">1、阿里云的数据库专家 Yangyidba</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E3%80%8AMySQL-%E6%98%AF%E6%80%8E%E6%A0%B7%E8%BF%90%E8%A1%8C%E7%9A%84%E3%80%8B"><span class="nav-number">2.</span> <span class="nav-text">1、《MySQL 是怎样运行的》</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E3%80%8A%E9%AB%98%E6%80%A7%E8%83%BD-MySQL%E3%80%8B"><span class="nav-number">3.</span> <span class="nav-text">2、《高性能 MySQL》</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E3%80%8AMySQL-%E6%8A%80%E6%9C%AF%E5%86%85%E5%B9%95-InnoDB-%E5%AD%98%E5%82%A8%E5%BC%95%E6%93%8E%E3%80%8B"><span class="nav-number">4.</span> <span class="nav-text">3、《MySQL 技术内幕 InnoDB 存储引擎》</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81%E7%94%A8%E5%A5%BD-MySQL-%E5%AE%98%E6%96%B9%E6%96%87%E6%A1%A3"><span class="nav-number">5.</span> <span class="nav-text">4、用好 MySQL 官方文档</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81%E8%A7%86%E9%A2%91-x2F-%E9%9F%B3%E9%A2%91%E8%B5%84%E6%BA%90"><span class="nav-number">6.</span> <span class="nav-text">5、视频 &#x2F; 音频资源</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#1%E3%80%81%E4%BD%BF%E7%94%A8-Google-x2F-Baidu-%E6%88%96%E8%80%85-ChatGPT"><span class="nav-number">7.</span> <span class="nav-text">1、使用 Google&#x2F;Baidu 或者 ChatGPT</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2%E3%80%81%E5%A4%9A%E6%80%BB%E7%BB%93%E3%80%81%E5%A4%9A%E5%88%86%E4%BA%AB%E3%80%81%E5%A4%9A%E4%BA%A4%E6%B5%81"><span class="nav-number">8.</span> <span class="nav-text">2、多总结、多分享、多交流</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3%E3%80%81%E5%AD%A6%E4%BB%A5%E8%87%B4%E7%94%A8"><span class="nav-number">9.</span> <span class="nav-text">3、学以致用</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4%E3%80%81MySQL-%E6%BA%90%E4%BB%A3%E7%A0%81"><span class="nav-number">10.</span> <span class="nav-text">4、MySQL 源代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5%E3%80%81%E5%AD%A6%E6%9C%AF%E8%AE%BA%E6%96%87"><span class="nav-number">11.</span> <span class="nav-text">5、学术论文</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/learn-mysql-019/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-如何学习 MySQL | 亦彤blog">
+      <meta itemprop="description" content="如何学习 MySQL">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-如何学习 MySQL
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-03-25 16:07:32" itemprop="dateCreated datePublished" datetime="2023-03-25T16:07:32+08:00">2023-03-25</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">如何学习 MySQL</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <blockquote>
+<p>《高性能 MySQL》第四版发布后，收到了很多读者的反馈，其中关注最多的是作为一个初学者，应该如何能够较为系统的学习 MySQL，从而应对日常工作或者获得更好的职业发展。</p>
+</blockquote>
+<p>《高性能 MySQL》第四版发布后，收到了很多读者的反馈，其中关注最多的是作为一个初学者，应该如何能够较为系统的学习 MySQL，从而应对日常工作或者获得更好的职业发展。于是和多个业内朋友讨论后，整理了一些 MySQL 学习的推荐资源，供初学者参考。</p>
+<p>本文分成几部分，包括业界专家的经验、推荐 MySQL 书籍、MySQL 视频 &#x2F; 音频资源、MySQL 其他资源或者 MySQL 学习方式等。</p>
+<h2 id="1、阿里云的数据库专家-Yangyidba"><a href="#1、阿里云的数据库专家-Yangyidba" class="headerlink" title="1、阿里云的数据库专家 Yangyidba"></a>1、阿里云的数据库专家 Yangyidba</h2><hr>
+<p><img src="/mysql/learn-mysql-019/20230324-ec9159d6-1f25-4460-b143-bb534f05c885.png" loading="lazy"></p>
+<p><strong>提问：刚刚入行时，有哪些资料给你了帮助？</strong></p>
+<p>正式接触 MySQL 是 2011 年底，当时的公司的数据库版本主要是 5.5 版本和少量 5.1 版本。因为之前学 Oracle 的经验是查看官方文档，学习 MySQL 资料主要是 “官方文档” 和当时的淘宝 DBA 团队组织的技术大学的技术分享，学习 MySQL 技术的技术特性和经典案例。</p>
+<p>其实就现在而言，MySQL 官方文档依然是最好的学习资料和教材, 里面非常详细的说明 MySQL 的基础架构，redo，undo，读写逻辑，字段类型，锁，存储引擎，主从复制，MGR ，性能优化等等。把官方文档通读一遍，基本上能超越 60-70% 左右的 DBA，为什么不是更高呢？因为学习技术是为了使用技能。</p>
+<p><strong>提问：进一步了解 MySQL &#x2F; 数据库，哪些资料给了你帮助？</strong></p>
+<p>换个回答的方式，哪些因素帮助我提升数据库技能水平？总结起来大概三个方面：</p>
+<ol>
+<li><p>掌握基础知识之后，会有 “纸上来得终觉浅，绝知此事要躬行”” 的想法。基于对各种 MySQL 技术知识点和 功能特性的理解，搭建单节点, 主备模式环境 做各种功能测试，并且将知识点的验证或者分析过程下来写博客，比如死锁，能将常见的 20 个死锁常见分析过程总结下来，相信死锁问题再也难不倒你了。</p>
+</li>
+<li><p>如果是第一条是模拟考，那么真实的业务场景则是实战演练，在海量的业务场景下，层出不穷的业务问题和技术难点驱动 DBA 对 数据库的使用和限制了解的更多。比如：</p>
+</li>
+</ol>
+<ul>
+<li><p>truncat 表 如何恢复?</p>
+</li>
+<li><p>如果有 500g binlog，如何加速 binlog 应用？</p>
+</li>
+<li><p>如何删除 3T 的大表？</p>
+</li>
+<li><p>秒杀场景下数据库设计和优化？</p>
+</li>
+<li><p>如何排查业务访问 db RT 异常?</p>
+</li>
+<li><p>为什么业务写完立即查询当时查不到?</p>
+</li>
+</ul>
+<ol start="3">
+<li>和优秀的同事或者优秀的人同行，比如有解决不了的疑惑可以咨询内核开发。</li>
+</ol>
+<p><strong>提问：现在回头来看，哪些资料你觉得是最推荐的，分别对于初入学，和深入学习的人来说？</strong></p>
+<p>对于初学者而言，首要目标是 夯实基础，学好基础 &#x2F; 理论知识。</p>
+<ol>
+<li>官方文档</li>
+<li>《高性能 MySQL》</li>
+<li>《MySQL 性能调优与架构设计》</li>
+<li>《MySQL 技术内幕: InnoDB 存储引擎》</li>
+</ol>
+<p>对于深入学习的人来说， 单独的数据库学习是没有意义的，必须服务好具体的业务场景才能发挥其价值。推荐：</p>
+<ol>
+<li>《数据密集型应用系统设计》</li>
+<li>《性能之巅》</li>
+<li>《漫画算法》</li>
+</ol>
+<p>学习和总结各种业务场景下的数据库架构设计 ，数据库高可用，容灾，强红包，秒杀，直播弹幕等等。</p>
+<p><img src="/mysql/learn-mysql-019/20230324-9befc5e3-c74b-41a6-87fb-4ff5e2e05f66.png" loading="lazy"></p>
+<p>对于初学者，建议自己手动安装常见的架构，比如最简单的一主一备，作为验证环境。找一些操作案例较多的博客或公众号文章，照着作者的思路执行。</p>
+<p>然后再自己设计一些执行案例，先自己推导结果，再执行验证，在验证过程中加深理解或者勘误。</p>
+<p>内核学习也可以延用这个方法，在验证过程中设想如果是自己实现这个功能的，会怎么写，然后通过阅读源码理解作者的设计思路。就是看源码要带着问题去看，找只要主要流程，GDB 去调试单步执行。</p>
+<p><img src="/mysql/learn-mysql-019/20230324-0ba735dd-342d-49ac-b88d-16df2ebf1452.png" loading="lazy"></p>
+<p><strong>推荐的重要学习资料包括：</strong></p>
+<ol>
+<li>MySQL 官方文档</li>
+<li>《MySQL 技术内幕：InnoDB 存储引擎》</li>
+<li>MySQL 周边组件的文档与源码，如 percona toolkit、MHA 等</li>
+<li>初学者：丁奇 45 讲、MySQL 官方文档</li>
+<li>深入学习：主要还是积累、排错，云数据库相关还是需要看下技术相关的论文。</li>
+</ol>
+<p>MySQL 作为当前最流行的关系型数据库，相关的书籍也非常多，这里罗列基本推荐如下：</p>
+<p><img src="/mysql/learn-mysql-019/20230324-a2d40815-db16-4347-9b89-22c99c28aa68.png" loading="lazy"></p>
+<p>MySQL 相关的书籍</p>
+<p>文档是最全面和权威的参考，而其他三本都是，根据豆瓣网友打分进行推荐的。第一本《MySQL 是怎样运行的》适用于完全的初学者，内容由浅到深。第二本《高性能 MySQL》则从 “优化” 为入口，非常系统介绍了 MySQL 的架构、优化，是一本非常好的进阶书籍。第三本是《MySQL 技术内幕 InnoDB 存储引擎》，这本书深入的介绍了 MySQL 核心组件 InnoDB 存储引擎，涵盖了数据库的事务原理、调度、物理存储、锁等知识。</p>
+<p>另外，其实 MySQL 领域还有很多书籍偏重各有不同，这里不一一推荐了。</p>
+<h2 id="1、《MySQL-是怎样运行的》"><a href="#1、《MySQL-是怎样运行的》" class="headerlink" title="1、《MySQL 是怎样运行的》"></a>1、《MySQL 是怎样运行的》</h2><p>这本书于 2020 年出版，是一本比较新的书籍，整个书籍也是围绕其标题展开《MySQL 是怎样运行的：从根儿上理解 MySQL》。这本书最大的特点是，全书有非常清晰的脉络，可以说是由 “入门到精通”，书中放弃了一定的完整性（这个可以去看 MySQL 文档），而是非常接地气的从零开始，用了很多形象的比喻介绍 MySQL 数据库的各个概念。</p>
+<p>同时，该书籍在每个章节对相关的概念也都进入了非常深入的讨论，例如，关于索引的介绍，从什么事索引、索引的物理结构开始介绍，然后，开始介绍 MySQL 的索引在查询、排序等场景的使用，最后，再介绍一些常见的索引优化技巧，包括普通索引、前缀索引、覆盖索引等。</p>
+<p>总得来说，这本书是最近几年，面向于初学者非常不错的一本书。</p>
+<h2 id="2、《高性能-MySQL》"><a href="#2、《高性能-MySQL》" class="headerlink" title="2、《高性能 MySQL》"></a>2、《高性能 MySQL》</h2><p>《高性能 MySQL》则从 “优化” 为入口，将 MySQL 相关的知识点聚合在一起，包括了查询性能优化（SQL 优化）、高性能索引、库表结构（Schema）优化等，也包括了服务器配置（硬件和软件）优化、架构优化（包括了复制、只读节点、分片）等，还介绍了部分云服务商的 MySQL 等内容，是一本非常适合进阶阅读的书籍。</p>
+<p>该书籍的作者、译者，也都是一直活跃在数据库领域第一线的数据库开发者，对于 MySQL 实践有着非常丰富经验。这也保障概书籍整体质量不错，不仅可以作为系统的阅读使用，也可以作为一个参考手册，可以根据自己工作需要，不定期的翻阅其中的部分章节。</p>
+<h2 id="3、《MySQL-技术内幕-InnoDB-存储引擎》"><a href="#3、《MySQL-技术内幕-InnoDB-存储引擎》" class="headerlink" title="3、《MySQL 技术内幕 InnoDB 存储引擎》"></a>3、《MySQL 技术内幕 InnoDB 存储引擎》</h2><p>这本书则以 InnoDB 为切入点，非常深入的介绍了 InnoDB 或者说数据库的原理。InnoDB 可以说是 MySQL 最为核心的组件，其原理不仅仅适用于 MySQL，也几乎适用于大多数关系型数据库系统。</p>
+<p>具体的，概书籍覆盖的内容包括了 MySQL&#x2F;InnoDB 物理存储结构、索引、锁、事务等等。本书底层原理为出发点，帮助开发者理解 MySQL 行为、特点。</p>
+<p>本书非常适合，对 MySQL 已经有一定程度了解，又希望更加深入了解其底层实现原理的人，或者是工作中需要对 MySQL 源码层进行修改或者定制的数据库内核开发者。</p>
+<h2 id="4、用好-MySQL-官方文档"><a href="#4、用好-MySQL-官方文档" class="headerlink" title="4、用好 MySQL 官方文档"></a>4、用好 MySQL 官方文档</h2><p>MySQL 官方文档可以说是最为权威、更新最为及时、质量也应该是最高的 MySQL 学习资料了。在早期，市面上还没有那么书籍的时候，我个人也是通过精读 MySQL 官方文档，以此为深入学习 MySQL、甚至是深入学习数据库原理的知识库。</p>
+<p>但是，官方文档为了保证完整性、准确性，会导致其看起来非常冗长、繁琐，有时候则感觉是在隔靴挠痒，偏向于介绍实现方式或原理以及 MySQL 提供的功能，而不会介绍读者最需要的最佳实践。例如，官方文档会详细介绍每个字段类型和参数详情，但是不会告诉你，哪些字段类型应该多用，哪些字段类型应该少用。</p>
+<p><strong>了解了官方文档的这些特性之后，官方文档阅读的几个要点总结如下：</strong></p>
+<ul>
+<li>在阅读 MySQL 官方文档之前，需要先花些时间了解文档的整体架构，方便后续阅读查阅；</li>
+<li>在需要了解某个具体 MySQL 知识点时，建议可以精读 MySQL 文档；</li>
+<li>如果希望系统的了解某个 MySQL 特效的时候，可以完整的阅读；</li>
+<li>MySQL 文档 MySQL 官方文档最新的都是英文的，需要有一定的英文阅读能力。</li>
+</ul>
+<p>总得来说，多阅读官方文档，虽然刚开始会觉得有些晦涩，坚持下来，你会发现收获巨大。</p>
+<p>另外，阅读官方文档也要注意：也正是因为官方文档注重保障完整性、准确性，所以必定会繁琐、冗长，而不怎么介绍最佳实践经验，甚至一些主流的应用等，例如官方文档也只会将内容限定在 MySQL 本身，而不会包括硬件、软件或者云环境的相关的内容。</p>
+<h2 id="5、视频-x2F-音频资源"><a href="#5、视频-x2F-音频资源" class="headerlink" title="5、视频 &#x2F; 音频资源"></a>5、视频 &#x2F; 音频资源</h2><p>现在也越来越多的人通过视频的方式去在线的学习各类知识，B 站上也有一些面相 MySQL 初学者的视频资源，质量我不太好评价，不过作为文字、书籍的补充学习，看一些视频学习还是非常不错的。大家可以去 B 站搜索一下 “MySQL 初学者” 就有很多的相关视频了，质量良莠不齐，需要大家自己甄别适合自己的。这里仅推荐一下由极客时间推出的《MySQL 实战 45 讲》。</p>
+<p><strong>《MySQL 实战 45 讲》</strong></p>
+<p><img src="/mysql/learn-mysql-019/20230324-020bd002-ff53-47f4-a901-49f7db40ac91.png" loading="lazy"></p>
+<p>该系列价格也非常便宜，可以说是买不了吃亏、买不了上当，反倒是容易买到自己不能全部看完 &#x2F; 听完的懊恼：《MySQL 实战 45 讲》。</p>
+<h2 id="1、使用-Google-x2F-Baidu-或者-ChatGPT"><a href="#1、使用-Google-x2F-Baidu-或者-ChatGPT" class="headerlink" title="1、使用 Google&#x2F;Baidu 或者 ChatGPT"></a>1、使用 Google&#x2F;Baidu 或者 ChatGPT</h2><p>通常，对于某个非常具体的知识点或者行业 &#x2F; 场景最佳实践，在文档中都不会覆盖，但是，因为 MySQL 的用户量极大，在互联网上也有非常多的分享和讨论，从初阶到高阶，面相各个级别的内容都有，可以说是一个大宝库，用好了也是可以事半功倍的。</p>
+<h2 id="2、多总结、多分享、多交流"><a href="#2、多总结、多分享、多交流" class="headerlink" title="2、多总结、多分享、多交流"></a>2、多总结、多分享、多交流</h2><p>学习本身通常都是无趣的，如果学习的知识不能够很快的在实际工作中使用，也很容易忘记。另一个非常好的学习方法，不仅仅限于学习 MySQL，就是分享很总结。一方面，可以让你系统的把一个知识点了解的比较完整和透彻，也可以帮你更好的记录，大大加深理解与记忆。</p>
+<h2 id="3、学以致用"><a href="#3、学以致用" class="headerlink" title="3、学以致用"></a>3、学以致用</h2><p>也许你学习 MySQL 的原因可能只是因为面试、解决一个工作中的问题、增长知识或者只是兴趣，无论是哪个原因促使你学习，动手练习并在工作中使用这些知识，都是非常有效的。如果，你对 MySQL 或者数据库很有兴趣，那么则建议在当前的公司，找一个与数据库更近的岗位工作，这样自然可以事半功倍。</p>
+<h2 id="4、MySQL-源代码"><a href="#4、MySQL-源代码" class="headerlink" title="4、MySQL 源代码"></a>4、MySQL 源代码</h2><p>MySQL 是一个开源数据库，另一个独天得厚的资源是 MySQL 源代码。不过，MySQL 发展的时间已经非常长了，其代码复杂度也比较高，可以考虑从一两个小的模块、小的功能点着手，去学习、验证。</p>
+<h2 id="5、学术论文"><a href="#5、学术论文" class="headerlink" title="5、学术论文"></a>5、学术论文</h2><p>当如果需要了解某个具体模块的来龙去脉以及设计思想的时候，有时候去查找一些经典的数据库领域论文可以很好的帮助你解决相关的疑问。有一套大部头《Readings in Database Systems》可以作为参考或者开始，不过内容较多，需要花费大量时间，总得来说不太适合初学者。</p>
+<p>对于不同基础的人，学习的重点和方法是各有不同的，所以本文会列举主要的 MySQL 数据库的学习资源和方法，读者需要结合自己的实际情况选择合适的方法。如果你有好的经验分享，可以在留言评论谈谈你的经验。</p>
+<p>orczhou 是《高性能 MySQL》的书籍的译者，同时也是来自 NineData（<span class="exturl" data-url="aHR0cHM6Ly93d3cubW9kYi5wcm8vZGIvd3d3Lm5pbmVkYXRhLmNsb3Vk">www.ninedata.cloud<i class="fa fa-external-link-alt"></i></span>）的工程师。NineData 向企业、开发者提供高效、安全的数据库 SQL 开发、数据库备份、数据复制 &#x2F; 迁移 &#x2F; 集成、数据对比等功能，是一个 SaaS 服务开箱即用，可以快速提升企业 SQL 开发效率，保障企业数据安全。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-018/" rel="prev" title="mysql学习笔记-推荐一款好用的数据一致性校验工具">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-推荐一款好用的数据一致性校验工具
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-020/" rel="next" title="mysql学习笔记-MySQL 之 InnoDB 表空间">
+                  mysql学习笔记-MySQL 之 InnoDB 表空间 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

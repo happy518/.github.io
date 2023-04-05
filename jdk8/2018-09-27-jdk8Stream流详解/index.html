@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="jdk8的新特性，stream流操作的api和深入分析">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jdk8方法引用详解">
+<meta property="og:url" content="https://theme-next.js.org/jdk8/2018-09-27-jdk8Stream%E6%B5%81%E8%AF%A6%E8%A7%A3/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="jdk8的新特性，stream流操作的api和深入分析">
+<meta property="og:locale" content="zh_CN">
+<meta property="article:published_time" content="2018-09-26T16:00:00.000Z">
+<meta property="article:modified_time" content="2022-03-10T05:44:38.112Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="jdk8">
+<meta property="article:tag" content="源码">
+<meta property="article:tag" content="stream">
+<meta name="twitter:card" content="summary">
+
+
+<link rel="canonical" href="https://theme-next.js.org/jdk8/2018-09-27-jdk8Stream%E6%B5%81%E8%AF%A6%E8%A7%A3/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/jdk8/2018-09-27-jdk8Stream%E6%B5%81%E8%AF%A6%E8%A7%A3/","path":"jdk8/2018-09-27-jdk8Stream流详解/","title":"jdk8方法引用详解"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>jdk8方法引用详解 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Stream%E6%B5%81%E7%89%B9%E6%80%A7%E8%A7%A3%E9%87%8A%EF%BC%9A"><span class="nav-number">1.</span> <span class="nav-text">Stream流特性解释：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stream%E7%89%B9%E5%BE%81%EF%BC%9A"><span class="nav-number">2.</span> <span class="nav-text">Stream特征：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B6%E8%A1%8CParallelism"><span class="nav-number">2.1.</span> <span class="nav-text">并行Parallelism</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%B8%8D%E5%B9%B2%E6%B6%89Non-interface"><span class="nav-number">2.2.</span> <span class="nav-text">不干涉Non-interface</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%97%A0%E7%8A%B6%E6%80%81Stateless-behaviors"><span class="nav-number">2.3.</span> <span class="nav-text">无状态Stateless behaviors</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%89%AF%E4%BD%9C%E7%94%A8Side-effects"><span class="nav-number">2.4.</span> <span class="nav-text">副作用Side-effects</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8E%92%E5%BA%8FOrdering"><span class="nav-number">2.5.</span> <span class="nav-text">排序Ordering</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%BB%93%E5%90%88%E6%80%A7Associativity"><span class="nav-number">2.6.</span> <span class="nav-text">结合性Associativity</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Stream%E5%88%9B%E5%BB%BA%E6%96%B9%E5%BC%8F"><span class="nav-number">3.</span> <span class="nav-text">Stream创建方式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%B8%AD%E9%97%B4%E6%93%8D%E4%BD%9Cintermediate-operations"><span class="nav-number">4.</span> <span class="nav-text">中间操作intermediate operations</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E8%A7%81%E6%B5%81%E7%9A%84%E4%B8%AD%E9%97%B4%E6%93%8D%E4%BD%9C"><span class="nav-number">4.1.</span> <span class="nav-text">常见流的中间操作</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BB%88%E7%82%B9%E6%93%8D%E4%BD%9Cterminal-operations"><span class="nav-number">5.</span> <span class="nav-text">终点操作terminal operations</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jdk8/2018-09-27-jdk8Stream%E6%B5%81%E8%AF%A6%E8%A7%A3/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="jdk8方法引用详解 | 亦彤blog">
+      <meta itemprop="description" content="jdk8的新特性，stream流操作的api和深入分析">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          jdk8方法引用详解
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2018-09-27 00:00:00" itemprop="dateCreated datePublished" datetime="2018-09-27T00:00:00+08:00">2018-09-27</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/jdk8/" itemprop="url" rel="index"><span itemprop="name">jdk8</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">jdk8的新特性，stream流操作的api和深入分析</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <p>新增的Streams API将生成函数式编程引入了Java库中，这是目前为止最大的一次对java库的完善，以便开发者能够写出更加有效，更加简洁和紧凑的代码。</p>
+<h2 id="Stream流特性解释："><a href="#Stream流特性解释：" class="headerlink" title="Stream流特性解释："></a>Stream流特性解释：</h2><p>Stream接口还包含了几个基本类型的子接口，如IntStream， LongStream，DoubleStream<br><br><br>关于流和其他集合具体的区别，可以参照下面的列表；</p>
+<ol>
+<li>不存储数据。流是基于数据源的对象，它本身不存储数据元素，而是通过管道将数据源的元素传递给操作。</li>
+<li>函数式编程。流的操作不会修改数据源，例如filter不会将数据源中的元素删除。</li>
+<li>延迟操作。流的很多操作如filter，map等中间操作都是延迟的，只有等到终点操作才会将按照操作顺序执行。</li>
+<li>可以解绑。对于无限流量的流，有些操作是可以在有限的时间内完成的，比如limit(n)，findFirst(), 这些操作可实现短路(Short-circuting),访问到有限的元素后就可以返回。</li>
+<li>纯消费。流的元素只能访问一次，类似Iterator，操作没有回头路，如果你想从头重新访问流元素，对不起，你得重新生成一个新的流。</li>
+</ol>
+<p>流的操作是以管道的方式串起来的，流管道包含一个数据源，接着包含零到N个中间操作，最后一一个终点操作结束。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Streams</span> &#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">enum</span> <span class="title class_">Status</span> &#123;</span><br><span class="line">        OPEN, CLOSE;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">class</span> <span class="title class_">Task</span> &#123;</span><br><span class="line">    </span><br><span class="line">        <span class="meta">@Getter</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Status status;</span><br><span class="line">        <span class="meta">@Getter</span></span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">final</span> Integer points;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">public</span> <span class="title function_">Task</span><span class="params">(<span class="keyword">final</span> Status status, <span class="keyword">final</span> Integer points)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.status = status;</span><br><span class="line">            <span class="built_in">this</span>.points = points;</span><br><span class="line">        &#125;</span><br><span class="line">        </span><br><span class="line">        <span class="meta">@Override</span></span><br><span class="line">        <span class="keyword">public</span> String <span class="title function_">toString</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> String.format(<span class="string">&quot;[%s, %d]&quot;</span>, status, points);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        List&lt;Task&gt; tasks = Arrays.toList(</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Task</span>(Status.OPEN, <span class="number">5</span>),</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Task</span>(Status.OPEN, <span class="number">13</span>)</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Task</span>(Status.CLOSE, <span class="number">8</span>)</span><br><span class="line">        );</span><br><span class="line">        </span><br><span class="line">        <span class="type">long</span> <span class="variable">sum</span> <span class="operator">=</span> tasks.stream().filter(t -&gt; Status.OPEN == t.getStatus).mapToInt(Task::getPoints).sum();</span><br><span class="line">        System.out.println(<span class="string">&quot;Total points:&quot;</span> + sum);</span><br><span class="line">        </span><br><span class="line">        <span class="type">double</span> <span class="variable">reduce</span> <span class="operator">=</span> tasks.stream().parallel().map(t -&gt; t.getPoints).reduce(<span class="number">0</span>, Integer::sum);</span><br><span class="line">        System.out.println(<span class="string">&quot;Total points(all tasks)&quot;</span> + reduce);</span><br><span class="line">        </span><br><span class="line">        Map&lt;Integer, List&lt;Task&gt;&gt; map = tasks.stream().collect(Collectors.groupinBy(Task::getPoints));</span><br><span class="line">        System.out.println(map);</span><br><span class="line">        </span><br><span class="line">        List&lt;String&gt; strs = tasks.stream().mapToInt(Task::getPoints).asLongStream().mapToDouble(p -&gt; p / reduce).boxed().mapToLong(w -&gt; (<span class="type">long</span>)(w * <span class="number">100</span>)).mapToObj(per -&gt; pre + <span class="string">&quot;%&quot;</span>).collect(Collectors.toList());</span><br><span class="line">        System.out.println(strs);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>首先，tasks集合被转换成steam表示，其次，在stream上的filter操作会过滤所有CLOSE的task，第三，mapToInt操作基于每个task实例的Task::getPoints方法将task流转换成Integer集合，最后，通过sum方法计算总和，得出最后的结果。</p>
+<p>晚期操作(例如forEach或者sum)，会遍历steam并得出结果或者附带结果，在执行晚期操作之后，steam处理线以及完毕了，就不能使用了，在几乎所有情况下，晚期操作都是立刻对stream进行遍历。</p>
+<h2 id="Stream特征："><a href="#Stream特征：" class="headerlink" title="Stream特征："></a>Stream特征：</h2><h3 id="并行Parallelism"><a href="#并行Parallelism" class="headerlink" title="并行Parallelism"></a>并行Parallelism</h3><p>所有的流操作都可以串行或者并行执行，除非显示地创建并行流，否则Java库中创建的都是串行流。Collection.stream()为集合创建串行流。Collection.parallelStream()为集合创建并行流。IntStream.range(int, int)创建的是串行流，通过parallel()方法可以将串行流转换成并行流，sequential()方法将流转成串行流。</p>
+<p>除非方法的javadoc中指明在并行执行的时候结果是不确定(比如findAny，forEach)，否则串行和并行的执行结果是一样的。</p>
+<h3 id="不干涉Non-interface"><a href="#不干涉Non-interface" class="headerlink" title="不干涉Non-interface"></a>不干涉Non-interface</h3><p>流可以从非线程安全的集合中创建，当流的管道执行d的时候，非concurrent数据源不应该被改变。下面的代码会抛出java.util.ConcurrentModificationException异常;</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strs = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(Arrays.asList(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>));</span><br><span class="line">strs.forEach(s -&gt; strs.add(<span class="string">&quot;three&quot;</span>));</span><br></pre></td></tr></table></figure>
+<p>在设置中间操作的时候，是可以更改数据源的，只有在执行终点操作的时候，才有可能出现并发问题(抛出异常，或者不期望的结果)，比如下面的代码不会抛出异常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strs = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(Arrays.asList(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>));</span><br><span class="line">Stream&lt;String&gt; stream = strs.stream();</span><br><span class="line">strs.add(<span class="string">&quot;three&quot;</span>);</span><br><span class="line">stream.forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<p>对于concurrent数据源，不会有这样的问题，比如下面的代码运行正常：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strs = <span class="keyword">new</span> <span class="title class_">CopyOnWriteArrayList</span>&lt;&gt;(Arrays.asList(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>));</span><br><span class="line">strs.stream().forEach(strs.add(<span class="string">&quot;three&quot;</span>));</span><br></pre></td></tr></table></figure>
+<p>虽然我们上面例子是在终点操作中队非并发数据源进行修改，但是非并发数据源也可能在其它线程中修改，同样会有并发问题。</p>
+<h3 id="无状态Stateless-behaviors"><a href="#无状态Stateless-behaviors" class="headerlink" title="无状态Stateless behaviors"></a>无状态Stateless behaviors</h3><p>大部分流操作的参数都是函数式接口，可以使用lambda表达式实现，它们用来描述用户的行为，称之为行为参数(behavioral parameters)。</p>
+<p>如果这些行为参数有状态，则流操作的结果可能是不确定的，比如下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strs = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;(Arrays.asList(<span class="string">&quot;one&quot;</span>, <span class="string">&quot;two&quot;</span>));</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">State</span> &#123;</span><br><span class="line">    <span class="type">boolean</span> s;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">final</span> <span class="type">State</span> <span class="variable">state</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">State</span>();</span><br><span class="line">strs.stream().map(e -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span>(state.s) &#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="string">&quot;OK&quot;</span>;</span><br><span class="line">    &#125;<span class="keyword">else</span> &#123;</span><br><span class="line">        state.s = <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> e;</span><br><span class="line">&#125;).forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<p>上面的代码在并行执行时多次的执行结果可能是不同的，这是因为这个lambda表达式是由状态的。</p>
+<h3 id="副作用Side-effects"><a href="#副作用Side-effects" class="headerlink" title="副作用Side-effects"></a>副作用Side-effects</h3><p>有副作用的行为参数是被鼓励使用的。</p>
+<p>副作用指的是行为参数在执行的时候有输入输出，比如网络输入输出等。</p>
+<p>这是因为java不保证这些副作用对其它现场可见，也不保证相同管道上的同样元素的不同操作运行在同一个线程中。</p>
+<p>很多有副作用的行为参数可以被无副作用的实现，一般来说，println()这样的副作用代码不会有伤害。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 副作用代码</span></span><br><span class="line">List&lt;String&gt; strs = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">Stream.filter(s -&gt; pattern.matcher(s).matchers()).forEach(s -&gt; strs.add(s));</span><br></pre></td></tr></table></figure>
+<p>上面代码可以修改成无副作用的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strs = Stream.filter(s -&gt; pattern.matcher(s).matchers()).collect(Collectors.toList());</span><br></pre></td></tr></table></figure>
+
+<h3 id="排序Ordering"><a href="#排序Ordering" class="headerlink" title="排序Ordering"></a>排序Ordering</h3><p>某些流的返回的元素是有确定顺序的，我们称之为encounter order。这个顺序是流提供它的元素顺序，比如数组的encounter order是它的元素的排列顺序，List是它的迭代顺序(iteration order), 对于HashSet，它本身就没有encounter order。</p>
+<p>一个流是否是encounter order主要依赖数据源和它的中间操作，比如数据源List和Array上创建的流是有序的(ordered)，但是HashSet创建的流不是有序的。</p>
+<p>sorted()方法可以将流转换成有序的，unordered可以将流转换成无序的，除此之外，一个操作可能会影响流的有序性，比如map方法，他会用不同的值甚至类型替换流中的元素，所以输入元素的有序性已经变得没有意义了，但是对于filter方法来说，它只是丢掉一些值而已，输入元素的有序性还是保障的。</p>
+<p>对于串行流，流有序与否不会影响其性能，只是会影响确定性(determinism),无序流多次执行的结果可能是不一样的。</p>
+<p>对于并行流，去掉有序这个约束可能会影响其性能，比如distinct，groupingBy这些聚合操作。</p>
+<h3 id="结合性Associativity"><a href="#结合性Associativity" class="headerlink" title="结合性Associativity"></a>结合性Associativity</h3><p>一个操作或者函数op满足结合性意味着满足下面的条件：<br>(a op b) op c &#x3D;&#x3D; a op (b op c)</p>
+<p>对于并发流来说，如果操作满足结合性，我们就可以并行计算：<br>a op b op c op d &#x3D;&#x3D; (a op b ) op (c op d)<br>比如min，max以及字符串连接都是满足结合性的。</p>
+<h2 id="Stream创建方式"><a href="#Stream创建方式" class="headerlink" title="Stream创建方式"></a>Stream创建方式</h2><p>可以通过多种方式创建流：</p>
+<ol>
+<li>通过集合的stream()方法或者parallelStream(). 比如Arrays.asList(1, 2, 3).stream();</li>
+<li>通过Arrays.stream(Object[])方法，比如Arrays.stream(new int[]{1, 2, 3}).</li>
+<li>使用流的静态方法，比如Stream.of(Object[]), IntStream.range(int, int)或者Stream.iterate(Object, UnaryOperator), 如Stream.iterate(0, n -&gt; n * 2), 或者generate(Supplier<T> s)，如Stream.generate(Math::random).</T></li>
+<li>BufferedReader.lines()从文件中获取行的流。</li>
+<li>Files类的操作路径的方法，如list，find，walk等。</li>
+<li>随机数流Random.ints().</li>
+<li>其他一些l类提供创建流的方法，比如BiSet.strema()，Pattern.splitAsStream(), 和JarFile.stream().</li>
+<li>更底层的使用StreamSupport，它提供了将Spliterator转换成流的方法。</li>
+</ol>
+<h2 id="中间操作intermediate-operations"><a href="#中间操作intermediate-operations" class="headerlink" title="中间操作intermediate operations"></a>中间操作intermediate operations</h2><p>中间操作将会返回一个新的流，并且操作是延迟执行的(lazy)，它不会修改原始的数据源，而且是在终点操作开始的时候才真正开始执行，这个Scala集合的转换操作不同，Scala集合转换操作会生成一个新的中间集合，显而易见java的这种设计会减少中间对象的生成。</p>
+<h3 id="常见流的中间操作"><a href="#常见流的中间操作" class="headerlink" title="常见流的中间操作"></a>常见流的中间操作</h3><p><strong>distinct</strong></p>
+<p>distinct保证输出的流中包含唯一的元素，它是通过Object.equals(Object)来检查是否包含相同的元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;String&gt; strs = Stream.of(<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>, <span class="string">&quot;a&quot;</span>).distinct().collect(Collectors.toList());</span><br><span class="line">System.out.println(strs);</span><br></pre></td></tr></table></figure>
+
+<p><strong>filter</strong></p>
+<p>filter返回流中只包含满足断言(predicate)的数据。<br>下面的代码返回流中的偶数集合。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; ints = IntStream.range(<span class="number">1</span>, <span class="number">10</span>).filter(i -&gt; i % <span class="number">2</span> == <span class="number">0</span>).boxed().collect(Collectors.toList());</span><br><span class="line">System.out.println(ints);</span><br></pre></td></tr></table></figure>
+
+<p><strong>map</strong></p>
+<p>map方法将流中的元素映射成另外的值，新的值类型可以和原来的元素类型不同。<br>下面的代码中将字符串映射成它的哈希码(ASCII值)</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; ints = Stream.of(<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>).map(s -&gt; s.hashcode()).collect(Collectors.toList());</span><br><span class="line">System.out.println(ints);</span><br></pre></td></tr></table></figure>
+
+<p><strong>flatMap</strong></p>
+<p>flatMap方法混合了map和flatten的功能，它将映射后的流的元素全部放入到一个新的流中，它的方法定义如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">String</span> <span class="variable">poetry</span> <span class="operator">=</span> <span class="string">&quot;Where, before me, are the ages that have gone?/n&quot;</span> + <span class="string">&quot;And where, behind me, are the coming generations?/n&quot;</span> + <span class="string">&quot;I think of heaven and earth, without limit, without end,/n&quot;</span> + <span class="string">&quot;And I am all alone and my tears fall down.&quot;</span>;</span><br><span class="line"></span><br><span class="line">Arrays.stream(poetry.split(<span class="string">&quot;/n&quot;</span>)).flatMap(line -&gt; Arrays.stream(line.split(<span class="string">&quot; &quot;</span>)).map(w -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span>(w.endsWith(<span class="string">&quot;,&quot;</span>) || w.endsWith(<span class="string">&quot;.&quot;</span>) || w.endWith(<span class="string">&quot;?&quot;</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> w.substring(<span class="number">0</span>, w.length() -<span class="number">1</span>).trim().toLowerCase();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> w.trim().toLowerCase();</span><br><span class="line">&#125;).distinct().sorted().collect(Collectors.toList()).forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<p><strong>limit</strong></p>
+<p>limit方法制定数量的元素的流，对于串行流，这个方法是有效的，这是因为它只需要返回前n个元素即可，但是对于有序的并行流，它可能花费相对较长的时间，如果你不在意有序，可以将有序并行流转换成无序的，可以提高性能。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">List&lt;Integer&gt; ints = IntStream.range(<span class="number">1</span>, <span class="number">100</span>).limit(<span class="number">5</span>).boxed().collect(Collectors.toList()).forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<p><strong>peek</strong></p>
+<p>peek方法会使用一个Consumer消费流中的元素，但是返回的流中还是包含原来流中的元素。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">String[] strs = &#123;<span class="string">&quot;a&quot;</span>, <span class="string">&quot;b&quot;</span>, <span class="string">&quot;c&quot;</span>, <span class="string">&quot;d&quot;</span>&#125;;</span><br><span class="line">Arrays.toList(strs).stream().peek(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<p><strong>sorted</strong><br>sorted()将流中的元素按照自然顺序方式进行排列，如果元素没有实现Comparable，则终点操作会抛出java.lang.ClassCastException异常。sorted(Comparator&lt;? super T&gt; comparator)可以指定排列方式。</p>
+<p>对于有序流，排序是稳定的，对于非有序流，不保证排序稳定。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">String[] arr = <span class="keyword">new</span> <span class="title class_">String</span>[]&#123;<span class="string">&quot;b_123&quot;</span>, <span class="string">&quot;c+124&quot;</span>, <span class="string">&quot;b#632&quot;</span>, <span class="string">&quot;d_123&quot;</span>&#125;;</span><br><span class="line">Arrays.stream(arr).sorted((s1, s2) -&gt; &#123;</span><br><span class="line">    <span class="keyword">if</span>(s1.charAt(<span class="number">0</span>) == s2.charAt(<span class="number">0</span>)) &#123;</span><br><span class="line">        <span class="keyword">return</span> s1.substring(<span class="number">2</span>).compareTo(s2.substring(<span class="number">2</span>));</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">return</span> s1.charAt(<span class="number">0</span>) - s2.charAt(<span class="number">0</span>);</span><br><span class="line">&#125;).collect(Collectors.toList()).forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+
+<p><strong>skip</strong></p>
+<p>skip返回丢弃了前n个元素的流，如果流中的元素小于或者等于n，返回空的流;</p>
+<h2 id="终点操作terminal-operations"><a href="#终点操作terminal-operations" class="headerlink" title="终点操作terminal operations"></a>终点操作terminal operations</h2><p><strong>match</strong></p>
+<p>这一组方法用来检查流中的元素是否满足断言。</p>
+<ul>
+<li>allMatch只有在所有的元素都满足断言时才返回true，否则false，流为空是总是返回true。</li>
+<li>anyMatch只有在任意一个元素满足断言时就返回true，否则false。</li>
+<li>noneMatch只有在所有的元素都不满足断言时才返回true，否则false。<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">System.out.println(Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).allMatch(i -&gt; i &gt; <span class="number">0</span>)); <span class="comment">// true</span></span><br><span class="line">System.out.println(Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).anyMatch(i -&gt; i &gt; <span class="number">0</span>)); <span class="comment">// true</span></span><br><span class="line">System.out.println(Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).noneMatch(i -&gt; i &gt; <span class="number">0</span>)); <span class="comment">// false</span></span><br><span class="line">System.out.println(Stream.&lt;Integer&gt;empty().allMatch(i -&gt; i &gt; <span class="number">0</span>)); <span class="comment">// true</span></span><br><span class="line">System.out.println(Stream.&lt;Integer&gt;empty().antMatch(i -&gt; i &gt; <span class="number">0</span>)); <span class="comment">// false</span></span><br><span class="line">System.out.println(Stream.&lt;Integer&gt;empty().noneMatch(i -&gt; i &gt; <span class="number">0</span>)); <span class="comment">// true</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p><strong>count</strong></p>
+<p>count方法返回流中的元素的数量，它的实现是:<br>mapToLong(e -&gt; 1L).sum();</p>
+<p><strong>collect</strong></p>
+<p>使用一个Collector执行mutable reduction操作，辅助类Collectors提供了很多Collector, 可以满足我们日常需求，你也可以创建新的collector实现特定的需求，他是一个值得关注的类，你需要熟悉特定的收集器，如聚合类averagingInt，最大值maxBy和最小值minBy，计数counting，分组groupingBy，字符串连接joining，分区partioningBy，汇总summarizingInt，化简reducing，转换toX等。</p>
+<ul>
+<li>find</li>
+</ul>
+<p>findAny()返回任意一个元素，如果流是空，返回空的Optional，对于并行流来说，它只需要返回任意一个元素即可，所以性能可能要好于findFirst()，但是有可能多次执行的时候返回的结果不一样。findFirst()返回第一个元素，如果流是空，返回空的Optional。</p>
+<ul>
+<li>forEach和forEachOrdered</li>
+</ul>
+<p>forEach遍历流的每一个元素，执行制定的action，它是一个终点操作，和peek方法不同，这个方法不担保按照encounter order顺序执行，如果对于有序流按照它的encounter order顺序执行，你可以使用forEachOrdered方法。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).forEach(System.out::println);</span><br></pre></td></tr></table></figure>
+<ul>
+<li>最大值和最小值</li>
+</ul>
+<p>max返回流中的最大值，min返回流中的最小值。</p>
+<ul>
+<li>reduce</li>
+</ul>
+<p>第一个方法使用流中的第一个参数作为初始值，后面两个方法则使用一个提供的初始值。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">Optional&lt;Integer&gt; opt = Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).reduce((x, y) -&gt; x + y);</span><br><span class="line"><span class="type">Integer</span> <span class="variable">total</span> <span class="operator">=</span> Stream.of(<span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>, <span class="number">4</span>, <span class="number">5</span>).reduce(<span class="number">0</span>, (x, y) -&gt; x + y);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>toArray()</li>
+</ul>
+<p>将流中的元素放入到一个数值中。</p>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/jdk8/" rel="tag"># jdk8</a>
+              <a href="/tags/%E6%BA%90%E7%A0%81/" rel="tag"># 源码</a>
+              <a href="/tags/stream/" rel="tag"># stream</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/jdk8/2018-09-26-jdk8%E5%87%BD%E6%95%B0%E5%BC%8F%E6%8E%A5%E5%8F%A3/" rel="prev" title="jdk8函数式接口学习总结">
+                  <i class="fa fa-chevron-left"></i> jdk8函数式接口学习总结
+                </a>
+            </div>
+            <div class="post-nav-item">
+                <a href="/jdk8/2018-10-21-jdk8%E7%9A%84optional%E6%B7%B1%E5%85%A5%E8%AF%A6%E8%A7%A3/" rel="next" title="jdk8的optional深入详解">
+                  jdk8的optional深入详解 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

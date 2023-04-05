@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="heap_number和buffer pool的内存结构，以及checkpoint，doublewrite，change buffer和自适应hash索引(AHI)">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-详细介绍innodb内存结构">
+<meta property="og:url" content="https://theme-next.js.org/mysql/learn-mysql-024/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="heap_number和buffer pool的内存结构，以及checkpoint，doublewrite，change buffer和自适应hash索引(AHI)">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401231752713.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401231917442.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401232957861.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401233221806.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401233740442.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/innodb-buffer-pool-list.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230402224313552.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230402225556931.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230402230705699.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230403110338141.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230403115403008.png">
+<meta property="article:published_time" content="2023-04-01T15:03:36.000Z">
+<meta property="article:modified_time" content="2023-04-03T04:20:58.274Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401231752713.png">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/learn-mysql-024/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/learn-mysql-024/","path":"mysql/learn-mysql-024/","title":"mysql学习笔记-详细介绍innodb内存结构"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-详细介绍innodb内存结构 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">56</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#heap-number"><span class="nav-number">1.</span> <span class="nav-text">heap number</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%BC%93%E5%86%B2%E6%B1%A0-buffer-bool"><span class="nav-number">2.</span> <span class="nav-text">缓冲池(buffer bool)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#checkpoint"><span class="nav-number">3.</span> <span class="nav-text">checkpoint</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#double-write"><span class="nav-number">4.</span> <span class="nav-text">double write</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#insert-x2F-change-buffer"><span class="nav-number">5.</span> <span class="nav-text">insert&#x2F;change buffer</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#adaptive-hash-index-%E8%87%AA%E9%80%82%E5%BA%94hash%E7%B4%A2%E5%BC%95"><span class="nav-number">6.</span> <span class="nav-text">adaptive hash index(自适应hash索引)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#flush-neighbor-page-FNP"><span class="nav-number">7.</span> <span class="nav-text">flush neighbor page(FNP)</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">56</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/learn-mysql-024/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-详细介绍innodb内存结构 | 亦彤blog">
+      <meta itemprop="description" content="heap_number和buffer pool的内存结构，以及checkpoint，doublewrite，change buffer和自适应hash索引(AHI)">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-详细介绍innodb内存结构
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-01 23:03:36" itemprop="dateCreated datePublished" datetime="2023-04-01T23:03:36+08:00">2023-04-01</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">heap_number和buffer pool的内存结构，以及checkpoint，doublewrite，change buffer和自适应hash索引(AHI)</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="heap-number"><a href="#heap-number" class="headerlink" title="heap number"></a>heap number</h2><ul>
+<li><p>heap number表示的是页中每个记录插入的顺序序号</p>
+<ul>
+<li>假设插入的数据是 a，b，d，e，g；则对应的heap_number是2，3，4，5，6</li>
+<li>0和1被infimun和supermum所使用<ul>
+<li>infimun对应最小的heap_number</li>
+<li>supermum对应最大的head_number，随着数据的插入，该值会被更新</li>
+</ul>
+</li>
+<li>update对head_number没有影响</li>
+<li>heap_number是物理的，存储在row的record header字段中</li>
+</ul>
+<p><img src="/mysql/learn-mysql-024/image-20230401231752713.png" alt="image-20230401231752713" loading="lazy"></p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">shell&gt; </span><span class="language-bash">innodb_space -s ibdata1 -T tbl_innodb_ruby/t_people -p 5 -R 127 record-dump</span></span><br></pre></td></tr></table></figure>
+
+<img src="/mysql/learn-mysql-024/image-20230401231917442.png" alt="image-20230401231917442" style="zoom:50%;">
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status; ## 查看锁信息</span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="缓冲池-buffer-bool"><a href="#缓冲池-buffer-bool" class="headerlink" title="缓冲池(buffer bool)"></a>缓冲池(buffer bool)</h2><ul>
+<li><p><strong>缓冲池介绍</strong></p>
+<ul>
+<li>每次读写数据都是通过buffer pool<ul>
+<li>当buffer pool中没有用户所需要的数据是，才会从磁盘中获取</li>
+</ul>
+</li>
+<li>通过innodb_buffer_pool_size设置总容量，该值越大越好</li>
+<li>innodb_buffer_pool_instances设置为多少个缓冲池<ul>
+<li>总容量还是innodb_buffer_size</li>
+<li>设置多少个instances可将热点数据分散，提高并发性能(建议设置成cpu个数)</li>
+</ul>
+</li>
+<li>buffer pool是以页为单位进行管理的，且大小和innodb_page_size一致</li>
+</ul>
+<p><img src="/mysql/learn-mysql-024/image-20230401232957861.png" alt="image-20230401232957861" loading="lazy"></p>
+</li>
+<li><p><strong>buffer pool性能测试</strong></p>
+<p><img src="/mysql/learn-mysql-024/image-20230401233221806.png" alt="image-20230401233221806" loading="lazy"></p>
+<blockquote>
+<p>18G的测试数据，80M条记录</p>
+<ol>
+<li>当buffer pool使用的内存超过数据库大小时，比如20G(数据库中所有数据都在内存中)，此时的性能有很大的提升。</li>
+<li>该图测试的TPS(每秒事务数)，sysbench中一个事务有18条sql组成，即这里的QPS时4.5w</li>
+<li>内存减少10%，性能下降60%</li>
+</ol>
+</blockquote>
+</li>
+<li><p><strong>buffer pool的管理</strong></p>
+<ul>
+<li><p>buffer pool的组成</p>
+<p><img src="/mysql/learn-mysql-024/image-20230401233740442.png" alt="image-20230401233740442" loading="lazy"></p>
+<ul>
+<li><p>free list</p>
+<blockquote>
+<p>buffer pool刚启动时，有一个16k的空白页，这些页存放(链表串联)在free list中</p>
+</blockquote>
+</li>
+<li><p>lru list</p>
+<blockquote>
+<p>当读取一个数据页的时候，就从free list中取出一个页，存入数据，并将该页放入到lru list中</p>
+</blockquote>
+</li>
+<li><p>flush list</p>
+<blockquote>
+<ol>
+<li>当lru list中的页第一次被修改了，将该页的指针(page number)放入到flush list(只要修改过，就放入，不管修改次数)</li>
+<li>flush list中包含脏页(数据经过修改，但是未刷入磁盘的页)</li>
+<li>flush list中存放的不是一个页，而是页的指针(page number)</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>查看buffer pool的状态</p>
+<ul>
+<li><p>使用命令 show engine innodb status;</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br></pre></td><td class="code"><pre><span class="line">MySQL hadoop<span class="variable">@localhost</span>:(<span class="keyword">none</span>)<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Type   <span class="operator">|</span> Name <span class="operator">|</span> Status                                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> InnoDB <span class="operator">|</span>      <span class="operator">|</span>                                                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span>                                            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">2023</span><span class="number">-04</span><span class="number">-01</span> <span class="number">15</span>:<span class="number">46</span>:<span class="number">33</span> <span class="number">0xfffe0c1ac1c0</span> INNODB MONITOR OUTPUT                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span>                                            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Per</span> <span class="keyword">second</span> averages calculated <span class="keyword">from</span> the <span class="keyword">last</span> <span class="number">13</span> seconds                          <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">-----------------                                                                |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> 省略其他输出.......                                                                <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> BUFFER POOL <span class="keyword">AND</span> MEMORY                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Total <span class="keyword">large</span> memory allocated <span class="number">6596591616</span>                                          <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Dictionary memory allocated <span class="number">123994</span>                                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Buffer pool size   <span class="number">393168</span>                                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Free</span> buffers       <span class="number">392675</span>                                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Database pages     <span class="number">493</span>                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Old</span> database pages <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Modified db pages  <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending <span class="keyword">reads</span>      <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending writes: LRU <span class="number">0</span>, flush list <span class="number">0</span>, single page <span class="number">0</span>                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages made young <span class="number">0</span>, <span class="keyword">not</span> young <span class="number">0</span>                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> youngs<span class="operator">/</span>s, <span class="number">0.00</span> non<span class="operator">-</span>youngs<span class="operator">/</span>s                                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read <span class="number">441</span>, created <span class="number">52</span>, written <span class="number">56</span>                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0.00</span> creates<span class="operator">/</span>s, <span class="number">0.00</span> writes<span class="operator">/</span>s                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">No</span> buffer pool page gets since the <span class="keyword">last</span> printout                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read ahead <span class="number">0.00</span><span class="operator">/</span>s, evicted <span class="keyword">without</span> access <span class="number">0.00</span><span class="operator">/</span>s, Random read ahead <span class="number">0.00</span><span class="operator">/</span>s <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> LRU len: <span class="number">493</span>, unzip_LRU len: <span class="number">0</span>                                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> I<span class="operator">/</span>O sum[<span class="number">0</span>]:cur[<span class="number">0</span>], unzip sum[<span class="number">0</span>]:cur[<span class="number">0</span>]                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> INDIVIDUAL BUFFER POOL INFO                                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">---BUFFER POOL 0                                                                 |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Buffer pool size   <span class="number">49146</span>                                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Free</span> buffers       <span class="number">49046</span>                                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Database pages     <span class="number">100</span>                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Old</span> database pages <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Modified db pages  <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending <span class="keyword">reads</span>      <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending writes: LRU <span class="number">0</span>, flush list <span class="number">0</span>, single page <span class="number">0</span>                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages made young <span class="number">0</span>, <span class="keyword">not</span> young <span class="number">0</span>                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> youngs<span class="operator">/</span>s, <span class="number">0.00</span> non<span class="operator">-</span>youngs<span class="operator">/</span>s                                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read <span class="number">100</span>, created <span class="number">0</span>, written <span class="number">2</span>                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0.00</span> creates<span class="operator">/</span>s, <span class="number">0.00</span> writes<span class="operator">/</span>s                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">No</span> buffer pool page gets since the <span class="keyword">last</span> printout                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read ahead <span class="number">0.00</span><span class="operator">/</span>s, evicted <span class="keyword">without</span> access <span class="number">0.00</span><span class="operator">/</span>s, Random read ahead <span class="number">0.00</span><span class="operator">/</span>s <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> LRU len: <span class="number">100</span>, unzip_LRU len: <span class="number">0</span>                                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> I<span class="operator">/</span>O sum[<span class="number">0</span>]:cur[<span class="number">0</span>], unzip sum[<span class="number">0</span>]:cur[<span class="number">0</span>]                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Buffer pool size的单位是页，Modified db pages是脏页， young表示的是old --&gt; new的状态</p>
+</blockquote>
+</li>
+<li><p>使用原数据表INNODB_BUFFER_PAGE_LRU</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">MySQL hadoop<span class="variable">@localhost</span>:information_schema<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> `INNODB_BUFFER_PAGE_LRU`;</span><br><span class="line"></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">1.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">POOL_ID             <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">LRU_POSITION        <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">SPACE               <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">PAGE_NUMBER         <span class="operator">|</span> <span class="number">7</span></span><br><span class="line">PAGE_TYPE           <span class="operator">|</span> <span class="keyword">SYSTEM</span></span><br><span class="line">FLUSH_TYPE          <span class="operator">|</span> <span class="number">1</span></span><br><span class="line">FIX_COUNT           <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">IS_HASHED           <span class="operator">|</span> <span class="keyword">NO</span></span><br><span class="line">NEWEST_MODIFICATION <span class="operator">|</span> <span class="number">1381535819</span></span><br><span class="line">OLDEST_MODIFICATION <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">ACCESS_TIME         <span class="operator">|</span> <span class="number">18035656</span></span><br><span class="line">TABLE_NAME          <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">INDEX_NAME          <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">NUMBER_RECORDS      <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">DATA_SIZE           <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">COMPRESSED_SIZE     <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">COMPRESSED          <span class="operator">|</span> <span class="keyword">NO</span></span><br><span class="line">IO_FIX              <span class="operator">|</span> IO_NONE</span><br><span class="line">IS_OLD              <span class="operator">|</span> <span class="keyword">NO</span></span><br><span class="line">FREE_PAGE_CLOCK     <span class="operator">|</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>NEWEST_MODIFICATION: 表示的是该页最近一次(最新)被修改的lsn值</p>
+<p>OLDEST_MODIFICATION: 表示的是该页在buffer pool中第一次被修改的lsn值，flush list是根据该值进行排序的，该值越小，表示该页应该最新被刷新</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>lru list的管理</p>
+<ul>
+<li><p>使用mid point的lru算法</p>
+<ol>
+<li><p>当该页被第一次读取时，该页优先放在mid point的位置</p>
+</li>
+<li><p>当被读取到第二次时，才会将该页放入到new page的首部</p>
+</li>
+<li><p>innodb_old_blocks_pct参数控制mid point的位置，默认37，即3&#x2F;8的位置</p>
+<img src="/mysql/learn-mysql-024/innodb-buffer-pool-list.png" alt="innodb_buffer_pool_lru_list." style="zoom:75%;">
+
+<blockquote>
+<p>LRU list中new page和old page时在一个链表上的，访问多的就从mid point排到了链表的前面，然后冷的页面就慢慢的被挤到了old page中，如果old中的数据被继续多次访问，还是会回到new中</p>
+<ol>
+<li>mid --&gt; new</li>
+<li>mid --&gt; old --&gt; new</li>
+<li>mid --&gt; old --&gt; 刷回磁盘</li>
+<li>new --&gt; old --&gt; 刷回磁盘</li>
+</ol>
+<p>当free list中没有空闲的页时，就需要从old page中将最后的页(被淘汰的)取出，给新的查询所使用</p>
+<p>如果被淘汰的页时脏页(page number在flush list中)，则需要先刷回磁盘后，在给新的查询使用</p>
+</blockquote>
+</li>
+</ol>
+<ul>
+<li><p>避免扫描语句污染lru</p>
+<p>当使用select * from tablename时，则该语句会读取某个页很多次(即该页可能被读取了两次以上，读取一条记录，就需要读取一次页)</p>
+<ol>
+<li><p>Innodb_old_block_time</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">MySQL hadoop<span class="variable">@localhost</span>:information_schema<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;innodb_old%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name          <span class="operator">|</span> <span class="keyword">Value</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> innodb_old_blocks_pct  <span class="operator">|</span> <span class="number">37</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_old_blocks_time <span class="operator">|</span> <span class="number">1000</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">------------------------+-------+</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>innodb_old_blocks_time单位时秒</p>
+<ol>
+<li>当该页第一次被读取时，该页放在mid point位置，但是随后无论读多少次，在innodb_old_blocks_time的时间内都不管(被视作只读取了一次)，等这个世界过去了，如果该页还是被读取了，才会将该页放入到new page的首部</li>
+<li>通常select * 扫描操作不回超过1s，一个页很快就被扫描完了</li>
+</ol>
+</blockquote>
+</li>
+</ol>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p>buffer pool的预热</p>
+<p>mysql5.6以后，可以在停机的时候dump出buffer pool的数据(space，page number)，然后在启动的时候load进buffer pool，该功能可以让mysql启动时自动预热，无需人工干预</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">MySQL hadoop<span class="variable">@localhost</span>:information_schema<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;innodb_buffer_pool%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------+----------------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name                       <span class="operator">|</span> <span class="keyword">Value</span>          <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------+----------------+</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_chunk_size       <span class="operator">|</span> <span class="number">134217728</span>      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_dump_at_shutdown <span class="operator">|</span> <span class="keyword">ON</span>             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_dump_now         <span class="operator">|</span> OFF            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_dump_pct         <span class="operator">|</span> <span class="number">40</span>             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_filename         <span class="operator">|</span> ib_buffer_pool <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_instances        <span class="operator">|</span> <span class="number">8</span>              <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_load_abort       <span class="operator">|</span> OFF            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_load_at_startup  <span class="operator">|</span> <span class="keyword">ON</span>             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_load_now         <span class="operator">|</span> OFF            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_buffer_pool_size             <span class="operator">|</span> <span class="number">6442450944</span>     <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------------+----------------+</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>innodb_buffer_pool_dump_pct: dump的百分比，是每个buffer pool文件，而不是整体</p>
+<ol>
+<li>dump的越多，启动的越慢</li>
+<li>频繁的手工dump(set innodb_buffer_pool_dump_now &#x3D; 1)，会导致buffer pool中的数据越来越少，是因为设置了innodb_buffer_pool_dump_pct</li>
+<li>如果做了高可用，可以定期dump，然后将dump文件传输到slave上，然后直接load(set innodb_buffer_pool_load_now &#x3D; 1)</li>
+<li>load now和dump now都是异步处理的</li>
+</ol>
+</blockquote>
+<blockquote>
+<p>提示：</p>
+<p>由于innodb_buffer_pool_dump_cpt是针对每个innodb pool的百分比，测试的时候应该将其调整的小一些</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>buffer pool与压缩页</p>
+<ul>
+<li><p>查找buffer pool中的压缩页</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> table_name, space, page_number, index_name, compressed_size, compressed <span class="keyword">from</span> information_schema.`INNODB_UFFER_PAGE_LRU` <span class="keyword">where</span> `COMPRESSED_SIZE` <span class="operator">!=</span> <span class="number">0</span> limit <span class="number">10</span>;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------+-------+-------------+-----------------+-----------------+------------+</span></span><br><span class="line"><span class="operator">|</span> table_name              <span class="operator">|</span> space <span class="operator">|</span> page_number <span class="operator">|</span> index_name      <span class="operator">|</span> compressed_size <span class="operator">|</span> compressed <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------+-------+-------------+-----------------+-----------------+------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">64</span>    <span class="operator">|</span> <span class="number">0</span>           <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">64</span>    <span class="operator">|</span> <span class="number">1</span>           <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">64</span>    <span class="operator">|</span> <span class="number">2</span>           <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> `ypb`.`test_compressed` <span class="operator">|</span> <span class="number">64</span>    <span class="operator">|</span> <span class="number">3</span>           <span class="operator">|</span> GEN_CLUST_INDEX <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">67</span>    <span class="operator">|</span> <span class="number">320</span>         <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">67</span>    <span class="operator">|</span> <span class="number">321</span>         <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">67</span>    <span class="operator">|</span> <span class="number">322</span>         <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">67</span>    <span class="operator">|</span> <span class="number">323</span>         <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">67</span>    <span class="operator">|</span> <span class="number">324</span>         <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>                  <span class="operator">|</span> <span class="number">67</span>    <span class="operator">|</span> <span class="number">325</span>         <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>          <span class="operator">|</span> <span class="number">4096</span>            <span class="operator">|</span> <span class="keyword">NO</span>         <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------+-------+-------------+-----------------+-----------------+------------+</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span>  <span class="keyword">select</span> table_id, name, space, row_format, zip_page_size <span class="keyword">from</span> information_schema.`INNODB_SYS_TABLES` <span class="keyword">where</span> `SPACE` <span class="keyword">in</span> (<span class="number">64</span>, <span class="number">67</span>);</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+---------------------+-------+------------+---------------+</span></span><br><span class="line"><span class="operator">|</span> table_id <span class="operator">|</span> name                <span class="operator">|</span> space <span class="operator">|</span> row_format <span class="operator">|</span> zip_page_size <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+---------------------+-------+------------+---------------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">68</span>       <span class="operator">|</span> ypb<span class="operator">/</span>test_compressed <span class="operator">|</span> <span class="number">64</span>    <span class="operator">|</span> Compressed <span class="operator">|</span> <span class="number">4096</span>          <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+---------------------+-------+------------+---------------+</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>压缩页在内存中的存放</p>
+<ul>
+<li><p>压缩页存放在unzip_lru中</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Type   <span class="operator">|</span> Name <span class="operator">|</span> Status                                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> InnoDB <span class="operator">|</span>      <span class="operator">|</span>                                                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> BUFFER POOL <span class="keyword">AND</span> MEMORY                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Total <span class="keyword">large</span> memory allocated <span class="number">6596591616</span>                                          <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Dictionary memory allocated <span class="number">144581</span>                                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Buffer pool size   <span class="number">393174</span>                                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Free</span> buffers       <span class="number">319176</span>                                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Database pages     <span class="number">64425</span>                                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Old</span> database pages <span class="number">23619</span>                                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Modified db pages  <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending <span class="keyword">reads</span>      <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending writes: LRU <span class="number">0</span>, flush list <span class="number">0</span>, single page <span class="number">0</span>                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages made young <span class="number">0</span>, <span class="keyword">not</span> young <span class="number">0</span>                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> youngs<span class="operator">/</span>s, <span class="number">0.00</span> non<span class="operator">-</span>youngs<span class="operator">/</span>s                                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read <span class="number">6567</span>, created <span class="number">57858</span>, written <span class="number">105643</span>                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0.00</span> creates<span class="operator">/</span>s, <span class="number">0.00</span> writes<span class="operator">/</span>s                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">No</span> buffer pool page gets since the <span class="keyword">last</span> printout                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read ahead <span class="number">0.00</span><span class="operator">/</span>s, evicted <span class="keyword">without</span> access <span class="number">0.00</span><span class="operator">/</span>s, Random read ahead <span class="number">0.00</span><span class="operator">/</span>s <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> LRU len: <span class="number">64425</span>, unzip_LRU len: <span class="number">38273</span>                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> I<span class="operator">/</span>O sum[<span class="number">0</span>]:cur[<span class="number">0</span>], unzip sum[<span class="number">0</span>]:cur[<span class="number">0</span>]                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> INDIVIDUAL BUFFER POOL INFO                                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">---BUFFER POOL 0                                                                 |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Buffer pool size   <span class="number">49152</span>                                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Free</span> buffers       <span class="number">39845</span>                                                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Database pages     <span class="number">8087</span>                                                          <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Old</span> database pages <span class="number">2965</span>                                                          <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Modified db pages  <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending <span class="keyword">reads</span>      <span class="number">0</span>                                                             <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pending writes: LRU <span class="number">0</span>, flush list <span class="number">0</span>, single page <span class="number">0</span>                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages made young <span class="number">0</span>, <span class="keyword">not</span> young <span class="number">0</span>                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> youngs<span class="operator">/</span>s, <span class="number">0.00</span> non<span class="operator">-</span>youngs<span class="operator">/</span>s                                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read <span class="number">870</span>, created <span class="number">7217</span>, written <span class="number">12719</span>                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0.00</span> <span class="keyword">reads</span><span class="operator">/</span>s, <span class="number">0.00</span> creates<span class="operator">/</span>s, <span class="number">0.00</span> writes<span class="operator">/</span>s                                      <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">No</span> buffer pool page gets since the <span class="keyword">last</span> printout                                 <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages read ahead <span class="number">0.00</span><span class="operator">/</span>s, evicted <span class="keyword">without</span> access <span class="number">0.00</span><span class="operator">/</span>s, Random read ahead <span class="number">0.00</span><span class="operator">/</span>s <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> LRU len: <span class="number">8087</span>, unzip_LRU len: <span class="number">4874</span>                                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> I<span class="operator">/</span>O sum[<span class="number">0</span>]:cur[<span class="number">0</span>], unzip sum[<span class="number">0</span>]:cur[<span class="number">0</span>]                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>unzip_LRU len: 压缩页LRU的长度在buffer pool中的长度</p>
+</blockquote>
+</li>
+<li><p>伙伴算法</p>
+<blockquote>
+<ol>
+<li>磁盘中存放压缩页row_format&#x3D;compressed，假设key_block_size&#x3D;8k，buffer pool的页大小时16k</li>
+<li>向free list中申请空闲的页，如果没有空闲的页，则向RLU list申请页，如果LRU满了，则找LRU中最后一个页，如果最后页是脏页，则做flush操作，最后得到一个空白的16k的页</li>
+<li>该16k的空白页，就给8k的压缩页使用，剩余的8k空间，保存到8k到free list中</li>
+<li>如果有一个4k到压缩页，将8k到free list中的空闲页给他用，然后将多余的4k空间保存到4k到free list中去</li>
+</ol>
+</blockquote>
+<p><img src="/mysql/learn-mysql-024/image-20230402224313552.png" alt="image-20230402224313552" loading="lazy"></p>
+<blockquote>
+<ol>
+<li>通过上面的方式，不同大小的页可以在同一个buffer pool中使用</li>
+<li>不能根据页的大小来划分缓冲池，缓冲池中页的大小就是固定大小，(等于innodb_page_size)</li>
+<li>LRU list和Flush list不需要根据页大小划分，都是统一的innodb_page_size大小</li>
+</ol>
+</blockquote>
+</li>
+<li><p>压缩页在内存中的保留</p>
+<ol>
+<li>压缩页需要中buffer pool中解压</li>
+<li>原来的压缩页保留在buffer pool中</li>
+</ol>
+<blockquote>
+<p>缺点就是压缩页占用了buffer pool的大小，对于热点数据来说，相当于内存变小了，可能造成性能下降</p>
+<ol>
+<li>所以在开启了压缩后，buffer pool的空间要相应的增大</li>
+<li>如果启用压缩后节省了磁盘io能够抵消buffer pool空间变小所带来的性能下降，那整体性能还是会上涨</li>
+<li>启用压缩的前提是，内存尽可能大</li>
+</ol>
+</blockquote>
+<ol start="3">
+<li>压缩页保留的原因是为了在更新数据的时候，将redo添加到压缩页的空闲部分，如果要刷回磁盘，可以直接将压缩页刷回去，如果该页被写满，则做一次reorganize操作(在此之前需要解压)，真的写满了才做分裂</li>
+</ol>
+<p><img src="/mysql/learn-mysql-024/image-20230402225556931.png" alt="image-20230402225556931" loading="lazy"></p>
+<blockquote>
+<p>保留压缩页是为了更快的刷回磁盘</p>
+<p>解压页是为了更快的查询</p>
+</blockquote>
+<p>透明压缩表没有上面压缩页的问题，因为压缩是文件系统层的，对mysql是透明的</p>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="checkpoint"><a href="#checkpoint" class="headerlink" title="checkpoint"></a>checkpoint</h2><ul>
+<li><p><strong>checkpint的作用</strong></p>
+<ul>
+<li>缩短数据库恢复时间</li>
+<li>缓冲池不够用时，将脏页刷新到磁盘</li>
+<li>重做日志不可用时，刷新脏页</li>
+</ul>
+<blockquote>
+<ol>
+<li>数据页首先被读取到缓冲池中，当数据页中某几条记录被更新或者插入新记录时，所有的操作都是先在buffer pool中完成的</li>
+<li>buffer pool中的某个页和磁盘中的某个页在(space，page_number)上是相同的，但是其内容可能是不同的(buffer pool中被更新过)，形成了脏页</li>
+<li>要定期将缓冲池中的脏页刷回磁盘，达到最终一致性，即通过checkpoint机制来刷新脏页</li>
+</ol>
+</blockquote>
+<p><img src="/mysql/learn-mysql-024/image-20230402230705699.png" alt="image-20230402230705699" loading="lazy"></p>
+</li>
+<li><p><strong>lsn(log sequence number)</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Type   <span class="operator">|</span> Name <span class="operator">|</span> Status                                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> InnoDB <span class="operator">|</span>      <span class="operator">|</span>                                                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span>                                            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">2023</span><span class="number">-04</span><span class="number">-02</span> <span class="number">15</span>:<span class="number">08</span>:<span class="number">05</span> <span class="number">0xfffe040e61c0</span> INNODB MONITOR OUTPUT                         <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span><span class="operator">=</span>                                            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Per</span> <span class="keyword">second</span> averages calculated <span class="keyword">from</span> the <span class="keyword">last</span> <span class="number">39</span> seconds                          <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">---                                                                              |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> LOG                                                                              <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">---                                                                              |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Log sequence number <span class="number">2290380642</span>                                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Log flushed up <span class="keyword">to</span>   <span class="number">2290380642</span>                                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Pages flushed up <span class="keyword">to</span> <span class="number">2290380642</span>                                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">Last</span> checkpoint <span class="keyword">at</span>  <span class="number">2290380633</span>                                                   <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">0</span> pending log flushes, <span class="number">0</span> pending chkp writes                                     <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="number">784</span> log i<span class="operator">/</span>o<span class="string">&#x27;s done, 0.00 log i/o&#x27;</span>s<span class="operator">/</span><span class="keyword">second</span>                                        <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">----------------------                                                           |</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>Log sequence number: 当前内存中最新的lsn</p>
+<p>Log flushed up to: redo刷新到磁盘的lsn</p>
+<p>Pages flushed up to: 最后一次刷新到磁盘上的页的最新的lsn(NEWEST_MODIFICATION)</p>
+<p>Last checkpoint at: 最后一次刷到磁盘上页的第一次被修改的lsn(OLDEST_MODIFICATION)</p>
+<p>lsn是一个字节数</p>
+<ol>
+<li>log sequence number和log flush up这两个lsn可能回不同，运行过程中可能回出现小于后者，因为redo日志也是先在内存中更新，在刷新到磁盘的</li>
+<li>pages flushed up和last checkpoint其实都指向了最后一个刷新到磁盘的页，只是pages flushed up代表了页中的NEWEST_MODIFICATION，而last checkpoint代表了OLDEST_MODIFICATION<ul>
+<li>flush list使用OLDEST_MODIFICATION进行排序，在刷新脏页时，checkpoint的lsn值就对应时当前刷新到某个页的OLDEST_MODIFICATION</li>
+<li>当某个页只被修改过一次，则pages flushed up和last checkpoint会想等，反之多次修改，则pages flushed up大于last checkpoint</li>
+<li>在恢复时，从checkpoint开始恢复，如果当前页的lsn大于checkpoint的lsn，表示不需要恢复了</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<ul>
+<li><p>日志(redo)中的lsn</p>
+<p>假设当前的lsn为c，此时对某个页被修改，则会产生M个字节的日志，则此时的lsn为c+m，日志中的lsn代表了日志一共写入了多少字节</p>
+</li>
+<li><p>页中的lsn</p>
+<p>页中也有lsn，表示该页被修改的时候，对应的lsn是多少</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">desc</span> information_schema.INNODB_BUFFER_PAGE_LRU;</span><br></pre></td></tr></table></figure>
+
+<p>page中的lsn主要用在恢复的时候，保存在页头</p>
+</li>
+<li><p>checkpoint的lsn</p>
+<p>每个数据库中也有一个lsn，表示最后一个刷新到磁盘页的lsn，表明了该lsn之前的数据已经刷新到磁盘了，且如果需要做恢复操作，也只要从当前这个checkpoint lsn开始恢复</p>
+<blockquote>
+<p>checkpoint lsn写在redo log的前2k空间中</p>
+<ol>
+<li>日志中的lsn &#x3D; checkpoint的lsn。表示所有页都已经刷新会磁盘</li>
+<li>日志中的lsn &gt; checkpoint的lsn。表示还有页没有刷新到磁盘，如果是宕机，则需要用日志恢复</li>
+<li>日志中的lsn &lt; checkpoint的lsn，报错</li>
+</ol>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p><strong>checkpint的分类</strong></p>
+<ul>
+<li><p>sharp checkpoint</p>
+<ul>
+<li>将所有脏页刷新会磁盘</li>
+<li>通常在数据库关闭的时候</li>
+<li>刷新的时候hang住</li>
+<li>innodb_fast_shutdown &#x3D; 1&#x2F;0</li>
+</ul>
+</li>
+<li><p>fuzzy checkpoint</p>
+<ul>
+<li><p>将部分脏页刷新到磁盘</p>
+</li>
+<li><p>对系统影响小</p>
+</li>
+<li><p>innodb_io_capacity</p>
+<blockquote>
+<p>最小限制100</p>
+<p>一次最多刷新到脏页能力，与iops有关</p>
+</blockquote>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><p><strong>刷新</strong></p>
+<ul>
+<li><p>master thread checkpoint </p>
+<p>从flush list中刷新</p>
+</li>
+<li><p>flush lru list checkpoint</p>
+<p>从lru list中刷新</p>
+<p>innodb_lru_scan_depth表示的是每次进行lru list刷新脏页的数量</p>
+<blockquote>
+<p>该参数是应用到每个buffer pool实例中的，总数为 innodb_lru_scan_depth * innodb_buffer_pool_instances</p>
+<p>建议该值不要超过innodb_io_capacity&#x2F;innodb_buffer_pool_instances</p>
+</blockquote>
+</li>
+<li><p>async&#x2F;sync flush checkpoint</p>
+<p>重做日志</p>
+</li>
+<li><p>dirty page too much checkpoint</p>
+<p>innodb_max_dirty_pages_pct参数控制</p>
+</li>
+</ul>
+</li>
+</ul>
+<h2 id="double-write"><a href="#double-write" class="headerlink" title="double write"></a>double write</h2><ul>
+<li><p>double write介绍</p>
+<p>double write的目的是为了保证数据库写入的可靠性，避免partial write的情况</p>
+<blockquote>
+<p>partial write(部分写)</p>
+<ol>
+<li>16k的页只写了4k，8k，12k的情况(此时是不完整的，不干净的页)</li>
+<li>不可以通过redo进行恢复。redo恢复的前提是该页必须是完整的，干净的</li>
+</ol>
+</blockquote>
+<p>double write是全局的</p>
+<p>共享表空间存在一个段对象double write，让后这个段由两个区(一个区1m)组成</p>
+<p>2m固定大小(both file and memory)</p>
+<p>页在刷新时，首选顺序的写入到double write</p>
+<p>然后再刷新到磁盘(ibd)</p>
+<img src="/mysql/learn-mysql-024/image-20230403110338141.png" alt="image-20230403110338141" style="zoom:50%;">
+
+<blockquote>
+<p>double write buffer：1， double write(ibdata1)， 2，ibd</p>
+<ol>
+<li>将脏页copy到double write buffer对象中，默认2m大小</li>
+<li>将double write buffer中的对象先写入到ibdata1共享表空间中， 2m循环覆盖，顺序写入，一次IO</li>
+<li>在根据(space，page_number)写入到原来的ibd文件中</li>
+<li>如果是在写入ibdata1时，发生宕机，此刻原来的ibd file是完整的，干净的，下次启动可以根据redo文件进行恢复</li>
+<li>如果是写入到ibd文件时，发生了宕机，此刻原来的ibdata1中存在副本，可以直接覆盖ibd文件中去，然后在进行redo恢复</li>
+</ol>
+<p>redo时物理逻辑的，物理表示记录的日志针对的是页的修改，逻辑表示记录日志的内容时逻辑的</p>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%double%write%&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name      <span class="operator">|</span> <span class="keyword">Value</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> innodb_doublewrite <span class="operator">|</span> <span class="keyword">ON</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------+-------+</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>double write开销</p>
+<ul>
+<li>假设每个页大小16k，则2m的double write中存放了128个页，在使用了double write之后，IO从原来的128次变成了128+1次IO，而不是128+128次IO</li>
+<li>double write的2m数据时顺序刷人磁盘的，是一次IO，该IO的大小是2m</li>
+<li>开启double write的性能降低5%～25%</li>
+<li>slave服务器同样需要开启</li>
+</ul>
+</li>
+<li><p>double write可以关闭的前提</p>
+<ul>
+<li>支持原子写入的设备</li>
+<li>Innodb_doublewrite&#x3D;0表示关闭double write功能</li>
+</ul>
+</li>
+</ul>
+<h2 id="insert-x2F-change-buffer"><a href="#insert-x2F-change-buffer" class="headerlink" title="insert&#x2F;change buffer"></a>insert&#x2F;change buffer</h2><ul>
+<li><p>insert&#x2F;change buffer介绍</p>
+<ul>
+<li>mysql5.5版本之前叫做insert buffer，现在叫做change buffer</li>
+<li>提高辅助索引的插入性能</li>
+<li>非唯一的二级索引</li>
+<li>insert&#x2F;change buffer是一个持久化的对象，在ibdata1中，同时页会写入redo日志</li>
+<li>insert&#x2F;change buffer页是一颗B+数，每次缓存2k的记录</li>
+<li>开启后有30%的性能提升</li>
+<li>mysql5.5版本之前，可以设置的最大只是buffer pool的1&#x2F;2，现在最大只能是1&#x2F;4</li>
+<li>当insert buffer进行合并的时候，性能下降</li>
+</ul>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> variables <span class="keyword">like</span> <span class="string">&#x27;%change_buffer%&#x27;</span>;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> Variable_name                 <span class="operator">|</span> <span class="keyword">Value</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------+-------+</span></span><br><span class="line"><span class="operator">|</span> innodb_change_buffer_max_size <span class="operator">|</span> <span class="number">25</span>    <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> innodb_change_buffering       <span class="operator">|</span> <span class="keyword">all</span>   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------------------------------+-------+</span></span><br></pre></td></tr></table></figure>
+</li>
+<li><p>insert&#x2F;change buffer举例</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> t (</span><br><span class="line">    a <span class="type">INT</span> AUTO_INCREMENT, <span class="comment">-- a是自增</span></span><br><span class="line">    b <span class="type">VARCHAR</span>(<span class="number">30</span>),        <span class="comment">-- b是varchar</span></span><br><span class="line">    <span class="keyword">PRIMARY</span> KEY(a)        <span class="comment">-- a是主键</span></span><br><span class="line">    key(b)                <span class="comment">-- b是二级索引</span></span><br><span class="line">);</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><p>对于主键(a列)，每次插入都要立即插入对应的聚集索引中(在内存中的就直接插入，不在内存就先读取到内存)</p>
+</li>
+<li><p>对于二级索引(secondary index)(b列)</p>
+<ol>
+<li>在没有insert&#x2F;change buffer时，每次插入一条记录，就要读取一次页(读取内存，或者从磁盘读取到内存)，让后将记录插入到页中</li>
+<li>在有insert&#x2F;change buffer时，插入一条记录时，先判断记录对应要插入到二级索引(secondary index)页是否在buffer pool中，如果该二级索引页已经在buffer pool中，则直接插入，反之，将其cache起来，放入到insert&#x2F;change buffer中，等待该二级索引页被读到时，将insert&#x2F;change buffer中对该页的记录进行合并(merge)进去，从而减少IO操作</li>
+</ol>
+<blockquote>
+<p>insert&#x2F;change buffer就是用来提升二级索引插入的性能</p>
+<p>使用空间换时间，批量插入的方式(二级索引不着急插入，只要主键已经插入了即可)</p>
+</blockquote>
+</li>
+</ul>
+</li>
+<li><p>insert&#x2F;change buffer性能</p>
+<img src="/mysql/learn-mysql-024/image-20230403115403008.png" alt="image-20230403115403008" style="zoom:50%;">
+
+<ul>
+<li>左图开启了insert&#x2F;change buffer，而右图未开启</li>
+<li>一开启都比较高的原因是因为还没有全量进行刷磁盘(脏页全部在buffer pool中，还没满)，当insert buffer进行合并的时候，性能才开始下降</li>
+<li>开启insert&#x2F;change buffer后，insert的常量值在5k左右</li>
+<li>ssd场景下页建议开启</li>
+</ul>
+</li>
+<li><p>insert&#x2F;change buffer查看</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status;</span><br><span class="line"></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> Type   <span class="operator">|</span> Name <span class="operator">|</span> Status                                                                           <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br><span class="line"><span class="operator">|</span> InnoDB <span class="operator">|</span>      <span class="operator">|</span>                                                                                  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">-------------------------------------                                            |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="keyword">INSERT</span> BUFFER <span class="keyword">AND</span> ADAPTIVE HASH INDEX                                            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> <span class="comment">-------------------------------------                                            |</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> Ibuf: size <span class="number">1</span>, <span class="keyword">free</span> list len <span class="number">0</span>, seg size <span class="number">2</span>, <span class="number">0</span> merges                              <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> merged operations:                                                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span>  <span class="keyword">insert</span> <span class="number">0</span>, <span class="keyword">delete</span> mark <span class="number">0</span>, <span class="keyword">delete</span> <span class="number">0</span>                                               <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span> discarded operations:                                                            <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span>        <span class="operator">|</span>      <span class="operator">|</span>  <span class="keyword">insert</span> <span class="number">0</span>, <span class="keyword">delete</span> mark <span class="number">0</span>, <span class="keyword">delete</span> <span class="number">0</span>                                               <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+------+----------------------------------------------------------------------------------+</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li>seg size: 页的数量。假如页的大小是8k，则seg_size * 8k就是insert&#x2F;change buffer使用的内存大小</li>
+<li>merges: 合并了多少页，这里为0，可能是buffer pool足够大，数据页都缓存到内存中了，就用不到buffer了</li>
+<li>mergeed insert: 插入了多少条记录，insert&#x2F;merges就是插入到效率，插入一条记录，就要读取一次页</li>
+<li>discarded operations: 应该是很小的值，或者为0，当记录写入到insert&#x2F;change buffer后，对应的表被删除了，则相应的buffer中的记录就应该被丢弃</li>
+</ol>
+<blockquote>
+<p>使用insert&#x2F;change buffer的前提是，需要使用随机IO，这时才放入buffer中，如果页已经在buffer pool中了，就不需要使用insert&#x2F;change buffer了</p>
+</blockquote>
+</li>
+<li><p>change buffer</p>
+<p>从mysql5.5以后，该名为change buffer，表示不仅仅适用于insert</p>
+<ol>
+<li>insert</li>
+<li>delete mark：标记删除</li>
+<li>purge：清除</li>
+<li>innodb_change_buffering&#x3D;{all,none,inserts,deletes,purge,changes&#x3D;(insert &amp; delete marking)}</li>
+</ol>
+</li>
+</ul>
+<h2 id="adaptive-hash-index-自适应hash索引"><a href="#adaptive-hash-index-自适应hash索引" class="headerlink" title="adaptive hash index(自适应hash索引)"></a>adaptive hash index(自适应hash索引)</h2><ul>
+<li>检索的时间复杂度。B+tree O(t)，只能定位到该记录所在的页，hash O(1)，可以直接定位到记录</li>
+<li>可以自己判断是否是活跃的页，如果是活跃的页，可以自动做hash，管理员无需干预</li>
+<li>mysql5.6版本以后，官方不建议使用自适应hash索引，cpu使用率变高，但是性能没有提升</li>
+<li>mysql5.7中增加了innodb_adaptive_hash_index_parts，增加分片，以减少竞争</li>
+<li>只对等值的操作有意义</li>
+</ul>
+<h2 id="flush-neighbor-page-FNP"><a href="#flush-neighbor-page-FNP" class="headerlink" title="flush neighbor page(FNP)"></a>flush neighbor page(FNP)</h2><ul>
+<li>刷新脏页所在的区(extent)的所有脏页，合并IO，随机转顺序的优化<ul>
+<li>写入的数据太多</li>
+<li>如果业务确实是频繁更新，那刷新页会很频繁</li>
+</ul>
+</li>
+<li>对传统机械盘有意义<ul>
+<li>innodb_flush_neighbors&#x3D;{0|1|2}(&gt;&#x3D;mysql5.6)</li>
+<li>0: 表示关闭该功能</li>
+<li>1: 表示刷新一个区内的脏页</li>
+<li>2: 表示刷新几个连续的脏页</li>
+</ul>
+</li>
+<li>ssd建议关闭该功能。非ssd建议使用2</li>
+</ul>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-023/" rel="prev" title="mysql学习笔记-Mysql基于ibd文件恢复数据">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-Mysql基于ibd文件恢复数据
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>
