@@ -160,12 +160,12 @@
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -885,7 +885,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/java/2017-07-15-%E6%AD%BB%E7%A3%95Java%E5%B9%B6%E5%8F%91-%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90volatile%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/java/learn-java-005/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -903,7 +903,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/java/2017-07-15-%E6%AD%BB%E7%A3%95Java%E5%B9%B6%E5%8F%91-%E6%B7%B1%E5%85%A5%E5%88%86%E6%9E%90volatile%E7%9A%84%E5%AE%9E%E7%8E%B0%E5%8E%9F%E7%90%86/" class="post-title-link" itemprop="url">未命名</a>
+          <a href="/java/learn-java-005/" class="post-title-link" itemprop="url">阿里一道Java并发面试题(详细分析)</a>
         </h2>
 
         <div class="post-meta-container">
@@ -914,7 +914,16 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-03-10 13:48:37" itemprop="dateCreated datePublished" datetime="2022-03-10T13:48:37+08:00">2022-03-10</time>
+      <time title="创建时间：2022-03-10 00:28:54" itemprop="dateCreated datePublished" datetime="2022-03-10T00:28:54+08:00">2022-03-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/%E5%A4%9A%E7%BA%BF%E7%A8%8B/" itemprop="url" rel="index"><span itemprop="name">多线程</span></a>
+        </span>
     </span>
 
   
@@ -927,98 +936,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>并发程序导致的问题:</p>
-<ol>
-<li>缓存导致的可见性问题<blockquote>
-<p>一个线程对共享变量的修改，另外一个线程能够立即看到，我们称之为可见性 <br><br>多核时代，每颗cpu都有自己的缓存，线程A操作的是cpu1上的缓存，线程b操作的是cpu2上的缓存。</p>
-</blockquote>
-</li>
-</ol>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">Test</span>&#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">long</span> <span class="variable">count</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">void</span> <span class="title function_">add</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="type">int</span> <span class="variable">idx</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(idx++&lt;<span class="number">1000</span>)&#123;</span><br><span class="line">            count += <span class="number">1</span>;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="type">long</span> <span class="title function_">calc</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">final</span> <span class="type">Test</span> <span class="variable">test</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Test</span>();</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">th1</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;test.add());</span><br><span class="line">        <span class="type">Thread</span> <span class="variable">th2</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;test.add());</span><br><span class="line">        </span><br><span class="line">        th1.start();</span><br><span class="line">        th2.start();</span><br><span class="line">        </span><br><span class="line">        th1.join();</span><br><span class="line">        th2.join();</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> test.count();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<ol start="2">
-<li>线程切换带来的原子性问题<blockquote>
-<p>操作系统允许某个进程执行一小段时间，例如50毫秒，过了50毫秒操作系统会重新选择一个1进程来执行(我们称为任务切换), 这个50毫秒成为时间片 <br><br>早期的操作系统基于进程来调度cpu的，不同的进程间是不共享内存空间的，所以进程间做任务切换就要切换内存映射地址，而一个进程创建的所有线程，都是共享一个内存空间的，所以线程做认为切换的成本就很低了。<br><br>java并发程序都是基于多线程的，自然也会涉及到任务切换，任务切换的时机大多数是在时间片结束的时候，我们现在基本上都使用高级语言编程，高级语言里一条语句往往需要很多条cpu指令完成，例如上面代码中的count+&#x3D;1，至少需要三条cpu指令<br><br>1). 首先，需要把变量count从内存中加载到cpu的寄存器 <br><br>2). 之后，在寄存器中执行+1操作 <br><br>3). 最后，将结果写入内存(缓存机制导致可能写入的是cpu缓存而不是内存) <br><br>操作系统做任务切换，可以发生在任何一条cpu指令执行完。是cpu指令，而不是高级语言的一条语句。<br><br>我们把一个或者多个操作在cpu执行的过程中不被中断的特性称为原子性。cpu能保证的的原子性操作是cpu指令级别的，而不是高级语言的操作符。</p>
-</blockquote>
-</li>
-<li>编程优化带来的有序性问题<blockquote>
-<p>有序性指的是就是程序按照代码的先后顺序执行。编译器为了优化性能，有时候会改变程序中语句的先后顺序。比如，程序中的: a &#x3D; 6: b &#x3D; 7; 编译器优化后可能变成b &#x3D; 7; a &#x3D; 6;</p>
-</blockquote>
-</li>
-</ol>
-<p>要写好并发程序，首先需要知道并发程序的问题在哪里，只有确定了靶子，才有可能把问题解决，毕竟所有的解决方案都是有针对性的，并发程序经常出现的诡异问题看上去非常无厘头，但是如果深究的话，无外乎就是自觉欺骗了我们，只要我们能够深刻的立即可见性，原子性，有序性在并发场景下的原理，很多并发bug都是可以理解，可以诊断的。</p>
-<p>在介绍可见性，原子性，有序性的时候，特意提到缓存导致的可见性问题，线程切换带来的原子性问题，编译优化带来的有序性问题，其实缓存，线程，编译优化的目的和我们写并发程序的目的是一样的，都是提高程序的性能，但是技术在解决一个问题的时候，必然会带来另外的问题，所以在采用一项技术的同时，一定要清楚它带来的问题是什么，以及如果规避。</p>
-<p>一个变量如果用volatile修饰了，这java可以确保所有线程看到这个变量的值是一致的，如果某个线程对volatile修饰的共享变量进行更新，那么其他线程可以立马看到这个更新，这就是所谓的可见性。</p>
-<h1 id="内存模型相关概念"><a href="#内存模型相关概念" class="headerlink" title="内存模型相关概念"></a>内存模型相关概念</h1><p>理解volatile其实还是有点难度的，它与java的内存模型有关。</p>
-<h2 id="操作系统语义"><a href="#操作系统语义" class="headerlink" title="操作系统语义"></a>操作系统语义</h2><p>计算机在运行程序是，每条指令都是在cpu中执行的，在执行过程中势必会涉及到数据的读写，我们知道程序运行过程中数据都是存储在主存中的， 这时就有一个问题，读写主存中的数据没有cpu中执行指令的速度快，如果任何的交互都需要与主存打交道则会大大降低效率，所以就有了cpu高速缓存，cpu高速缓存就是为了某个cpu独有，只与该cpu运行的线程有关。</p>
-<p>有了cpu高速缓存虽然解决了效率问题，但是它带来了一个新的问题，数据一致性。在程序运行中，会将运行所需要的数据复制到一份到cpu高速缓存中，在进行运算时cpu不再与主存打交道，而是直接从高速缓存中读写数据，只有当运行结束后，才会将数据刷新到主存中。举一个简单的例子</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">i = i + <span class="number">1</span></span><br></pre></td></tr></table></figure>
-
-<p>当线程运行这段代码的时候，首先会从主内存中读取i的值，然后复制一份到cpu高速缓存中，然后cpu执行+1的操作。然后将数据i的值写入到缓存中，最后刷新到主内存中。</p>
-<p>其实这样做在单线程是没有问题的，有问题的是多线程：如下：</p>
-<p>假设有两个线程A和B都执行这个操作(i++), 按照我们正常的逻辑主存中i的值应该是3才对，但是事实并非如此。</p>
-<p>两个线程从主存中读取i的值(假设i的值是1)，到各自的高速缓存中，然后A线程执行了+1操作，并将结果写入高速缓存中，最后写入到主存中，此时主存中i&#x3D;2，这时B线程做了同样的操作，主存中i仍然是2，最终结果是2，并不是3，这就是缓存一致性问题。</p>
-<p>缓存一致性问题的解决方案：</p>
-<ol>
-<li>通过给总线加lock#锁的方式</li>
-<li>通过缓存一致性协议</li>
-</ol>
-<p>第一种方案：存在一个问题，他是采用一种独占的方式来实现的，即总线加lock#锁，只有一个cpu能够运行，其他cpu都得阻塞，效率较为低下。</p>
-<p>第二种方案：缓存一致性协议(MESI协议)，它确保每个缓存中使用的共享变量的副本是一致的，其核心思想如下：当某个cpu在写数据是，如果发现操作的变量是共享变量，则会通知其他cpu该变量的缓存行是无效的，因此其他cpu在读取该变量是，发现其无效就重新从主内存中加载数据。</p>
-<h2 id="java内存模型"><a href="#java内存模型" class="headerlink" title="java内存模型"></a>java内存模型</h2><p>上面从操作系统层次阐述了如何保证数据一致性，下面我们来看一下 Java 内存模型，稍微研究一下它为我们提供了哪些保证，以及在 Java 中提供了哪些方法和机制，来让我们在进行多线程编程时能够保证程序执行的正确性。</p>
-<p>在并发编程中我们一般都会遇到这三个基本概念：原子性、可见性、有序性。我们稍微看下volatile 。</p>
-<h3 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h3><blockquote>
-<p>原子性：即一个操作或者多个操作，要么全部执行并且执行的过程不会被任何因素打断，要么就都不执行。</p>
-</blockquote>
-<p>原子性就像数据库里面的事务一样，他们是一个团队，同生共死。其实理解原子性非常简单，我们看下面一个简单的例子即可：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">i = <span class="number">0</span>;  <span class="comment">// &lt;1&gt;</span></span><br><span class="line">j = i ;  <span class="comment">// &lt;2&gt;</span></span><br><span class="line">i++;  <span class="comment">// &lt;3&gt;</span></span><br><span class="line">i = j + <span class="number">1</span>; <span class="comment">// &lt;4&gt;</span></span><br></pre></td></tr></table></figure>
-
-<p>上面四个操作，有哪个几个是原子操作，那几个不是？如果不是很理解，可能会认为都是原子性操作，其实只有 1 才是原子操作，其余均不是。</p>
-<ul>
-<li>&lt;1&gt;在 Java 中，对基本数据类型的变量和赋值操作都是原子性操作。</li>
-<li>&lt;2&gt;：包含了两个操作：读取 i，将 i 值赋值给 j 。</li>
-<li>&lt;3&gt;：包含了三个操作：读取 i 值、i + 1 、将 +1 结果赋值给 i 。</li>
-<li>&lt;4&gt;：同 &lt;3&gt; 一样</li>
-</ul>
-<p>volatile 是无法保证复合操作的原子性</p>
-<h3 id="有序性"><a href="#有序性" class="headerlink" title="有序性"></a>有序性</h3><blockquote>
-<p>有序性：即程序执行的顺序按照代码的先后顺序执行。</p>
-</blockquote>
-<p>在 Java 内存模型中，为了效率是允许编译器和处理器对指令进行重排序，当然重排序它不会影响单线程的运行结果，但是对多线程会有影响。</p>
-<h1 id="剖析volatile原理"><a href="#剖析volatile原理" class="headerlink" title="剖析volatile原理"></a>剖析volatile原理</h1><blockquote>
-<p>volatile 可以保证线程可见性且提供了一定的有序性，但是无法保证原子性。在 JVM 底层，volatile 是采用“内存屏障”来实现的。</p>
-</blockquote>
-<p>上面那段话，有两层语义：</p>
-<ul>
-<li>保证可见性、不保证原子性</li>
-<li>禁止指令重排序</li>
-</ul>
-<p>第一层语义就不做介绍了，下面重点介绍指令重排序。</p>
-<p>在执行程序时为了提高性能，编译器和处理器通常会对指令做重排序：</p>
-<ul>
-<li>编译器重排序。编译器在不改变单线程程序语义的前提下，可以重新安排语句的执行顺序。</li>
-<li>处理器重排序。如果不存在数据依赖性，处理器可以改变语句对应机器指令的执行顺序。</li>
-</ul>
-<p>指令重排序对单线程没有什么影响，他不会影响程序的运行结果，但是会影响多线程的正确性。既然指令重排序会影响到多线程执行的正确性，那么我们就需要禁止重排序。那么JVM是如何禁止重排序的呢？</p>
-<blockquote>
-<p>程序次序规则：一个线程内，按照代码顺序，书写在前面的操作，happens-before 于书写在后面的操作。<br> 锁定规则：一个 unLock 操作，happens-before 于后面对同一个锁的 lock 操作。<br> volatile 变量规则：对一个变量的写操作，happens-before于后面对这个变量的读操作。<br>传递规则：如果操作 A happens-before 操作 B，而操作 B happens-before操作C，则可以得出，操作 A happens-before 操作C<br>线程启动规则：Thread 对象的 start 方法，happens-before 此线程的每个一个动作。<br>线程中断规则：对线程 interrupt 方法的调用，happens-before被中断线程的代码检测到中断事件的发生。<br>线程终结规则：线程中所有的操作，都 happens-before线程的终止检测，我们可以通过Thread.join()方法结束、Thread.isAlive() 的返回值手段，检测到线程已经终止执行。<br>对象终结规则：一个对象的初始化完成，happens-before 它的 finalize() 方法的开始</p>
-</blockquote>
-<p>我们着重看第三点 Volatile规则：对 volatile变量的写操作，happen-before 后续的读操作。为了实现 volatile 内存语义，JMM会重排序，其规则如下：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/14423059-0fe50eef5d127364.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" loading="lazy"></p>
-<pre><code>当第二个操作是 volatile 写操作时，不管第一个操作是什么，都不能重排序。这个规则，确保 volatile 写操作之前的操作，都不会被编译器重排序到 volatile 写操作之后。
-</code></pre>
-<p>对 happen-before 原则有了稍微的了解，我们再来回答这个问题 JVM 是如何禁止重排序的？</p>
-<p>观察加入 volatile 关键字和没有加入 volatile 关键字时所生成的汇编代码发现，加入volatile 关键字时，会多出一个 lock 前缀指令。lock 前缀指令，其实就相当于一个内存屏障。内存屏障是一组处理指令，用来实现对内存操作的顺序限制。volatile 的底层就是通过内存屏障来实现的。下图是完成上述规则所需要的内存屏障：</p>
-<p><img src="http://upload-images.jianshu.io/upload_images/14423059-57509b5f520ccb58.png?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" loading="lazy"></p>
-<p>volatile 暂且下分析到这里，JMM体系较为庞大，不是三言两语能够说清楚的，后面会结合 JMM 再一次对 volatile 深入分析。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>volatile 看起来简单，但是要想理解它还是比较难的，这里只是对其进行基本的了解。</p>
-<p>volatile 相对于 synchronized 稍微轻量些，在某些场合它可以替代 synchronized ，但是又不能完全取代 synchronized 。只有在某些场合才能够使用 volatile，使用它必须满足如下两个条件：</p>
-<pre><code>对变量的写操作，不依赖当前值。
-该变量没有包含在具有其他变量的不变式中。
-
-volatile 经常用于两个两个场景：状态标记变量、Double Check 。
-</code></pre>
-<p><span class="exturl" data-url="aHR0cDovL2Ntc2Jsb2dzLmNvbS8/cD0yMDky">http://cmsblogs.com/?p=2092<i class="fa fa-external-link-alt"></i></span></p>
-
+          <p>阿里一道Java并发面试题(详细分析)</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/java/learn-java-005/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1044,7 +970,7 @@ volatile 经常用于两个两个场景：状态标记变量、Double Check 。
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/java/%E9%98%BF%E9%87%8C%E4%B8%80%E9%81%93Java%E5%B9%B6%E5%8F%91%E9%9D%A2%E8%AF%95%E9%A2%98(%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90)/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/mysql_dba/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -1062,7 +988,7 @@ volatile 经常用于两个两个场景：状态标记变量、Double Check 。
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/java/%E9%98%BF%E9%87%8C%E4%B8%80%E9%81%93Java%E5%B9%B6%E5%8F%91%E9%9D%A2%E8%AF%95%E9%A2%98(%E8%AF%A6%E7%BB%86%E5%88%86%E6%9E%90)/" class="post-title-link" itemprop="url">未命名</a>
+          <a href="/mysql/mysql_dba/" class="post-title-link" itemprop="url">mysql学习笔记-mysql的备忘录</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1073,7 +999,16 @@ volatile 经常用于两个两个场景：状态标记变量、Double Check 。
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2022-03-10 13:48:26" itemprop="dateCreated datePublished" datetime="2022-03-10T13:48:26+08:00">2022-03-10</time>
+      <time title="创建时间：2022-03-10 00:20:00" itemprop="dateCreated datePublished" datetime="2022-03-10T00:20:00+08:00">2022-03-10</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
     </span>
 
   
@@ -1086,46 +1021,15 @@ volatile 经常用于两个两个场景：状态标记变量、Double Check 。
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>大家先看看下面的这个问题，看看有没有问题呢？那里有问题呢?</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadSafeCache</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> result;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getResult</span><span class="params">()</span>&#123;</span><br><span class="line">        <span class="keyword">return</span> result;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">setResult</span><span class="params">(<span class="type">int</span> result)</span>&#123;</span><br><span class="line">        <span class="built_in">this</span>.result = result;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="结论"><a href="#结论" class="headerlink" title="结论"></a>结论</h2><p>多线程并发的同时进行set，get操作，A线程调用set方法，B线程不一定能对这个改变可见！！</p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>这个类很简单，里面有一个属性，有2个方法，get和set方法，一个用来赋值，一个用来获取属性值，在设置的方法上面添加了synchronized。</p>
-<p>隐含的信息: 多线程并发的是set和get操作，A线程调用set方法，B线程能够感受到变化吗？</p>
-<p>说道这里，问题就变成了synchronized在刚刚说的上下文里面能否保证可见性！！！</p>
-<h2 id="关键字synchronized的用法"><a href="#关键字synchronized的用法" class="headerlink" title="关键字synchronized的用法"></a>关键字synchronized的用法</h2><p>指定加锁对象：对给定的对象加锁，进入同步代码前需要获得给定对象的锁</p>
-<p>直接作用于实例方法：相当于对当前实例加锁，进入同步代码块前要获得当前对象实例的锁</p>
-<p>直接作用于静态方法：相当于对当前类加锁，进入同步代码块前要获得当前类的锁</p>
-<p>synchronized它的工作就是对需要同步的代码加锁，使得每一次只有一个线程可以进入同步块，从而保证线程之间的安全性。</p>
-<p>从这里我们可以知道，我们需要分析的属于的二种情况，也就是说多个线程如果同时进行set方法的时候，由于存在锁，所以会一个一个的进行set操作，并且是线程安全的，但是get方法并没有加锁，表示假如A线程在进行set的同时B线程可以进行get操作，并且可以多个线程同时进行get操作，但是同时最多只能有一个set操作。</p>
-<h2 id="Java内存模型-happens-before规则"><a href="#Java内存模型-happens-before规则" class="headerlink" title="Java内存模型 happens-before规则"></a>Java内存模型 happens-before规则</h2><p>内存模型使用happens-before的概念来阐述操作之间的内存可见性，在JMM中，如果一个操作执行的结果需要对另一个操作可见，那么这两个操作之间必须存在happens-before关系，这里提到的两个操作既可以是一个线程内，也可以是不同线程之间。</p>
-<p>与程序员密切相关的happens-before规则如下：</p>
-<p>程序顺序规则：一个线程中的每个操作，happens-before于该线程中的任意后续操作</p>
-<p>监视器锁规则：对一个监视器的解锁，happens-before于随后对这个监视器的加锁</p>
-<p>volatile变量规则：对一个volatile域的写，happens-before于任意后续对这个volatile域的读。</p>
-<p>传递性：如果A happens-before B，B happens-before C, 那么A happens-before C</p>
-<p>注意，两个操作之间具有happens-before关系，并不意味着前一个操作必须要在后一个操作之前执行！ happens-before仅仅要求前一个操作(执行的结果)对后一个操作可见，且前一个操作按顺序排在第二个操作之前(the first is volatile to and ordered before the second).</p>
-<p>其中有监视器锁规则：对一个监视器的解锁，happens-before与随后对这个监视器的加锁，这一条，仅仅是针对synchronized的set方法，而对于get方法并没有这方面的说明。</p>
-<p>其实在这种上下文下面一个synchronized的set方法，一个普通的get方法，A线程调用set方法，B线程，B线程不一定能对这个改变可见！！</p>
-<h2 id="volatile可见性"><a href="#volatile可见性" class="headerlink" title="volatile可见性"></a>volatile可见性</h2><p>前面happens-before原则就提到：volatile变量规则：对一个volatile域的写，happens-before与任意后续对这个volatile与的读，volatile从而保证了多线程的不可见性！！！</p>
-<p>volatile禁止内存重排序</p>
-<p>下面是JMM针对编译器制定的volatile重排序规则表</p>
-<p>能否重排序 | 第二个操作 | | |<br>| ---|--- | --- | --- | ---<br>第一个操作 | 普通读&#x2F;写 | volatile读 | volatile写<br>普通读&#x2F;写  |    |   |   NO<br>volatile读 |  NO    | NO    | NO<br>volatile写 |    | NO | NO</p>
-<p>为了实现volatile的内存语义，编译器在生成字节码时，会在指令序列前插入内存屏障来禁止特定类型的处理器重排序，</p>
-<p>下面是基于保守策略的JMM内存屏障插入策略</p>
-<p>在每一个volatile写操作的前面插入一个StoreStore屏障</p>
-<p>在每一个volatile写操作的后面插入一个StoreLoad屏障</p>
-<p>在每一个volatile读操作的后面插入一个LoadLoad屏障</p>
-<p>在每一个volatile读操作的后面插入一个LoadStore屏障。</p>
-<p>下面是保守策略下，volatile 写操作 插入内存屏障后生成的指令序列示意图：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/10297697-cb57c7483a58e500.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" loading="lazy"></p>
-<p>下面是在保守策略下，volatile 读操作 插入内存屏障后生成的指令序列示意图：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/10297697-cab2dbc34f3e8dda.png!web?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" loading="lazy"></p>
-<p>上述 volatile 写操作和 volatile 读操作的内存屏障插入策略非常保守。在实际执行时，只要不改变 volatile 写-读的内存语义，编译器可以根据具体情况省略不必要的屏障。</p>
-<h2 id="模拟"><a href="#模拟" class="headerlink" title="模拟"></a>模拟</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.ypb.concurrent.stage2.chapter3;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">VolatileAndSynchronizedTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="comment">// 程序会一直卡在这边不动，表示set修改的200，get方法并不可见！！！</span></span><br><span class="line"><span class="comment">//        test1();</span></span><br><span class="line"></span><br><span class="line"><span class="comment">//        test2();</span></span><br><span class="line">        test3();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">test3</span><span class="params">()</span> &#123;</span><br><span class="line">        <span class="type">VolatileTest</span> <span class="variable">test</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">VolatileTest</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">8</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">                    test.setResult(x++);</span><br><span class="line"></span><br><span class="line">                    System.out.println(<span class="string">&quot;x = &quot;</span> + x);</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            System.out.println(<span class="string">&quot;test.getResult() = &quot;</span> + test.getResult());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">test2</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">VolatileTest</span> <span class="variable">test</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">VolatileTest</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">8</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">while</span> (test.getResult() &lt; <span class="number">100</span>) &#123;</span><br><span class="line">                    x++;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                System.out.println(<span class="string">&quot;x = &quot;</span> + x);</span><br><span class="line">            &#125;).start();</span><br><span class="line">        &#125;</span><br><span class="line">        TimeUnit.MILLISECONDS.sleep(<span class="number">1000</span>);</span><br><span class="line">        test.setResult(<span class="number">200</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">test1</span><span class="params">()</span> <span class="keyword">throws</span> InterruptedException &#123;</span><br><span class="line">        <span class="type">SynchronizedTest</span> <span class="variable">test</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SynchronizedTest</span>();</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>; i &lt; <span class="number">8</span>; i++) &#123;</span><br><span class="line">            <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">                <span class="type">int</span> <span class="variable">x</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">                <span class="keyword">while</span> (test.getResult() &lt; <span class="number">100</span>) &#123;</span><br><span class="line">                    x++;</span><br><span class="line">                &#125;</span><br><span class="line"></span><br><span class="line">                System.out.println(<span class="string">&quot;x = &quot;</span> + x);</span><br><span class="line">            &#125;).start();</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        Thread.sleep(<span class="number">1000</span>);</span><br><span class="line">        test.setResult(<span class="number">200</span>);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">SynchronizedTest</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="type">int</span> result;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getResult</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">synchronized</span> <span class="keyword">void</span> <span class="title function_">setResult</span><span class="params">(<span class="type">int</span> result)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.result = result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">VolatileTest</span> &#123;</span><br><span class="line">        <span class="keyword">private</span> <span class="keyword">volatile</span> <span class="type">int</span> result;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="type">int</span> <span class="title function_">getResult</span><span class="params">()</span> &#123;</span><br><span class="line">            <span class="keyword">return</span> result;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">setResult</span><span class="params">(<span class="type">int</span> result)</span> &#123;</span><br><span class="line">            <span class="built_in">this</span>.result = result;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<h2 id="结论-1"><a href="#结论-1" class="headerlink" title="结论"></a>结论</h2><p>多线程并发的同时进行set、get操作， A线程调用set方法，B线程并一定能对这个改变可见！！！ ，上面的代码中，如果对get方法也加synchronized也是可见的，还是happens-before的 监视器锁规则：对一个监视器的解锁，happens-before 于随后对这个监视器的加锁。 ，只是volatile比synchronized更轻量级，所以本例直接用volatile。但是对于符合原子操作i++这里还是不行的还是需要synchronized。</p>
-
+          <p>详细介绍mysql的相关知识点</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/mysql/mysql_dba/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 

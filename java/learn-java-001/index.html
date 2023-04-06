@@ -21,37 +21,37 @@
 
 <script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
 
-    <meta name="description" content="https:&#x2F;&#x2F;github.com&#x2F;wupeixuan&#x2F;JDKSourceCode1.8&#x2F;blob&#x2F;master&#x2F;src&#x2F;java&#x2F;util&#x2F;HashMap.java HashMap底层实现原理HashMap底层原理总结，几个Hash集合之间的对比。 参考：什么是HashMap？  参考：Java 8系列之重新认识HashMap  HashMap底层存储结构HashMap是一个用于存储Key-V">
+    <meta name="description" content="HashMap深度解析">
 <meta property="og:type" content="article">
-<meta property="og:title" content="jdk8源码之HashMap深度解析">
-<meta property="og:url" content="https://theme-next.js.org/java/2017-03-03-JDK8%E6%BA%90%E7%A0%81%E4%B9%8BHashMap%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/index.html">
+<meta property="og:title" content="JDK8源码之HashMap深度解析">
+<meta property="og:url" content="https://theme-next.js.org/java/learn-java-001/index.html">
 <meta property="og:site_name" content="亦彤blog">
-<meta property="og:description" content="https:&#x2F;&#x2F;github.com&#x2F;wupeixuan&#x2F;JDKSourceCode1.8&#x2F;blob&#x2F;master&#x2F;src&#x2F;java&#x2F;util&#x2F;HashMap.java HashMap底层实现原理HashMap底层原理总结，几个Hash集合之间的对比。 参考：什么是HashMap？  参考：Java 8系列之重新认识HashMap  HashMap底层存储结构HashMap是一个用于存储Key-V">
+<meta property="og:description" content="HashMap深度解析">
 <meta property="og:locale" content="zh_CN">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-837dac531ca01daa.png">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-794edcdbedc4b7ec.png">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-7935c4c7f2335cb8.png">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-73d0dc1f00dea165.png">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-4ebc4aafe7d6808e.png">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-e9365ec251327548.png">
-<meta property="og:image" content="https://upload-images.jianshu.io/upload_images/14423059-b4ca3403f4e917a4.png">
-<meta property="article:published_time" content="2017-03-02T16:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-10T05:52:11.328Z">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-837dac531ca01daa.png">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-794edcdbedc4b7ec.png">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-7935c4c7f2335cb8.png">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-73d0dc1f00dea165.png">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-4ebc4aafe7d6808e.png">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-e9365ec251327548.png">
+<meta property="og:image" content="https://theme-next.js.org/java/learn-java-001/14423059-b4ca3403f4e917a4.png">
+<meta property="article:published_time" content="2017-03-02T16:08:36.000Z">
+<meta property="article:modified_time" content="2023-04-06T16:15:46.996Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="jdk8">
 <meta property="article:tag" content="源码">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="https://upload-images.jianshu.io/upload_images/14423059-837dac531ca01daa.png">
+<meta name="twitter:image" content="https://theme-next.js.org/java/learn-java-001/14423059-837dac531ca01daa.png">
 
 
-<link rel="canonical" href="https://theme-next.js.org/java/2017-03-03-JDK8%E6%BA%90%E7%A0%81%E4%B9%8BHashMap%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+<link rel="canonical" href="https://theme-next.js.org/java/learn-java-001/">
 
 
 
-<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/java/2017-03-03-JDK8%E6%BA%90%E7%A0%81%E4%B9%8BHashMap%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/","path":"java/2017-03-03-JDK8源码之HashMap深度解析/","title":"jdk8源码之HashMap深度解析"}</script>
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/java/learn-java-001/","path":"java/learn-java-001/","title":"JDK8源码之HashMap深度解析"}</script>
 
 <script class="next-config" data-name="calendar" type="application/json">""</script>
-<title>jdk8源码之HashMap深度解析 | 亦彤blog</title>
+<title>JDK8源码之HashMap深度解析 | 亦彤blog</title>
   
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
   <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
@@ -175,12 +175,12 @@
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-count">11</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
           <a href="/tags/">
-        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-count">20</span>
         <span class="site-state-item-name">标签</span></a>
       </div>
   </nav>
@@ -221,7 +221,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/java/2017-03-03-JDK8%E6%BA%90%E7%A0%81%E4%B9%8BHashMap%E6%B7%B1%E5%BA%A6%E8%A7%A3%E6%9E%90/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/java/learn-java-001/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -234,12 +234,12 @@
     </span>
 
     <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
-      <meta itemprop="name" content="jdk8源码之HashMap深度解析 | 亦彤blog">
-      <meta itemprop="description" content="">
+      <meta itemprop="name" content="JDK8源码之HashMap深度解析 | 亦彤blog">
+      <meta itemprop="description" content="HashMap深度解析">
     </span>
       <header class="post-header">
         <h1 class="post-title" itemprop="name headline">
-          jdk8源码之HashMap深度解析
+          JDK8源码之HashMap深度解析
         </h1>
 
         <div class="post-meta-container">
@@ -250,7 +250,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2017-03-03 00:00:00" itemprop="dateCreated datePublished" datetime="2017-03-03T00:00:00+08:00">2017-03-03</time>
+      <time title="创建时间：2017-03-03 00:08:36" itemprop="dateCreated datePublished" datetime="2017-03-03T00:08:36+08:00">2017-03-03</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -265,6 +265,7 @@
   
 </div>
 
+            <div class="post-description">HashMap深度解析</div>
         </div>
       </header>
 
@@ -284,7 +285,7 @@
 <p>因为table数组的长度是有限的，再好的hash函数也会出现index冲突的情况，所以我们用链表来解决这个问题，table数组的每一个元素不只是一个Entry对象，也是一个链表的头节点，每一个Entry对象通过Next指针指向下一个Entry节点。当新来的Entry映射到冲突数组位置时，只需要插入对应的链表即可。</p>
 <p>需要注意的是：JDK1.7 新来的Entry节点插入链表时，会插在链表的头部，因为HashMap的发明者认为，后插入的Entry被查找的可能性更大。 JDK1.8是将节点查下链表的尾部，因为需要遍历链表，计算长度，插入头部，需要移动链表</p>
 <p>HashMap中的table数组如下所示：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-837dac531ca01daa.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-837dac531ca01daa.png" loading="lazy"></p>
 <p>所以，HashMap是数组+链表+红黑树（在Java 8中为了优化Entry的查找性能，新加了红黑树部分）实现的。</p>
 <h3 id="Put方法原理"><a href="#Put方法原理" class="headerlink" title="Put方法原理"></a>Put方法原理</h3><p>调用hashMap.put(&quot;str&quot;, 1)，将会在HashMap的table数组中插入一个Key为“str”的元素，这时候需要我们用一个hash()函数来确定Entry的插入位置，而每种数据类型有自己的hashCode()函数，比如String类型的hashCode()函数如下所示：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="type">int</span> <span class="title function_">hashCode</span><span class="params">(<span class="type">byte</span>[] value)</span> &#123;</span><br><span class="line">    <span class="type">int</span> <span class="variable">h</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">    <span class="keyword">for</span> (<span class="type">byte</span> v : value) &#123;</span><br><span class="line">        h = <span class="number">31</span> * h + (v &amp; <span class="number">0xff</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> h;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
@@ -310,20 +311,20 @@
 
 <p>HashMap中的hash()函数是将得到hashcode做进一步处理，它将hashcode的高16位和低16位进行异或操作，这样做的目的是：在table的长度比较小的情况下，也能保证hashcode的高位参与到地址映射的计算当中，同时不会有太大的开销。</p>
 <p>综上所述：从hashcode计算得到table索引的计算过程如下所示：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-794edcdbedc4b7ec.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-794edcdbedc4b7ec.png" loading="lazy"></p>
 <p>put()方法的执行过程如下所示：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-7935c4c7f2335cb8.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-7935c4c7f2335cb8.png" loading="lazy"></p>
 <h3 id="HashMap的扩容机制"><a href="#HashMap的扩容机制" class="headerlink" title="HashMap的扩容机制"></a>HashMap的扩容机制</h3><p>在HashMap中有一下两个属性和扩容相关：</p>
 <figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> threshold;</span><br><span class="line"><span class="keyword">final</span> <span class="type">float</span> loadFactor;</span><br></pre></td></tr></table></figure>
 
 <p>其中threshold &#x3D; Length * loadFactor，Length表示table数组的长度（默认值是16），loadFactor为负载因子（默认值是0.75），阀值threshold表示当table数组中存储的元素超过这个阀值的时候，就需要扩容了。以默认长度16，和默认负载因子0.75为例，threshold &#x3D; 16 * 0.75 &#x3D; 12，即当table数组中存储的元素个数超过12个的时候，table数组就该扩容了。</p>
 <p>当然Java中的数组是无法自动扩容的，方法是使用一个新的数组代替已有的容量小的数组，然后将旧数组中的元素经过重新计算放到新数组中，那么怎样对旧元素进行重新映射呢？</p>
 <p>其实很简单，由于我们在扩容时，是使用2的幂扩展，即数组的长度扩大到原来的2倍, 4倍, 8倍…，因此在resize时(Length - 1)这部分相当于在高位新增一个或多个1bit，我们以扩大到原来的两倍为例说明：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-73d0dc1f00dea165.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-73d0dc1f00dea165.png" loading="lazy"></p>
 <p>(a)中n为16，(b)中n扩大到两倍为32，相当于(n - 1)这部分的高位多了一个1, 然后和原hash码作与操作，这样元素在数组中映射的位置要么不变，要不向后移动16个位置：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-4ebc4aafe7d6808e.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-4ebc4aafe7d6808e.png" loading="lazy"></p>
 <p>因此，我们在扩充HashMap的时候，只需要看看原来的hash值新增的那个bit是1还是0就好了，是0的话索引没变，是1的话索引变成“原索引+oldCap”，可以看看下图为16扩充为32的resize示意图：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-e9365ec251327548.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-e9365ec251327548.png" loading="lazy"></p>
 <p>这个设计确实非常的巧妙，既省去了重新计算hash值的时间，而且同时，由于新增的1bit是0还是1可以认为是随机的，因此resize的过程，均匀的把之前的冲突的节点分散到新的bucket了。这一块就是JDK1.8新增的优化点。有一点注意区别，JDK1.7中resize的时候，旧链表迁移新链表的时候，如果在新表的数组索引位置相同，则链表元素会倒置，但是从上图可以看出，JDK1.8不会倒置。</p>
 <h3 id="HashMap死锁形成原理"><a href="#HashMap死锁形成原理" class="headerlink" title="HashMap死锁形成原理"></a>HashMap死锁形成原理</h3><p>HashMap非线程安全，即任一时刻可以有多个线程同时写HashMap，可能会导致数据的不一致。如果需要满足线程安全，可以用 Collections的synchronizedMap方法使HashMap具有线程安全的能力，或者使用线程安全的ConcurrentHashMap。</p>
 <p>要理解HashMap死锁形成的原理，我们要对HashMap的resize里的transfer过程有所了解，transfer过程是将旧数组中的元素复制到新数组中，在Java 8之前，复制过程会导致链表倒置，这也是形成死锁的重要原因（Java 8中已经不会倒置），transfer的基本过程如下：</p>
@@ -337,7 +338,7 @@
 <p>在形成链表换以后再对HashMap进行Get操作时，就会形成死循环。</p>
 <p>在Java 8中对这里进行了优化，链表复制到新数组时并不会倒置，不会因为多个线程put导致死循环，但是还有很多弊端，比如数据丢失等，因此多线程情况下还是建议使用ConcurrentHashMap。</p>
 <h3 id="HashMap和Hashtable有什么区别"><a href="#HashMap和Hashtable有什么区别" class="headerlink" title="HashMap和Hashtable有什么区别"></a>HashMap和Hashtable有什么区别</h3><p>Java为数据结构中的映射定义了一个接口java.util.Map，此接口主要有四个常用的实现类，分别是HashMap、Hashtable、LinkedHashMap和TreeMap，类继承关系如下图所示：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-b4ca3403f4e917a4.png" loading="lazy"></p>
+<p><img src="/java/learn-java-001/14423059-b4ca3403f4e917a4.png" loading="lazy"></p>
 <p>Hashtable：Hashtable是遗留类，很多映射的常用功能与HashMap类似，不同的是它承自Dictionary类，并且是线程安全的，任一时间只有一个线程能写Hashtable，并发性不如ConcurrentHashMap，因为ConcurrentHashMap引入了分段锁。Hashtable不建议在新代码中使用，不需要线程安全的场合可以用HashMap替换，需要线程安全的场合可以用ConcurrentHashMap替换。</p>
 <h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><pre><code>1. 扩容是一个特别耗性能的操作，所以当程序员在使用HashMap的时候，估算map的大小，初始化的时候给一个大致的数值，避免map进行频繁的扩容。
 2. 负载因子是可以修改的，也可以大于1，但是建议不要轻易修改，除非情况非常特殊。
@@ -366,8 +367,8 @@
                 </a>
             </div>
             <div class="post-nav-item">
-                <a href="/java/2017-07-13-java%E7%BA%BF%E7%A8%8B%E6%B1%A0ThreadPoolExecutor%E7%9A%84%E5%B7%A5%E4%BD%9C%E5%8E%9F%E7%90%86%E4%B8%8E%E6%BA%90%E7%A0%81%E8%A7%A3%E8%AF%BB/" rel="next" title="java线程池ThreadPoolExecutor的工作原理与源码解读">
-                  java线程池ThreadPoolExecutor的工作原理与源码解读 <i class="fa fa-chevron-right"></i>
+                <a href="/java/learn-java-004/" rel="next" title="Java多线程学习">
+                  Java多线程学习 <i class="fa fa-chevron-right"></i>
                 </a>
             </div>
           </div>
