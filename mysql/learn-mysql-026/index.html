@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="介绍mysql中join的算法，以及优缺点">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-mysql的join算法">
+<meta property="og:url" content="https://theme-next.js.org/mysql/learn-mysql-026/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="介绍mysql中join的算法，以及优缺点">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406170445213.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406170513133.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406171000449.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406172917321.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406181313158.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406181815753.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406182000940.png">
+<meta property="article:published_time" content="2023-04-06T07:51:43.000Z">
+<meta property="article:modified_time" content="2023-04-06T14:25:13.217Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://theme-next.js.org/mysql/learn-mysql-026/image-20230406170445213.png">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/learn-mysql-026/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/learn-mysql-026/","path":"mysql/learn-mysql-026/","title":"mysql学习笔记-mysql的join算法"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-mysql的join算法 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">58</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#join%E8%AF%AD%E6%B3%95"><span class="nav-number">1.</span> <span class="nav-text">join语法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%95%B0%E6%8D%AE%E5%87%86%E5%A4%87"><span class="nav-number">1.1.</span> <span class="nav-text">数据准备</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%951"><span class="nav-number">1.2.</span> <span class="nav-text">语法1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%952"><span class="nav-number">1.3.</span> <span class="nav-text">语法2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E8%AF%AD%E6%B3%953"><span class="nav-number">1.4.</span> <span class="nav-text">语法3</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join%E7%AE%97%E6%B3%95"><span class="nav-number">2.</span> <span class="nav-text">join算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#simple-nested-loop-join"><span class="nav-number">2.1.</span> <span class="nav-text">simple nested loop join</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#index-nested-loop-join"><span class="nav-number">2.2.</span> <span class="nav-text">index nested loop join</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#block-nested-loop-join"><span class="nav-number">2.3.</span> <span class="nav-text">block nested loop join</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#block-join%E4%B8%8Esimple-join%E6%AF%94%E8%BE%83"><span class="nav-number">2.4.</span> <span class="nav-text">block join与simple join比较</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%87%A0%E7%A7%8Djoin%E7%AE%97%E6%B3%95%E5%BC%80%E9%94%80%E5%AF%B9%E6%AF%94"><span class="nav-number">2.5.</span> <span class="nav-text">几种join算法开销对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#BAK-join-batched-key-access-join"><span class="nav-number">2.6.</span> <span class="nav-text">BAK join(batched key access join)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#join%E7%AE%97%E6%B3%95%E6%80%BB%E7%BB%93"><span class="nav-number">3.</span> <span class="nav-text">join算法总结</span></a></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">9</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">18</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/learn-mysql-026/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-mysql的join算法 | 亦彤blog">
+      <meta itemprop="description" content="介绍mysql中join的算法，以及优缺点">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-mysql的join算法
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-06 15:51:43" itemprop="dateCreated datePublished" datetime="2023-04-06T15:51:43+08:00">2023-04-06</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">介绍mysql中join的算法，以及优缺点</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="join语法"><a href="#join语法" class="headerlink" title="join语法"></a>join语法</h2><h3 id="数据准备"><a href="#数据准备" class="headerlink" title="数据准备"></a>数据准备</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建join测试数据库</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> database db_join_test;</span><br><span class="line"><span class="comment">-- 创建join的表</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tbl_join_test_1(a <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span> <span class="keyword">primary</span> key, b <span class="type">int</span>);</span><br><span class="line"><span class="comment">-- 创建join的表</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tbl_join_test_2 <span class="keyword">like</span> tbl_join_test_1;</span><br><span class="line"><span class="comment">-- 创建数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl_join_test_1 <span class="keyword">values</span> (<span class="number">1</span>, <span class="number">1</span>), (<span class="number">2</span>, <span class="number">11</span>), (<span class="number">3</span>, <span class="number">12</span>), (<span class="number">5</span>, <span class="number">50</span>);</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl_join_test_2 <span class="keyword">values</span> (<span class="number">2</span>, <span class="number">2</span>);</span><br></pre></td></tr></table></figure>
+
+<h3 id="语法1"><a href="#语法1" class="headerlink" title="语法1"></a>语法1</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_join_test_1 <span class="keyword">as</span> a, tbl_join_test_2 <span class="keyword">as</span> b <span class="keyword">where</span> a.a <span class="operator">=</span> b.a;</span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="operator">|</span> a <span class="operator">|</span> b  <span class="operator">|</span> a <span class="operator">|</span> b <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="comment">-- explain分析</span></span><br><span class="line">mysql<span class="operator">&gt;</span> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_join_test_1 <span class="keyword">as</span> a, tbl_join_test_2 <span class="keyword">as</span> b <span class="keyword">where</span> a.a <span class="operator">=</span> b.a;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type <span class="operator">|</span> <span class="keyword">table</span> <span class="operator">|</span> partitions <span class="operator">|</span> type   <span class="operator">|</span> possible_keys <span class="operator">|</span> key     <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>              <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> SIMPLE      <span class="operator">|</span> b     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>     <span class="operator">|</span> <span class="keyword">ALL</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>       <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>           <span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> <span class="number">100.0</span>    <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> SIMPLE      <span class="operator">|</span> a     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>     <span class="operator">|</span> eq_ref <span class="operator">|</span> <span class="keyword">PRIMARY</span>       <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">4</span>       <span class="operator">|</span> db_join_test.b.a <span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> <span class="number">100.0</span>    <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="语法2"><a href="#语法2" class="headerlink" title="语法2"></a>语法2</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_join_test_1 <span class="keyword">as</span> a <span class="keyword">inner</span> <span class="keyword">join</span> tbl_join_test_2 <span class="keyword">as</span> b <span class="keyword">on</span> a.a <span class="operator">=</span> b.a;</span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="operator">|</span> a <span class="operator">|</span> b  <span class="operator">|</span> a <span class="operator">|</span> b <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="comment">-- explain分析</span></span><br><span class="line">mysql<span class="operator">&gt;</span> explain  <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_join_test_1 <span class="keyword">as</span> a <span class="keyword">inner</span> <span class="keyword">join</span> tbl_join_test_2 <span class="keyword">as</span> b <span class="keyword">on</span> a.a <span class="operator">=</span> b.a;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type <span class="operator">|</span> <span class="keyword">table</span> <span class="operator">|</span> partitions <span class="operator">|</span> type   <span class="operator">|</span> possible_keys <span class="operator">|</span> key     <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>              <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> SIMPLE      <span class="operator">|</span> b     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>     <span class="operator">|</span> <span class="keyword">ALL</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>       <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>           <span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> <span class="number">100.0</span>    <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> SIMPLE      <span class="operator">|</span> a     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>     <span class="operator">|</span> eq_ref <span class="operator">|</span> <span class="keyword">PRIMARY</span>       <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">4</span>       <span class="operator">|</span> db_join_test.b.a <span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> <span class="number">100.0</span>    <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<h3 id="语法3"><a href="#语法3" class="headerlink" title="语法3"></a>语法3</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_join_test_1 <span class="keyword">as</span> a <span class="keyword">join</span> tbl_join_test_2 <span class="keyword">as</span> b <span class="keyword">on</span> a.a <span class="operator">=</span> b.a;</span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="operator">|</span> a <span class="operator">|</span> b  <span class="operator">|</span> a <span class="operator">|</span> b <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+---+---+</span></span><br><span class="line"><span class="comment">-- explain分析</span></span><br><span class="line">mysql<span class="operator">&gt;</span> explain <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_join_test_1 <span class="keyword">as</span> a <span class="keyword">join</span> tbl_join_test_2 <span class="keyword">as</span> b <span class="keyword">on</span> a.a <span class="operator">=</span> b.a;</span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br><span class="line"><span class="operator">|</span> id <span class="operator">|</span> select_type <span class="operator">|</span> <span class="keyword">table</span> <span class="operator">|</span> partitions <span class="operator">|</span> type   <span class="operator">|</span> possible_keys <span class="operator">|</span> key     <span class="operator">|</span> key_len <span class="operator">|</span> <span class="keyword">ref</span>              <span class="operator">|</span> <span class="keyword">rows</span> <span class="operator">|</span> filtered <span class="operator">|</span> Extra  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> SIMPLE      <span class="operator">|</span> b     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>     <span class="operator">|</span> <span class="keyword">ALL</span>    <span class="operator">|</span> <span class="keyword">PRIMARY</span>       <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>           <span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> <span class="number">100.0</span>    <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>  <span class="operator">|</span> SIMPLE      <span class="operator">|</span> a     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>     <span class="operator">|</span> eq_ref <span class="operator">|</span> <span class="keyword">PRIMARY</span>       <span class="operator">|</span> <span class="keyword">PRIMARY</span> <span class="operator">|</span> <span class="number">4</span>       <span class="operator">|</span> db_join_test.b.a <span class="operator">|</span> <span class="number">1</span>    <span class="operator">|</span> <span class="number">100.0</span>    <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----+-------------+-------+------------+--------+---------------+---------+---------+------------------+------+----------+--------+</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>通过上面的explain可以得知，三种join语法在执行性能和效果上是一样的</p>
+</blockquote>
+<h2 id="join算法"><a href="#join算法" class="headerlink" title="join算法"></a>join算法</h2><h3 id="simple-nested-loop-join"><a href="#simple-nested-loop-join" class="headerlink" title="simple nested loop join"></a>simple nested loop join</h3><p>Simple nested loop join(简单嵌套循环链接)：可以理解成两个for循环，外循环走一次，内循环走n次(n等于外循环的次数)</p>
+<ul>
+<li>其算法伪代码如下:</li>
+</ul>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 扫描R表</span><br><span class="line">for each row r in R do</span><br><span class="line">  # 扫描S表</span><br><span class="line">  for each row s in s do</span><br><span class="line">  # 如果r和s满足join的条件</span><br><span class="line">  if r and s satisfy the join condition</span><br><span class="line">     # 输出结果集</span><br><span class="line">     then output the tuple</span><br></pre></td></tr></table></figure>
+
+<p>For each row r in R do # 扫􏰀R表 Foreach row s in S do # 扫􏰀S表</p>
+<p>If r and s satisfy the join condition # 如果r和s满足join条件 Then output the tuple # 那就输出结果集</p>
+<img src="/mysql/learn-mysql-026/image-20230406170445213.png" alt="image-20230406170445213" style="zoom:50%;">
+
+<blockquote>
+<ol>
+<li>R表扫描了1次</li>
+<li>S表扫描了count(R)次</li>
+<li>该方法相当于笛卡尔积，实际上数据库不会使用该算法</li>
+</ol>
+</blockquote>
+<h3 id="index-nested-loop-join"><a href="#index-nested-loop-join" class="headerlink" title="index nested loop join"></a>index nested loop join</h3><p>index nested loop join(索引嵌套循环链接)：外表扫描一次，内表不会直接扫描，而是查找内表相应的索引的方式，和外表的记录进行匹配</p>
+<ul>
+<li><p>算法伪代码如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"># 扫描R表</span><br><span class="line">for each row r in R do</span><br><span class="line">	# 查询S表的索引(固定3～4次IO，B+tree的高度)</span><br><span class="line">	loopup s in s index</span><br><span class="line">	  # 如果匹配了索引s</span><br><span class="line">		if found s == r</span><br><span class="line">			# 输出结果集</span><br><span class="line">			then output the tuple</span><br></pre></td></tr></table></figure>
+<img src="/mysql/learn-mysql-026/image-20230406170513133.png" alt="image-20230406170445213" style="zoom:50%;">
+
+<ul>
+<li><p>具体的执行过程：</p>
+<ol>
+<li>从表R中读入一行数据r</li>
+<li>从数据行r中，取出join字段到表S的索引上查询</li>
+<li>取出S中满足条件的行，根r组成1行，作为结果集的一部分</li>
+<li>重复执行1到3，直到R表的末尾，循环结束</li>
+</ol>
+</li>
+<li><p>优化思路</p>
+<p>主要是为了减少内层表数据的匹配次数，简单来说index nested loop join就是通过外层表匹配条件，直接与内层表索引进行匹配，避免了和内层表的每条记录进行比较，极大了减少了对内层表的匹配次数，从原来的匹配次数&#x3D;外层表行数 * 内层表行数，变成了外层表行数 * 内层表索引的高度，极大的提升了join的性能。</p>
+</li>
+</ul>
+<blockquote>
+<ol>
+<li>S表上有索引，R表上可以没有索引</li>
+<li>扫描R表，将R表的记录和S表的索引进行匹配</li>
+<li>优化器倾向使用记录数少的表作为外表(又称驱动表)</li>
+<li>如果数据量大，index nested loop join的成本也是很高的，尤其是在二级索引的情况下，需要大量的回表操作</li>
+</ol>
+</blockquote>
+<img src="/mysql/learn-mysql-026/image-20230406171000449.png" alt="image-20230406171000449" style="zoom:50%;">
+
+<blockquote>
+<p>注意：</p>
+<p>使用index nested loop join算法的前提是匹配的字段必须建立了索引</p>
+</blockquote>
+</li>
+</ul>
+<h3 id="block-nested-loop-join"><a href="#block-nested-loop-join" class="headerlink" title="block nested loop join"></a>block nested loop join</h3><p>block nested loop join(缓存块嵌套循环链接)：将外表中需要join匹配的列(不是完整的记录)，暂时保存到一块内存(join buffer)中，让后将这块内存中的数据和内表进行匹配，内表只扫描一次，可用于链接是all，index，range的类型</p>
+<ul>
+<li><p>其算法伪代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"># 扫描R表</span><br><span class="line">for each row r in R do</span><br><span class="line">	# 将部分或者全部R记录保存到join buffer中，记为p</span><br><span class="line">	store used columns as p from R in join buffer</span><br><span class="line">	for each tuple in S do</span><br><span class="line">		# p与s满足join条件</span><br><span class="line">	  if p and s satisfy the join condition</span><br><span class="line">	  	# 输出结果集</span><br><span class="line">	  	then ouput the tuple</span><br></pre></td></tr></table></figure></li>
+</ul>
+<img src="/mysql/learn-mysql-026/image-20230406172917321.png" alt="image-20230406172917321" style="zoom:50%;">
+
+<ul>
+<li>具体的执行过程：<ol>
+<li>把表R的数据读入线程内存join_buffer中</li>
+<li>扫描S表，把S表的每一行取出来，根join_buffer中的数据进行比较，满足join的，作为结果集的一部分返回</li>
+<li>如果R表的数据太大，join_buffer一次放不下，会分段处理，一块一块的加载到内存</li>
+<li>加载R表的一部分数据到join_buffer，执行1，2后，在清空join_buffer，在继续扫描R表，进行1，2操作</li>
+</ol>
+</li>
+</ul>
+<blockquote>
+<p>block nested loop join与simple nested loop join相比，多了一个join buffer</p>
+</blockquote>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">mysql&gt; show variables like &#x27;%join%buffer%&#x27;;</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| Variable_name    | Value     |</span><br><span class="line">+------------------+-----------+</span><br><span class="line">| join_buffer_size | 134217728 |</span><br><span class="line">+------------------+-----------+</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>128m, 默认256k</p>
+<p>join buffer用的不是buffer pool中的内存，而是线程级别的内存，可以通过explian查看执行计划，通过join字段的大小，来预估join_buffer_size的大小</p>
+<p>注意：</p>
+<p>增大join_buffer_size优化的前提是没有使用index，如果使用了index，根本不会使用block nested join算法</p>
+</blockquote>
+<h3 id="block-join与simple-join比较"><a href="#block-join与simple-join比较" class="headerlink" title="block join与simple join比较"></a>block join与simple join比较</h3><blockquote>
+<p>外表A:abc</p>
+<p>内表B:1234</p>
+</blockquote>
+<img src="/mysql/learn-mysql-026/image-20230406181313158.png" alt="image-20230406181313158" style="zoom:50%;">
+
+<table>
+<thead>
+<tr>
+<th>join算法</th>
+<th>外表A扫描次数</th>
+<th>内表B的扫描次数</th>
+<th>比较次数</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>simple</td>
+<td>1</td>
+<td>3</td>
+<td>12</td>
+</tr>
+<tr>
+<td>block</td>
+<td>1</td>
+<td>1</td>
+<td>12</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>这里作为演示，将A表的数据全都放入了join buffer中，如果join buffer一次性放不下A表的数据，那么B表还是会被扫描多次</p>
+<p>假设A表中有1000w条数据，join buffer能存放10w条数据，那么B表需要被扫描100次</p>
+</blockquote>
+<h3 id="几种join算法开销对比"><a href="#几种join算法开销对比" class="headerlink" title="几种join算法开销对比"></a>几种join算法开销对比</h3><img src="/mysql/learn-mysql-026/image-20230406181815753.png" alt="image-20230406181815753" style="zoom:50%;">
+
+<h3 id="BAK-join-batched-key-access-join"><a href="#BAK-join-batched-key-access-join" class="headerlink" title="BAK join(batched key access join)"></a>BAK join(batched key access join)</h3><img src="/mysql/learn-mysql-026/image-20230406182000940.png" alt="image-20230406182000940" style="zoom:50%;">
+
+<blockquote>
+<p>通过上图可以知道，在index join的基础上，增加MRR的功能，先对索引进行排序，然后批量获取聚集索引中的记录 由于使用了MRR的功能，所以默认该join算法也是不会被使用到的</p>
+<p>set optimizer_switch&#x3D;&#39;mrr_cost_based&#x3D;off&#39;;</p>
+</blockquote>
+<h2 id="join算法总结"><a href="#join算法总结" class="headerlink" title="join算法总结"></a>join算法总结</h2><p>不论是index nested loop join还是block nested loop join都是在simple nested loop join的算法基础上进行优化的。</p>
+<p>index nested loop join是通过索引的机制减少内层表的循环匹配次数来达到优化效果的。</p>
+<blockquote>
+<p>个人理解：</p>
+<p>eg： select * from tbl_join_test_1 as a, tbl_join_test_2 as b where a.a &#x3D; b.a; # b表的a列添加了索引</p>
+<p>index join匹配过程，扫描外表a中的每一条记录r的a列，去内表b中查询，而simple join的匹配是扫描外表a中的每一条记录r，再去扫描内表b的每一条记录i，比较r的a列和i的a列是否相等</p>
+<p>所以说，index是优化了内层表的循环次数</p>
+</blockquote>
+<p>block nested loop join是通过一次缓存多条数据批量匹配的方式来减少外层表的IO次数，同时也减少了内层表的扫描次数。</p>
+<blockquote>
+<ol>
+<li>永远用小结果集驱动大结果集。(其本质就是检查外层表的数据量)</li>
+<li>为匹配字段增加索引(减少内层表的循环匹配次数)</li>
+<li>增大join_buffer_size大小，一次性缓存的数据越多，那么内存表扫描次数就越少</li>
+<li>减少不必要的字段查询，字段越少，join buffer所缓存的数据就越多</li>
+</ol>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-025/" rel="prev" title="mysql学习笔记-mysql空间清除方法">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-mysql空间清除方法
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>
