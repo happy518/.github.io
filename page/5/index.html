@@ -160,7 +160,7 @@
       </div>
       <div class="site-state-item site-state-categories">
           <a href="/categories/">
-        <span class="site-state-item-count">11</span>
+        <span class="site-state-item-count">10</span>
         <span class="site-state-item-name">分类</span></a>
       </div>
       <div class="site-state-item site-state-tags">
@@ -205,7 +205,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/2018-04-11%E7%BE%8E%E5%9B%A2%E9%9D%A2%E8%AF%95%E7%9C%9F%E9%A2%98%E4%B9%8B%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8BOOM%EF%BC%8C%E8%BF%9B%E7%A8%8B%E9%87%8C%E7%9A%84%E5%85%B6%E4%BB%96%E7%BA%BF%E7%A8%8B%E8%BF%98%E8%83%BD%E8%BF%90%E8%A1%8C%E5%90%97%EF%BC%9F/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-011/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -223,7 +223,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/2018-04-11%E7%BE%8E%E5%9B%A2%E9%9D%A2%E8%AF%95%E7%9C%9F%E9%A2%98%E4%B9%8B%E4%B8%80%E4%B8%AA%E7%BA%BF%E7%A8%8BOOM%EF%BC%8C%E8%BF%9B%E7%A8%8B%E9%87%8C%E7%9A%84%E5%85%B6%E4%BB%96%E7%BA%BF%E7%A8%8B%E8%BF%98%E8%83%BD%E8%BF%90%E8%A1%8C%E5%90%97%EF%BC%9F/" class="post-title-link" itemprop="url">美团面试真题之一个线程OOM，进程里的其他线程还能运行吗？</a>
+          <a href="/jvm/learn-jvm-011/" class="post-title-link" itemprop="url">美团面试真题之一个线程OOM，进程里的其他线程还能运行吗？</a>
         </h2>
 
         <div class="post-meta-container">
@@ -234,7 +234,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-11 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-11T00:00:00+08:00">2018-04-11</time>
+      <time title="创建时间：2018-04-11 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-11T15:51:43+08:00">2018-04-11</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -256,32 +256,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>一个进程有3个线程，如果一个线程抛出OOM，其他两个线程还能运行吗？ </p>
-<blockquote>
-<p>答案是还能运行</p>
-</blockquote>
-<p>不瞒大家说，正在面试中，我遇到这一题，我估计也会答错，因为我初看这一题的时候，觉得是在考察JVM的内存结构，我第一反应是OOM常见情况堆内存溢出，也就是下面的这种异常</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">java.lang.OutOfMemoryError：java heap space</span><br></pre></td></tr></table></figure>
-
-<p>多线程中栈与堆是公有还是私有的</p>
-<figure class="highlight txt"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">在多线程环境下，每个线程拥有一个栈和一个程序计数器，栈和程序计数器用来保存线程执行历史和线程执行状态，是线程私有的，堆是由用一个进程内多个线程共享的。</span><br></pre></td></tr></table></figure>
-
-<p>测试代码伪代码如下：</p>
-<p>一个线程去构造堆内存溢出，每隔ls申请一次堆内存。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">package</span> com.ypb.oom;</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> com.google.common.collect.Lists;</span><br><span class="line"><span class="keyword">import</span> java.time.LocalDateTime;</span><br><span class="line"><span class="keyword">import</span> java.time.format.DateTimeFormatter;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.Executors;</span><br><span class="line"><span class="keyword">import</span> java.util.concurrent.TimeUnit;</span><br><span class="line"><span class="keyword">import</span> lombok.extern.slf4j.Slf4j;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@className</span> ThreadOOMTest</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@description</span> 测试一个线程出现OOM，同进程下的其他线程还能继续运行吗？</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@author</span> yangpengbing</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@date</span> 22:12 2018/12/19</span></span><br><span class="line"><span class="comment"> * <span class="doctag">@version</span> 1.0.0</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="meta">@Slf4j</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">ThreadOOMTest</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">DateTimeFormatter</span> <span class="variable">formatter</span> <span class="operator">=</span> DateTimeFormatter.ofPattern(<span class="string">&quot;yyyy-MM-dd HH:mm:ss&quot;</span>);</span><br><span class="line">        <span class="type">int</span> <span class="variable">m</span> <span class="operator">=</span> <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">        <span class="type">String</span> <span class="variable">name</span> <span class="operator">=</span> <span class="string">&quot;oom-thread&quot;</span>;</span><br><span class="line"></span><br><span class="line">	    <span class="keyword">new</span> <span class="title class_">Thread</span>(() -&gt; &#123;</span><br><span class="line">    	    List&lt;<span class="type">byte</span>[]&gt; bytes = Lists.newArrayList();</span><br><span class="line">    	    <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">    		    show(format(formatter));</span><br><span class="line">    		    </span><br><span class="line">	    	    bytes.add(<span class="keyword">new</span> <span class="title class_">byte</span>[m]);</span><br><span class="line">	    	    </span><br><span class="line">		        sleep();</span><br><span class="line">    	    &#125;</span><br><span class="line">	    &#125;, name).start();</span><br><span class="line"></span><br><span class="line">        name = <span class="string">&quot;not-oom-thread&quot;</span>;</span><br><span class="line">        <span class="keyword">new</span> <span class="title class_">Thread</span>(()-&gt;&#123;</span><br><span class="line">            <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">                show(format(formatter));</span><br><span class="line">	            sleep();</span><br><span class="line">            &#125;</span><br><span class="line">        &#125;, name).start();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 控制台输出时间和线程名称</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> msg</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">show</span><span class="params">(String msg)</span> &#123;</span><br><span class="line">        System.out.println(msg);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 线程休眠1s</span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">sleep</span><span class="params">()</span> &#123;</span><br><span class="line">    	<span class="keyword">try</span> &#123;</span><br><span class="line">    	    TimeUnit.SECONDS.sleep(<span class="number">1L</span>);</span><br><span class="line">    	&#125; <span class="keyword">catch</span> (Exception e) &#123;</span><br><span class="line">    	    e.printStackTrace();</span><br><span class="line">    	&#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">/**</span></span><br><span class="line"><span class="comment">     * 格式化输出的信息</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@param</span> formatter</span></span><br><span class="line"><span class="comment">     * <span class="doctag">@return</span></span></span><br><span class="line"><span class="comment">     */</span></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> String <span class="title function_">format</span><span class="params">(DateTimeFormatter formatter)</span> &#123;</span><br><span class="line">        <span class="keyword">return</span> String.format(<span class="string">&quot;data &#123;%s&#125;, thread &#123;%s&#125;&quot;</span>, LocalDateTime.now().format(formatter), Thread.currentThread().getName());</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>控制台输出的结果：</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-30f285d5b4b1f729.png" loading="lazy"></p>
-<p>从日志中可以看出，线程oom-thread线程溢出了，其他线程not-oom-thread线程还在执行中。使用jvisualvm监控下。</p>
-<p>设置的jvm参数：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">-Xmx32m -Xms32m -XX:+UseConcMarkSweepGC -XX:+PrintGCDetails -verbose:gc -XX:+PrintGCDateStamps -Xloggc:E:/gc.log</span><br></pre></td></tr></table></figure>
-
-<p>1<a target="_blank" rel="noopener" href="https://upload-images.jianshu.io/upload_images/14423059-a8f1bf114c7a42d3.png"></a></p>
-<p>分析gc日志，可以看出老年代的内存使用率达到99.79%。内存使用率已经满了。出现内存溢出。</p>
-<p><img src="https://upload-images.jianshu.io/upload_images/14423059-561c9ae2e6106e2d.png" loading="lazy"></p>
-<p>上面是jvisualvm监控堆内存变化的结果，注意看图上，抛出OOM的时间在14:56:54左右，重点关注这个时间点左右的曲线变化。发现堆使用的数量突然间急速下滑，这代表这一点，当一个线程抛出OOM异常后，它说占用的内存空间会全部被释放掉，从而不会影响其他线程的运行。</p>
-<p>这个例子只是演示了堆内存溢出的情况，如果是栈内存溢出，结论也是一样的。</p>
-
+          <p>一个线程OOM，进程里的其他线程还能运行吗？</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/jvm/learn-jvm-011/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -307,7 +290,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-09-JVM%E7%B3%BB%E5%88%97%E4%B9%8B%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96java%20gc/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-009/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -325,7 +308,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-09-JVM%E7%B3%BB%E5%88%97%E4%B9%8B%E5%A6%82%E4%BD%95%E4%BC%98%E5%8C%96java%20gc/" class="post-title-link" itemprop="url">JVM系列之如何优化java gc</a>
+          <a href="/jvm/learn-jvm-009/" class="post-title-link" itemprop="url">JVM系列之如何优化java gc</a>
         </h2>
 
         <div class="post-meta-container">
@@ -336,7 +319,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-09 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-09T00:00:00+08:00">2018-04-09</time>
+      <time title="创建时间：2018-04-09 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-09T15:51:43+08:00">2018-04-09</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -358,296 +341,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>从前面的内容，我们了解到不同的GC算法的执行过程，GC的工作原理，新生代和老年代的概念，JDK7中你需要了解的5种GC类型以及每一种GC对性能的影响。这篇文章基于实际生产环境中的案例，介绍几个GC优化的最佳参数设置。</p>
-<h1 id="GC优化是必要的吗"><a href="#GC优化是必要的吗" class="headerlink" title="GC优化是必要的吗?"></a>GC优化是必要的吗?</h1><p>或者更准确的说，GC优化对java基础服务来说是必要的吗？答案是否定的，事实上GC优化对java基础服务来说在有些场合是可以省去的，但前提是这些正在运行的java系统，必须包含以下参数或者行为：</p>
-<ul>
-<li>内存大小已经通过-Xms和-Xmx参数指定过。</li>
-<li>运行在server模式下(使用-server参数)</li>
-<li>系统中没有残留超时日志之类的错误日志。</li>
-</ul>
-<p>换句话说，如果你在运行时没有手动设置内存大小并且打印出了过多的超时日志，那你就需要对系统进行GC优化。</p>
-<p>不过你需要时刻谨记一句话：GC tuning is the last task to be done</p>
-<p>现在来想一想GC优化的最根本原因，垃圾收集器的工作原理就是清除java创建的对象，垃圾收集器需要清理的对象数量以及要执行的gc数量均取决于已创建的对象数量，因此，为了使你的系统在gc上表现良好，首先需要减少创建对象的数量。</p>
-<p>俗话说&quot;冰冻三尺非一日之寒&quot;, 我们在编码时要首先把下面这些小细节做好，否则一些琐碎的不良代码累积起来将gc的工作变得繁重而难于管理：</p>
-<ul>
-<li>使用StringBuilder或者StringBuffer来代替Stirng</li>
-<li>尽量少输出日志</li>
-</ul>
-<p>尽管如此，仍然会有我们束手无策的情况，xmlh和json解析过程往往占用了最多的内存，即使我们已经尽可能得减少用String，少输出日志，仍然会有大量的临时内存(大约10-100MB)被用来解析xml和json文件，但我们有很难弃用xml和json，在此只需要知道这一过程会占用大量内存即可。</p>
-<p>如果在经过几次重复的优化后应用程序的内存占用情况有所改善，那么就可以启动GC优化了</p>
-<p>GC优化的两个目的：</p>
-<ul>
-<li><ol>
-<li>进入老年代的对象数量降到最低</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>减少Full的执行时间</li>
-</ol>
-</li>
-</ul>
-<h2 id="将进入老年代的对象数量降到最低"><a href="#将进入老年代的对象数量降到最低" class="headerlink" title="将进入老年代的对象数量降到最低"></a>将进入老年代的对象数量降到最低</h2><p>除了可以在JDK7以及更高版本中使用G1收集器以外，其他分代GC都是有Oracle JVM提供的，关于分代GC，就是对象在Eden区被创建，随后被转移到Survivor区，在此之后剩余的对象会被转入到老年代，也有一些对象由于占用内存过大，在Eden区被创建后直接被传入老年代，老年代GC相对来说比新生代GC更耗时，因此，减少进入老年代的对象数量可以显著降低Full GC的频率，你可能以为减少进入老年代的对象数量意味着把它们留在新生代，事实正好相反，新生代内存的大小是可以调节的。</p>
-<h2 id="降低Full-GC的时间"><a href="#降低Full-GC的时间" class="headerlink" title="降低Full GC的时间"></a>降低Full GC的时间</h2><p>Full GC的执行时间比Minor GC要长的多，因此，如果在Full GC上花费过多的时间(超过1s)，将可能出现超时错误。</p>
-<ul>
-<li>如果通过减少老年代内存来减少Full GC时间，可能会引起OutOfMemoryError或者导致Full GC的频率升高。</li>
-<li>另外，如果通过增加老年代内存来降低Full GC的频率，Full GC的时间可能因此增加。</li>
-</ul>
-<p>因此，你需要把老年代的大小设置成一个合适的值。</p>
-<h1 id="影响GC性能的参数"><a href="#影响GC性能的参数" class="headerlink" title="影响GC性能的参数"></a>影响GC性能的参数</h1><p>不要幻想着&quot;如果有人用他设置的GC参数获取了不错的性能，我们为什么不复制他的参数设置呢？&quot;，因为对于不同的web服务，他们创建对象的大小和生命周期都不相同。</p>
-<p>举一个简单的例子：如果一个任务的执行条件是A、B、C、D和E，另外一个完全相同的任务执行条件只有A和B，那么那一个任务执行速度更快呢，作为常识来讲，答案很明显是后者。</p>
-<p>Java GC参数的设置也是这个道理，设置好几个参数并不会提升GC的执行速度，反而会是它变得更慢，GC优化的基本原则就是将不同的GC参数应用到两个及以上的服务器上然后比较它们的性能，然后将那些被证明可以提高性能或者减少GC执行时间的参数应用到最终的工作服务器上。</p>
-<p>下面这张表展示了内存大小相关且会影响GC性能的GC参数</p>
-<table>
-<thead>
-<tr>
-<th align="right">类型</th>
-<th align="right">参数</th>
-<th>描述</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="right">堆内存大小</td>
-<td align="right">-Xms</td>
-<td>启动JVM时堆内存的大小</td>
-</tr>
-<tr>
-<td align="right"></td>
-<td align="right">-Xmx</td>
-<td>堆内存的最大限制</td>
-</tr>
-<tr>
-<td align="right">新生代空间大小</td>
-<td align="right">-XX:NewRatio</td>
-<td>新生代和老年代的内存比</td>
-</tr>
-<tr>
-<td align="right"></td>
-<td align="right">-XX:NewSize</td>
-<td>新生代内存大小</td>
-</tr>
-<tr>
-<td align="right"></td>
-<td align="right">-XX:SurvivorRatio</td>
-<td>Eden区和Survivor区的内存比</td>
-</tr>
-</tbody></table>
-<p>在进行GC优化时最常用的参数是-Xms，-Xmx和-XX:NewRatio. -Xms和-Xmx参数通常是必须的。所以NewRatio的值将对GC性能产生重要的影响。</p>
-<p>有些人可能会问如何设置永久代内存大小，你可以用-XX:PermSize和-XX:MaxPermSize参数来进行设置，但是要记住，只有当出现OutOfMemoryError错误时你才需要去设置永久代内存。</p>
-<p>还有一个会影响GC性能的因素是垃圾收集器的类型，下面展示了关于GC类型的可选参数(基于JDK 6.0)</p>
-<table>
-<thead>
-<tr>
-<th align="left">GC类型</th>
-<th align="left">参数</th>
-<th align="left">备注</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Serial GC</td>
-<td align="left">-XX:+UseSerialGC</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">Parallel GC</td>
-<td align="left">-XX:+UseParallel  -XX:ParallelGCThreads&#x3D;value</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">Parallel Compacting GC</td>
-<td align="left">-XX:+UseParallelOldGC</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">CMS GC</td>
-<td align="left">-XX:+UseConcMarkSweepGC  -XX:+UseParNewGC  -XX:+CMSParallelRemarkEnabled  -XX:CMSInitiatingOccupancyFraction&#x3D;value  -XX:+UseCMSInitiatingOccupancyOnly</td>
-<td align="left"></td>
-</tr>
-<tr>
-<td align="left">G1</td>
-<td align="left">-XX:+UnlockExperimentalVMOptions   -XX:+UseG1GC</td>
-<td align="left">在JDK6中这两个参数必须配合使用</td>
-</tr>
-</tbody></table>
-<p>除了G1收集器外，可以通过设置上表中每种类型第一行的参数来切换GC类型，最常见的非侵入式GC就是Serial GC，它针对客户端系统进行了特别的优化。</p>
-<p>会影响GC性能的参数还有很多，但是上面的参数会带来最显著的效果，请切记，设置太多的参数并不一定会提升GC的性能。</p>
-<h1 id="GC优化的过程"><a href="#GC优化的过程" class="headerlink" title="GC优化的过程"></a>GC优化的过程</h1><p>GC优化过程和大多数常见的提升性能的过程类似，下面是使用的流程：</p>
-<ol>
-<li>监控GC状态</li>
-</ol>
-<p>你需要监控GC从而检查系统中运行的GC的各种状态。</p>
-<ol start="2">
-<li>分析监控结果后决定是否需要优化GC</li>
-</ol>
-<p>在检查GC状态后，你需要分析监控结果并决定是否需要进行GC优化，如果分析结果显示运行GC的时间只要0.1-0.3秒，那么就不需要把时间浪费在GC优化上，但如果运行GC的时间达到1-3秒，甚至大于10秒，那么GC优化将是很有必要的。</p>
-<p>但是，如果你已经分配了大约10G内存给java，并且这些内存无法省下，那么就无法进行GC优化了，在进行GC优化之前，你需要考虑为什么你需要分配这么大的内存空间，如果你分配了1G或者2G大小的内存并且出现了OutOfMemoryError，那你就应该执行堆转储(heap dump)来消除导致异常的原因。</p>
-<blockquote>
-<p>注意：<br>堆转储(heap dump)是一个用来检查java内存中的对象和数据的内存文件。该文件可以通过通过执行JDK中的jmap命令来创建，在创建文件的过程中，所有java程序都将暂停，因此，不要再系统执行过程中创建该文件.</p>
-</blockquote>
-<ol start="3">
-<li>设置GC类型&#x2F;内存大小</li>
-</ol>
-<p>如果你决定要进行GC优化，那么你需要选择一个GC类型并且为它设置内存大小，此时如果你有多个服务器，请如上文提到的那样，在每台服务器上设置不同的GC参数并分析它们的区别。</p>
-<ol start="4">
-<li>分析结果</li>
-</ol>
-<p>在设置完GC参数后就可以开始收集数据，请在收集至少24小时后再进行结果分析，如果你足够幸运，你可能会找到系统的最佳GC参数，如若不然，你还需要分析输出日志并检查分配的内存，然后需要通过不断GC类型&#x2F;内存大小来找到系统的最佳参数。</p>
-<ol start="5">
-<li>如果结果令人满意，将参数应用到所有服务器上并结束GC优化</li>
-</ol>
-<p>如果GC优化的结果令人满意，就可以将参数应用到所有服务器上，并停止GC优化。</p>
-<p>下面详细阐述每一步所做的具体工作。</p>
-<h1 id="监控GC状态并分析结果"><a href="#监控GC状态并分析结果" class="headerlink" title="监控GC状态并分析结果"></a>监控GC状态并分析结果</h1><p>在运行中的web应用服务器，上查看GC状态的最佳方式就是使用jstat命令。前面已经介绍过jstat命令，</p>
-<p>下面的例子展示了某个还没有执行GC优化的jvm的状态(虽然它并不是运行服务器)</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">$ jstat -gcutil 21719 1s</span><br><span class="line">S0    S1    E    O    P    YGC    YGCT    FGC    FGCT GCT</span><br><span class="line">48.66 0.00 48.10 49.70 77.45 3428 172.623 3 59.050 231.673</span><br><span class="line">48.66 0.00 48.10 49.70 77.45 3428 172.623 3 59.050 231.673</span><br></pre></td></tr></table></figure>
-<p>我们先看一下YGC(从应用程序启动到采样时发生Young GC的次数)和YGCT(从应用程序启动采样时Young GC所用的时间(单位秒)), 计算YGCT&#x2F;YGC会得出，平均每次新生代的GC耗时50ms, 这是一个很小的数字，通过这个结果可以看出，我们大可不必关注新生代GC对GC性能的影响。</p>
-<p>现在来看一下FGC(从应用程序启动到采样时发生Full GC的次数)和FGCT(从应用程序启动到采样时Full GC所用的时间(单位秒))，计算FGCT&#x2F;FGC会得出，平均每次老年代的GC耗时19.86s，有可能是执行了三次Full GC，每次耗时19.68s，也可能是有两次只花了1s，另外花了58s。不管是哪一种情况，GC优化都是很有必要的。</p>
-<p>使用jstat命令可以很容易地查看GC状态，但是分析GC的最佳方式是加上 -verbosegc参数来生成日志。在之前的文章中笔者已经解释了如何分析这些日志。HPJmeter是比较常用的的用于分析-verbosegc生成的日志的工具，它简单易用，使用HPJmeter可以很容易地查看GC执行时间以及GC发生频率。</p>
-<p>此外，如果GC执行时间满足下列所有条件，就没有必要进行GC优化了：</p>
-<ul>
-<li>Minor GC执行非常迅速(50ms以内)</li>
-<li>Minor GC没有频繁执行(大约10s执行一次)</li>
-<li>Full GC执行非常迅速(1s以内)</li>
-<li>Full GC没有频繁执行(大约10min执行一次)</li>
-</ul>
-<p>括号中的数字并不是绝对的，他们也随着服务的状态而变化。有些服务可能要求一次Full GC在0.9s以内，而有些则会放得更宽一些，因此，对于不同的服务。需要按照不同的标准考虑是否需要执行GC优化。</p>
-<p>当检测GC状态时，不能只查看Minor GC和Full GC的时间，还必须要关注GC执行的次数，如果新生代空间太小，Minor GC会非常频繁地执行(有时每秒执行一次，甚至更多)，此外。传入老年代的对象数目也会上升，从而导致Full GC的频率升高，因此，在执行jstat命令时，请使用gccapacity参数来查看具体占用了多少空间。</p>
-<h1 id="设置GC类型-x2F-内存大小"><a href="#设置GC类型-x2F-内存大小" class="headerlink" title="设置GC类型&#x2F;内存大小"></a>设置GC类型&#x2F;内存大小</h1><h2 id="设置GC类型"><a href="#设置GC类型" class="headerlink" title="设置GC类型"></a>设置GC类型</h2><p>JVM有5种垃圾收集器，但是在JDK7以前的版本中，你只能在Parallel GC，Parallel Compacting GC和CMS GC之中选择。至于具体选择哪个，则没有具体的的原则和规则。</p>
-<p>既然这样的话，我们如何来选择GC呢？最好的方法是把三种都用上，但是有一点必须明确CMS GC通常比其他并行(Parallel) GC都要快(这是因为CMS GC是并发的GC)，如果确实如此，那只选择CMS GC优化就可以了，不过CMS GC也总是更快，当出现Concurrent mode failure时，CMS GC就会比并行GC更慢了。</p>
-<ul>
-<li>Concurrent mode failure</li>
-</ul>
-<p>现在我们来深入地了解一下concurrent mode failure。</p>
-<p>并行GC和CMS GC的最大的区别在于并行GC采用&quot;标记-整理&quot;(Mark-Compact)算法而CMS GC采用&quot;标记-清除&quot;(Mark-Sweep)算法，compact步骤就是通过移动内存来消除内存碎片，从而消除分配内存的内存之间的空白区域。</p>
-<p>对于并行GC来说，无论何时执行Full GC。都会进行Compact工作，这消耗了太多时间，不过在执行完Full GC后，下次分配内存将会变得更快(因为执行顺序分配相邻的内存)。</p>
-<p>相反，CMS GC没有compact的过程，因此CMS GC运行速度更快，但是也是由于没有整理内存，在进行磁盘清理之前，内存中会存在很多零碎的空白区域，这也导致没有足够的空间分配给大对象，例如，在老年代还有300M可用的空间，但是连一个10M的对象都没有办法被顺序存储在老年代中，在这种情况下，会报出&quot;concurrent mode failure&quot;的warning，然后系统执行compact操作，但是CMS GC在这种情况下执行的compact操作耗时要比并行GC高很多，并且还会导致另外一个问题，关于“concurrent mode failure”的详细说明，可用参考Oracle工程师撰写的 <span class="exturl" data-url="aHR0cHM6Ly9ibG9ncy5vcmFjbGUuY29tL3Bvb25hbS91bmRlcnN0YW5kaW5nLWNtcy1nYy1sb2dz">Understanding CMS GC Logs<i class="fa fa-external-link-alt"></i></span></p>
-<p>综上所述，你需要根据你的系统情况为其选择一个最合适的GC类型。</p>
-<p>每个系统都有最合适它的GC类型等着你去寻找，如果你有6台服务器，我建议你每两台服务器设置相同的参数，然后加上-verbosegc参数再分析结果。</p>
-<h2 id="设置内存大小"><a href="#设置内存大小" class="headerlink" title="设置内存大小"></a>设置内存大小</h2><p>下面展示了内存大小，GC运行次数和GC运行时间之间的关系；</p>
-<ul>
-<li>大内存空间</li>
-</ul>
-<ol>
-<li>减少GC的次数</li>
-<li>提高了GC的运行时间</li>
-</ol>
-<ul>
-<li>小内存空间</li>
-</ul>
-<ol>
-<li>增多了GC的次数</li>
-<li>降低了GC的运行时间</li>
-</ol>
-<p>关于如何设置内存的大小，没有一个标准的答案，如果服务器资源充足并且Full GC能在1s内完成，把内存设置为10GB也是可以的，但是大部分服务器并不处于这种状态中，当内存设置为10G时，Full GC会耗时10-30s，具体的时间自然与对象的大小有关。</p>
-<p>既然如此，我们该如何设置内存大小呢，通常我推荐设为500M，这里不是说你要通过-Xms500M和-Xmx500M参数来设置WAS内存，根据GC优化之前的状态，如果Full GC后还剩余300M的空间，那么把内存设置为1G是一个不错的选择(300M(默认程序占用) + 500M(老年代最小空间) + 200M(空闲内存))。这意味着你需要为老年代设置至少500M空间，因此如果你有三个运行服务器，你可以把它们的内存分别设置为1G，1.5G，2G，然后检查结果。</p>
-<p>理论上来说，GC执行速度应该遵循1G &gt; 1.5G &gt; 2G，1G内存时GC执行速度更快，然而，理论上的1G内存Full GC消耗1s。2G内存Full GC消耗2s在实际情况中是无法保证的，实际的运行时间还依赖于服务器的性能和对象大小，因此，最好的方法是创建尽可能多的的测量数据并监视它们。</p>
-<p>在设置内存空间大小时，你还需要设置一个参数：NewRatio。NewRatio的值是新生代和老年代空间大小的比例，如果-XX:NewRatio&#x3D;1, 则新生代空间:老年代空间&#x3D;1:1，如果堆内存为1G。则新生代:老年代&#x3D;500M:500M，如果NewRation&#x3D;2，这新生代:老年代&#x3D;1:2, 因此，NewRation的值越大，则老年代空间越大，新生代空间越小。</p>
-<p>你可能会认为NewRatio为1会是做好的选择，然而事实并非如此，根据经验知道，当NewRatio设置为2或者3时，整个GC的状态表现最好。</p>
-<p>完成GC优化最快的方式是什么？答案是比较性能测试结果，为了给每台服务器设置不同的的参数并监控它们，最好查看的是一天或者两天的数据，当通过性能测试来进行GC优化时，你需要在不同的测试时保证它们有相同的负载和运行环境，然而，即使是专业的性能测试人员，想精确的控制负载也很困难，并且需要大量的时间准备，因此，更加方便容易的方法是直接设置参数来运行，然后等待运行结果。</p>
-<h1 id="分析GC优化的结果"><a href="#分析GC优化的结果" class="headerlink" title="分析GC优化的结果"></a>分析GC优化的结果</h1><p>在设置了GC参数和-verbosegc参数后，可以使用tail命令确保日志被正确的生成，如果参数设置的不正确或者日志为生成，那你的时间就被白白浪费了，如果日志收集没有时间的话，在收集一天或者两天数据后在检查结果，最简单的方法是把日志从服务器下载到本地，然后用HPJmeter分析数据。</p>
-<p>在分析结果时，请关注下列几点(这个优先级是根据自己的经验定的，我认为选取GC参数时应该考虑的最重要的因素是Full GC的运行时间)：</p>
-<ul>
-<li>单次Full GC的运行时间</li>
-<li>单次Minor GC的运行时间</li>
-<li>Full GC运行间隔</li>
-<li>Minor GC运行间隔</li>
-<li>整个Full GC的运行时间</li>
-<li>整个Minor GC的运行时间</li>
-<li>整个GC的运行时间</li>
-<li>Full GC的执行次数</li>
-<li>Minor GC的执行次数</li>
-</ul>
-<p>找到最佳的GC参数是件非常幸运的，然而在大多数时候，我们并不幸运，在进行GC优化时一定要小心谨慎，因为当你试图一次完成所有的优化工作时，可能会出现OutOfMemoryError错误。</p>
-<h1 id="优化案例"><a href="#优化案例" class="headerlink" title="优化案例"></a>优化案例</h1><p>到目前为止，我们一直在从理论上介绍GC优化，现在是时候将这些理论付诸实践的时候了，我们通过几个例子来很深入地理解GC优化。</p>
-<h2 id="示例1"><a href="#示例1" class="headerlink" title="示例1"></a>示例1</h2><p>下面这个例子是Service S的优化，对于最近刚开发的的Service S，执行Full GC需要消耗过多的时间。</p>
-<p>现在看一下执行jstat -gcutil的结果</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S0 S1 E O P YGC YGCT FGC FGCT GCT</span><br><span class="line">12.16 0.00 5.18 63.78 20.32 54 2.047 5 6.946 8.993</span><br></pre></td></tr></table></figure>
-<p>左边的Perm区值对于最初的GC优化并不重要，而YGC参数的值更加对于这次优化更为重要。</p>
-<p>平均执行一次Minor GC和Full GC消耗的时间如下表所示：</p>
-<ul>
-<li>Service S的Minor GC和Full GC的平均执行时间</li>
-</ul>
-<table>
-<thead>
-<tr>
-<th align="left">GC类型</th>
-<th align="left">GC执行次数</th>
-<th align="left">GC执行时间</th>
-<th align="left">平均值</th>
-</tr>
-</thead>
-<tbody><tr>
-<td align="left">Minor GC</td>
-<td align="left">54</td>
-<td align="left">2.047s</td>
-<td align="left">37ms</td>
-</tr>
-<tr>
-<td align="left">Full GC</td>
-<td align="left">5</td>
-<td align="left">6.946s</td>
-<td align="left">1.389s</td>
-</tr>
-</tbody></table>
-<p>37ms对于Minor GC来说性能还可以，但1.389s对于Full GC来说意味着当Full GC发生时数据库Timeout设置为1s的系统中时，可能会频繁出现超时的情况。</p>
-<p>首先，你需要检查开始GC优化之前内存的使用情况，使用jstat -gccapacity命令可以检查内存使用情况，在笔者的服务器上查看的结果如下：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">NGCMN NGCMX NGC S0C S1C EC OGCMN OGCMX OGC OC PGCMN PGCMX PGC PC YGC FGC</span><br><span class="line">212992.0 212992.0 212992.0 21248.0 21248.0 170496.0 1884160.0 1884160.0 1884160.0 1884160.0 262144.0 262144.0 262144.0 262144.0 54 5</span><br></pre></td></tr></table></figure>
-
-<p>其中的关键值如下:</p>
-<ul>
-<li>新生代内存使用量: 212,992k</li>
-<li>老年代内存使用量: 1,884,160k</li>
-</ul>
-<p>因此，除了永久代以外，被分配的内存空间加起来有2G, 并且新生代:老年代&#x3D;1:9， 为了得到比使用jstat更细致的结果，还需要加上-verbosegc参数获取日志，并把三台服务器安装如下方式设置(除此外没有使用任何其他参数)</p>
-<ul>
-<li>NewRatio&#x3D;2</li>
-<li>NewRatio&#x3D;3</li>
-<li>NewRatio&#x3D;4</li>
-</ul>
-<p>一天后我得到了系统的GC log，幸运的是，在设置完NewRatio后系统没有发生任何Full GC。</p>
-<p>这是为什么呢？ 这是因为大部分对象在创建之后很快被回收了，所有这些对象没有被传入老年代，而是在新生代就被销毁回收了。</p>
-<p>在这种情况下，就没有必要去改变其他的参数值了，只要选择一个最合适的NewRatio值即可，那么，如何确定最佳的NewRatio的值呢？为此，我们分析一下每种NewRatio值下Minor GC的平均响应时间。</p>
-<p>在每种参数下Minor GC的平均响应时间如下：</p>
-<ul>
-<li>NewRatio&#x3D;2 45ms</li>
-<li>NewRatio&#x3D;3 34ms</li>
-<li>NewRatio&#x3D;4 30ms</li>
-</ul>
-<p>我们可以根据GC时间的长短得出NewRatio&#x3D;4是最佳的参数值(尽管NewRatio&#x3D;4时新生代空间是最小的)。在设置完GC参数之后，服务器没有发生Full GC。</p>
-<p>为了说明这个问题，下面是服务执行一段时间后执行jstat -gcutil的结果：</p>
-<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S0 S1 E O P YGC YGCT FGC FGCT GCT</span><br><span class="line">8.61 0.00 30.67 24.62 22.38 2424 30.219 0 0.000 30.219</span><br></pre></td></tr></table></figure>
-
-<p>你可能会认为是服务器接受的请求比较少才使得GC发生的频率比较低，实际上，虽然Full GC没有执行过，但Minor GC被执行了2424次。</p>
-<h2 id="示例2"><a href="#示例2" class="headerlink" title="示例2"></a>示例2</h2><p>这是一个Service A的例子，我们提供公司内部的应用性能管理系统(APM)发现JVM暂停了相当长的时间(超过了8s)，因此我们进行了GC优化，我们努力寻找JVM暂停的原因，后来发现是因为Full GC执行时间过长，因此我们决定进行GC优化。</p>
-<p>在GC优化的开始阶段，我们加上了-verbosegc参数，结果如下图所示：</p>
-<ul>
-<li>进行GC优化之前STW的时间</li>
-</ul>
-<p><img src="https://pic.yupoo.com/crowhawk/ebb4b181/a24f4e9b.png" alt="进行GC优化之前STW的时间" loading="lazy"></p>
-<p>上图是由HPJmeter生成的图片之一，横坐标表示JVM执行的时间，纵坐标表示每次GC的时间，CMS为绿点，表示Full GC的结果，而Parallel Scavenge为难点，表示Minor GC的结果。</p>
-<p>之前我说过CMS GC是最快的GC，但是上面的结果显示在一些时候CMS耗时达到了15s，是什么原因导致了这一结果呢？请记住我之前说的：CMS在执行compact操作时会显著变慢，此外，服务的内存通过-Xms1g和-Xmx4g设置了，而分配的内存只有4G。</p>
-<p>因此笔者将GC类型从CMS GC改为了Parallel GC，把内存大小设置为2G，并把NewRatio设为3，在执行jstat -gcutil几小时之后的结果如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">S0 S1 E O P YGC YGCT FGC FGCT GCT</span><br><span class="line">0.00 30.48 3.31 26.54 37.01 226 11.131 4 11.758 22.890</span><br></pre></td></tr></table></figure>
-
-<p>Full GC的时间缩短了，变成了每次3s，跟15s比有了显著提升，但是3s依然不够快，为此，笔者创建了下面6种情况：</p>
-<ul>
-<li>case 1：-XX:UseParallelGC -Xms1536m   -Xmx1536m   -XX:NewRatio&#x3D;2</li>
-<li>case 2: -XX:UseParallelGC -Xms1536m   -Xmx1536m   -XX:NewRatio&#x3D;3</li>
-<li>case 3: -XX:UseParallelGC -Xms1g      -Xmx1g      -XX:NewRatio&#x3D;3</li>
-<li>case 4: -XX:UseParallelOldGC -Xms1536m -Xmx1536m  -XX:NewRatio&#x3D;2</li>
-<li>case 5: -XX:UseParallelOldGC -Xms1536m -Xmx1536m  -XX:NewRatio&#x3D;3</li>
-<li>case 6: -XX:UseParallelOldGC -Xms1g    -Xmx1g     -XX:NewRatio&#x3D;3</li>
-</ul>
-<p>上面哪一种情况最快？结果显示，内存空间越小，运行结果最少，下面展示了性能最好的case 6的结果图，它的最慢响应时间只有1.7s，并且响应时间的平均值已经被控制到了1s以内。</p>
-<ul>
-<li>case 6的持续时间图</li>
-</ul>
-<p><img src="https://pic.yupoo.com/crowhawk/026cb5ec/dd3bdbb9.png" loading="lazy"></p>
-<p>基于上图的结果，按照case 6调整了GC参数，但这却导致了每晚都会发生OutOfMemoryError。很难解释发生异常的具体原因。简单的说，应该是批处理程序导致了内存泄漏，我们正在解决相关的问题。</p>
-<p>如果只对GC日志做一些短时间的分析就将相关参数部署到所有服务器行来执行GC优化，这是非常危险的，切记，只有当你同时仔细分析服务的执行情况和GC日志后，才能保证GC优化没有错误地执行。</p>
-<p>在上文中，我们通过两个GC优化的例子来说明GC优化是怎样执行的，正如上文中提到的，例子中设置了GC参数可以设置在相同的服务器之上，但前提是它们具有相同的CPU，操作系统，JDK版本并且运行这相同的服务，此外，不要把我使用的参数照搬到你的应用上，它们可能在你的服务器上并不能起到同样良好的效果。</p>
-<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>笔者没有执行heap dump并分析内存的详细情况，而是通过自己的经验进行GC优化，精确的分析内存可以得到更好的优化效果，不过这种分析一般只适用于内存使用量相对固定的场景，如果服务器严重过载并占有了大量的内存，则建议你根据之前的经验进行GC优化。</p>
-<p>笔者已经在一些服务器上设置了G1 GC参数并进行了性能测试，但还没有应用到生成环境，G1 GC的速度快于任何其他的GC类型，但是你必须升级到JDK7，此外，暂时还无法保证它的稳定性，没有人知道运行时是否会出现致命的错误，因此，G1 GC暂时还不适合投入应用。</p>
-
+          <p>JVM系列之如何优化java gc</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/jvm/learn-jvm-009/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -673,7 +375,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-08-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E8%A7%88/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-008/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -691,7 +393,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-08-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E7%9F%A5%E8%AF%86%E7%82%B9%E6%80%BB%E8%A7%88/" class="post-title-link" itemprop="url">JVM系列之jvm知识点总览</a>
+          <a href="/jvm/learn-jvm-008/" class="post-title-link" itemprop="url">JVM系列之jvm知识点总览</a>
         </h2>
 
         <div class="post-meta-container">
@@ -702,7 +404,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-08 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-08T00:00:00+08:00">2018-04-08</time>
+      <time title="创建时间：2018-04-08 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-08T15:51:43+08:00">2018-04-08</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -724,8 +426,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p><span class="exturl" data-url="aHR0cDovL3d3dy5pdHlvdWtub3cuY29tL2phdmEvMjAxNy8wMy8wMS9qdm0tb3ZlcnZpZXcuaHRtbA==">http://www.ityouknow.com/java/2017/03/01/jvm-overview.html<i class="fa fa-external-link-alt"></i></span></p>
-
+          <p>jvm知识点总览</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/jvm/learn-jvm-008/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -751,7 +460,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-07-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-007/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -769,7 +478,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-07-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E8%B0%83%E4%BC%98%E5%B7%A5%E5%85%B7/" class="post-title-link" itemprop="url">JVM系列之jvm调优工具</a>
+          <a href="/jvm/learn-jvm-007/" class="post-title-link" itemprop="url">JVM系列之jvm调优工具</a>
         </h2>
 
         <div class="post-meta-container">
@@ -780,7 +489,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-07 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-07T00:00:00+08:00">2018-04-07</time>
+      <time title="创建时间：2018-04-07 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-07T15:51:43+08:00">2018-04-07</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -802,119 +511,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>最近在整理一些关于介绍JVM的文章，发现有一些还没有补充全面，其中就包括如何利用工具来监控调优前后的性能变化。工具作为图形化界面来展示更能直观的发现问题，另一方面一些耗费性能的分析(dump文件分析) 一般也不会在生成环境直接分析，往往dump下来的文件大1G左右，人工分析效率低下，因此利用工具来分析JVM相关问题，往往可以达到事半功倍的效果。</p>
-<p>jvm监控分析工具一般分为两类，一种是jdk自带的工具，一种是第三方的分析工具，jdk自带工具一般在jdk bin目录下，以exe的形式直接点击就可以使用，其中包含分析工具已经很强大了，几乎涉及了方方面面，但是我们最常用的只有两个，jconsole和jvisualvm，第三方的分析工具比较多，各自的侧重点不同，比较有代表性的：MAT GChisto等。</p>
-<p>对于大型java应用程序来说，再精细的测试也难以堵住所有的漏洞，即便我们在测试阶段进行了大量卓有成效的工作，很多问题还是会在生成环境下暴露出来，并且很难在测试环境中进行重现，JVM能够记录下来问题发生时系统的部分运行状态，并将其存储在堆转储(Heap Dump)文件中，从而为我们分析和诊断问题提供了重要的依据，其中visual VM和MAT是dump文件的分析利器。</p>
-<h1 id="jdk自带的工具"><a href="#jdk自带的工具" class="headerlink" title="jdk自带的工具"></a>jdk自带的工具</h1><h2 id="jconsole"><a href="#jconsole" class="headerlink" title="jconsole"></a>jconsole</h2><p>jconsole(java monitoring and management console)是java5开始，在jdk中自带的java监控和管理控制台，用于对jvmn中内存，线程和类等监控，是一个基于jmx(java management extensions)的gui性能监测工具。jconsole使用jvm的扩展机制获取并展示虚拟机中运行的应用程序的性能和资源消耗等信息。</p>
-<p>自己在jdk&#x2F;bin目录下点击jconsole.exe即可启动，界面如下：</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jconsole01.jpg" loading="lazy"></p>
-<p>在弹出的框中可以选择本机的监控本地的java应用，也可以选择远程的java服务来监控，如果监控远程服务需要在tomcat中启动脚本中添加如下代码：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">-Dcom.sun.management.jmxremote.port=6969</span><br><span class="line">-Dcom.sun.management.jmxremote.ssl=false</span><br><span class="line">-Dcom.sun.management.jmxremote.authenticate=false</span><br></pre></td></tr></table></figure>
-
-<p>连接进去之后，就可以看到jconsole概览图和主要的功能：概述，内存，线程，类，vm，mbeans。</p>
-<ul>
-<li>概述 以图表的方式显示出堆内存使用量，活动线程数，已加载的类，cpu占用率的折线图，可以非常清晰的观察在程序执行过程中的变动情况。</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jconsole02.jpg" loading="lazy"></p>
-<ul>
-<li>内存 主要展示了内存的使用情况，同时可以查看堆和非堆内存的变化值对比，也可以点击执行GC来触发GC的执行</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jconsole03.jpg" loading="lazy"></p>
-<ul>
-<li>线程 主界面展示线程数的活动数和峰值，同时点击左下方线程可以查看线程的详细信息，比如线程的状态是什么，堆栈内容等，同时也可以点击&quot;检测死锁&quot;来检查线程之间是否有死锁的情况。</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jconsole04.jpg" loading="lazy"></p>
-<ul>
-<li>类 主要展示已加载类的相关信息。</li>
-<li>VM概要 展示jvm所有信息总览，包括基本信息，线程相关，堆相关，操作系统，vm参数等</li>
-<li>mbean 查看mbean的属性和方法等。</li>
-</ul>
-<h2 id="jvisualvm"><a href="#jvisualvm" class="headerlink" title="jvisualvm"></a>jvisualvm</h2><h3 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h3><p>jvisualvm是一个工具，它提供了一个可视界面，用于查看java虚拟机(jvm virtual machine)上运行的基于java技术的应用程序(java应用程序)的详细信息。visualvm对JDK工具所检索的jvm软件相关数据进行组织，并通过一种使您可以快速查看有多个java应用程序的数据的方式提供该信息，您可以查看本地应用程序已经远程主机上运行的应用程序的相关数据。此外，还可以捕获有关jvm软件实例的数据，并将该数据保存到本地系统，以供后期查看或者与其他用户共享。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm.jpg" loading="lazy"></p>
-<p>jvisualvm是jdk自带的最牛逼的调优工具了，也是我们平时使用最多的调优工具，几乎涉及到jvm调优的方法面面，同样是在jdk&#x2F;bin目录下面双击jvisualvm.exe就可以启动起来和jconsole一样可以选择本地和远程，如果需要监控远程同样需要配置相关参数，主界面如下：</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm01.jpg" loading="lazy"></p>
-<p>visualvm可以根据需要安装不同的插件，每个插件的关注点不同，有点主要监控gc，有的主要监控内存，有点监控线程等。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm02.jpg" loading="lazy"></p>
-<p>如何安装：</p>
-<blockquote>
-<ul>
-<li><ol>
-<li>从主菜单中选择&quot;工具&quot;--&gt;&quot;插件&quot;</li>
-</ol>
-</li>
-<li><ol start="2">
-<li>在&quot;可用插件&quot;标签中，选中该插件的&quot;安装&quot;复选框，点击&quot;安装&quot;</li>
-</ol>
-</li>
-<li><ol start="3">
-<li>逐步完成插件安装程序.</li>
-</ol>
-</li>
-</ul>
-</blockquote>
-<p>我这里以eclipse(pid 22296)为例，双击后直接展开，主界面展示了系统和jvm两大块内容，点击右下方jvm参数和系统属性可以参考详细的参数信息。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm03.jpg" loading="lazy"></p>
-<p>因为visualvm插件太多，我这里主要介绍常用三个：监控，线程，visual gc</p>
-<p>监控的主页其实也就是，cpu，内存，类，线程图表</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm04.jpg" loading="lazy"></p>
-<p>线程和jconsole功能没有太大的区别</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm05.jpg" loading="lazy"></p>
-<p>visual gc是常常使用的一个功能，可以明显的看到年轻代，老年代的内存变化，以及gc频率，gc的时间等。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm06.jpg" loading="lazy"></p>
-<p>以上的功能其实jconsole几乎都有，visual vm更全面更直观一些，另外visualvm非常多的其他功能，可以分析dump的内存快照，dump出来的线程快照并且进行分析等，还有其他很多插件大家可以自己去探索。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvisualvm07.jpg" loading="lazy"> </p>
-<h1 id="第三方调优工具"><a href="#第三方调优工具" class="headerlink" title="第三方调优工具"></a>第三方调优工具</h1><h2 id="MAT"><a href="#MAT" class="headerlink" title="MAT"></a>MAT</h2><h3 id="MAT是什么"><a href="#MAT是什么" class="headerlink" title="MAT是什么"></a>MAT是什么</h3><p>mat(memory analyzer tool)，一个基于eclipse的内存分析工具，是一个快速，功能丰富的java heap分析工具，它可以帮助我们查看内存泄漏和减少内存消耗，使用内存分析工具从众多对象中进行分析，快速的计算出在内存中对象的占用大小，看看是谁阻止了垃圾回收器的回收工作，并可以通过报表直观的查看到可能造成这种结果的对象。</p>
-<p>通常内存泄漏分析被认为是一件很有难度的工作，一般有团队中的资深人士进行，不过要介绍的mat被认为是一个傻瓜式的堆转储文件分析工具，你只需要轻轻点击一下鼠标就可以生成一个专业的分析报告，和其他内存泄漏分析工具相比，mat的使用非常容易，基本可以实现一键到位，即使是新手也能够快速上手使用。</p>
-<p>MAT以eclipse插件的形式来安装，具体的安装过程就不走这里描述了，可以利用visualvm或者是jmap命令生成堆文件，导入elipse mat中生成分析报告。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/mat01.jpg" loading="lazy"></p>
-<p>生成报表的同时，在dump文件的同级目录下生成三份(dump_top_consumers.zip，dump_leak_Suspects.zip，dump_top_components.zip)分析结果的html文件，方便发送给相关同事来查看。</p>
-<p>需要关注的是下面的Actions、Reports、Step by step区域：</p>
-<ul>
-<li>Histogram： 列出内存中的对象，对象的个数已经大小，支持正则表达式查找，也可以计算出该类所有对象的retained size</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/mat02.jpg" loading="lazy"></p>
-<ul>
-<li>Dominator Tree：；列出最大的对象以及其依赖存活的Object(大小是以Retained Heap为标准排序的)</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/mat03.jpg" loading="lazy"></p>
-<ul>
-<li>Top Customers：通过图形列出最大的object</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/mat04.jpg" loading="lazy"></p>
-<ul>
-<li>Duplicate classes：检测由多个类加载器加载的类</li>
-<li>Leak Suspects：内存泄漏分析</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/mat05.jpg" loading="lazy"></p>
-<ul>
-<li>Top Components：列出大于总堆数的百分之一的报表。</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/mat06.jpg" loading="lazy"></p>
-<ul>
-<li>Component Report：分析对象属于同一个包或者被同一个类加载器加载</li>
-</ul>
-<p>以上只是一个初级的介绍，mat还有更强大的使用，比如对比堆内存，在生产环境中往往为了定位问题，每隔几分钟dump出一个内存快照，随后在对比不同时间的堆内存的变化来发现问题。</p>
-<h2 id="GChisto"><a href="#GChisto" class="headerlink" title="GChisto"></a>GChisto</h2><p>GChisto是一款专业分析gc日志的工具，可以通过gc日志来分析：Minor GC，Full GC的时间，频率等等，通过列表，报表，图表等不同的形式来反应gc的情况，虽然界面略显粗糙，但是功能还是不错的。</p>
-<p>配置好本地的jdk环境之后，双击GChisto.jar，在弹出的输入框中点击add选择gc.log日志。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/g1.jpg" loading="lazy"></p>
-<ul>
-<li>GC Pause Stats: 可以查看gc的次数，gc的时间，gc的开销，最大gc时间和最小gc时间等，以及相应的柱状图</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/g2.jpg" loading="lazy"></p>
-<ul>
-<li>GC Pause Distribution：查看GC停顿的详细分布，x轴表示垃圾收集停顿时间，y轴表示是停顿次数。</li>
-<li>GC Timeline：显示整个时间线上的垃圾收集</li>
-</ul>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/g3.jpg" loading="lazy"></p>
-<p>不过这款工具已经不再维护，不能识别最新jdk的日志文件。</p>
-<h2 id="gcviewer"><a href="#gcviewer" class="headerlink" title="gcviewer"></a>gcviewer</h2><p>GCViewer也是一款分析小工具，用于可视化查看由Sun&#x2F;Orcale，IBM、HP和BEA java虚拟机产生的垃圾收集器的日志，gcviewer个人感觉显示的界面比较乱没有GChisto更专业一些。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/gv.jpg" loading="lazy"></p>
-<h2 id="GC-easy"><a href="#GC-easy" class="headerlink" title="GC easy"></a>GC easy</h2><p>这是一个web工具，在线使用非常方便</p>
-<p>地址：<span class="exturl" data-url="aHR0cDovL2djZWFzeS5pby8=">gc easy<i class="fa fa-external-link-alt"></i></span></p>
-<p>进入官网，将打包好的zip或者gz为后缀的压缩包，过一会就会拿到分析结果。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/gceasy1.png" loading="lazy"><br><img src="http://www.itmind.net/assets/images/2017/jvm/gceasy2.png" loading="lazy"></p>
-<p>推荐使用此工具进行gc分析</p>
-
+          <p>本文介绍jvm调优工具</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/jvm/learn-jvm-007/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -940,7 +545,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-06-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E6%9C%8D%E5%8A%A1gc%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98%E6%A1%88%E4%BE%8B/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-006/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -958,7 +563,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-06-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E6%9C%8D%E5%8A%A1gc%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98%E6%A1%88%E4%BE%8B/" class="post-title-link" itemprop="url">JVM系列之java服务gc参数调优案例</a>
+          <a href="/jvm/learn-jvm-006/" class="post-title-link" itemprop="url">JVM系列之java服务gc参数调优案例</a>
         </h2>
 
         <div class="post-meta-container">
@@ -969,7 +574,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-06 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-06T00:00:00+08:00">2018-04-06</time>
+      <time title="创建时间：2018-04-06 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-06T15:51:43+08:00">2018-04-06</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -994,7 +599,7 @@
           <p>本文介绍一次生产环境的jvm gc相关参数调优的过程，通过参数的调整避免了gc卡顿对java服务成功率的影响。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/jvm/2018-04-06-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E6%9C%8D%E5%8A%A1gc%E5%8F%82%E6%95%B0%E8%B0%83%E4%BC%98%E6%A1%88%E4%BE%8B/">
+              <a class="btn" href="/jvm/learn-jvm-006/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1025,7 +630,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-05-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%20gc%E5%88%86%E6%9E%90/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-005/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -1043,7 +648,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-05-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%20gc%E5%88%86%E6%9E%90/" class="post-title-link" itemprop="url">JVM系列之java gc分析</a>
+          <a href="/jvm/learn-jvm-005/" class="post-title-link" itemprop="url">JVM系列之java gc分析</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1054,7 +659,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-05 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-05T00:00:00+08:00">2018-04-05</time>
+      <time title="创建时间：2018-04-05 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-05T15:51:43+08:00">2018-04-05</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1079,7 +684,7 @@
           <p>java gc就是jvm记录仪，书画了JVM各个分区的表演</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/jvm/2018-04-05-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%20gc%E5%88%86%E6%9E%90/">
+              <a class="btn" href="/jvm/learn-jvm-005/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1110,7 +715,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-04-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E8%B0%83%E4%BC%98%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-004/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -1128,7 +733,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-04-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjvm%E8%B0%83%E4%BC%98%E7%9A%84%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/" class="post-title-link" itemprop="url">JVM系列之jvm调优的常用命令</a>
+          <a href="/jvm/learn-jvm-004/" class="post-title-link" itemprop="url">JVM系列之jvm调优的常用命令</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1139,7 +744,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-04 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-04T00:00:00+08:00">2018-04-04</time>
+      <time title="创建时间：2018-04-04 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-04T15:51:43+08:00">2018-04-04</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1161,301 +766,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>运用JVM自带的命令可以方便的在生成环境监控和打印堆栈日志信息帮助我们来定位问题！虽然jvm调优成熟的工具已经有很多：jconsole，大名鼎鼎的visualvm，IBM的Memory Analyzer等等。但是在生成环境出现问题的时候，一方面工具的使用会有所限制，另一方面喜欢装X的我们，总喜欢在出现问题的时候在终端输入一些命令来解决。所以的工具几乎都是依赖于jdk的接口和底层的这些命令，研究这些命令的使用也让我们更能了解JVM构成和特征。</p>
-<p>SUN JDK监控和故障处理命令有jps、jstat、jmap、jhat、jstack、jinfo等。下面做一一介绍</p>
-<h1 id="jps"><a href="#jps" class="headerlink" title="jps"></a>jps</h1><p>JVM Process Status Tool. 显示指定系统内所有的hotspot虚拟机进程</p>
-<h2 id="命令格式"><a href="#命令格式" class="headerlink" title="命令格式"></a>命令格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jps [options] [hostid]</span><br></pre></td></tr></table></figure>
-<h2 id="option参数"><a href="#option参数" class="headerlink" title="option参数"></a>option参数</h2><blockquote>
-<ul>
-<li>-l: 输出主类全名或jar路径</li>
-<li>-q: 只输出LVMID</li>
-<li>-m: 输出jvm启动时传递给main()的参数</li>
-<li>-v: 输出jvm启动时显示指定的JVM参数</li>
-</ul>
-</blockquote>
-<p>其中[option]、[hostid]参数也可以不写。</p>
-<h2 id="示例"><a href="#示例" class="headerlink" title="示例"></a>示例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">jps -l -m</span><br><span class="line">28920 org.apache.catalina.startup.Bootstrap start</span><br><span class="line">11589 org.apache.catalina.startup.Bootstrap start</span><br><span class="line">25816 sun.tools.jps.Jps -l -m</span><br></pre></td></tr></table></figure>
-
-<h1 id="jstat"><a href="#jstat" class="headerlink" title="jstat"></a>jstat</h1><p>jstat(JVM Statistics Monitoring)是用于监视虚拟机运行时状态信息的命令，它可以显示出虚拟机进程中的类装载，内存，垃圾收集，JIT编译等运行数据。</p>
-<h2 id="命令格式-1"><a href="#命令格式-1" class="headerlink" title="命令格式"></a>命令格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat [option] LVMID [interval [count]</span><br></pre></td></tr></table></figure>
-<h2 id="参数"><a href="#参数" class="headerlink" title="参数"></a>参数</h2><blockquote>
-<ul>
-<li>option: 操作参数</li>
-<li>LVMID: 本地虚拟机进程ID</li>
-<li>interval: 连续输出的时间间隔</li>
-<li>count: 连续输出的次数</li>
-</ul>
-</blockquote>
-<p><strong>option参数总览</strong></p>
-<table>
-<thead>
-<tr>
-<th>Option</th>
-<th>Displays...</th>
-</tr>
-</thead>
-<tbody><tr>
-<td>class</td>
-<td>class loader的行为统计。Statistics on the behavior of the class loader</td>
-</tr>
-<tr>
-<td>compiler</td>
-<td>Hotspot JIT编译器行为统计。statistics of the behavior of the Hotspot Just-in-time compiler</td>
-</tr>
-<tr>
-<td>gc</td>
-<td>垃圾回收堆的行为统计。statistics of the behavior of the garbage collected heap</td>
-</tr>
-<tr>
-<td>gccapacity</td>
-<td>各个垃圾回收代容量(young, old, perm)和他们响应的空间统计。statistics of the capacities of the generations and their corresponding sapces</td>
-</tr>
-<tr>
-<td>gcutil</td>
-<td>垃圾回收统计概述。summary of garbage collection statistics</td>
-</tr>
-<tr>
-<td>gccause</td>
-<td>垃圾收集统计概述(同-gcutil)，附加最近两次垃圾回收事件的原因。summary of garage collection statistics(same as -gcutil), with the cause of the last and</td>
-</tr>
-<tr>
-<td>gcnew</td>
-<td>新生代行为统计。statistics of behavior of the new generation</td>
-</tr>
-<tr>
-<td>gcnewcapacity</td>
-<td>新生代与其相应的内存空间统计。 statistics of the sizes of the new generation and its corresponding spaces</td>
-</tr>
-<tr>
-<td>gcold</td>
-<td>老年代和永生代行为统计。statistics of the behavior of the old and permanent generations</td>
-</tr>
-<tr>
-<td>gcoldcapacity</td>
-<td>老年代行为统计。statistics of the sizes of the old generation</td>
-</tr>
-<tr>
-<td>gcpermcapacity</td>
-<td>永生代行为统计。statistics of the sizes of the permanent generation</td>
-</tr>
-<tr>
-<td>printcompilation</td>
-<td>Hotspot编译方法统计。Hotspot compilation method statistics</td>
-</tr>
-</tbody></table>
-<p><strong>option参数详解</strong></p>
-<p>-class</p>
-<p>监视类装载，卸载数量，总空间以及耗费的时间</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -class 11589</span><br><span class="line">Loaded  Bytes  Unloaded  Bytes     Time   </span><br><span class="line">  7035  14506.3     0     0.0       3.67</span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>Loaded：加载class的数量</li>
-<li>Bytes: class字节大小</li>
-<li>Unloaded: 未加载class的数量</li>
-<li>Bytes: 未加载class的字节大小</li>
-<li>Time: 加载时间</li>
-</ul>
-</blockquote>
-<p>-compiler</p>
-<p>输出JIT编译过的方法数量耗时等。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -compiler 1262</span><br><span class="line">Compiled Failed Invalid   Time   FailedType FailedMethod</span><br><span class="line">    2573      1       0    47.60          1 org/apache/catalina/loader/WebappClassLoader findResourceInternal</span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>Compiled: 编译数量</li>
-<li>Failed: 编译失败的数量</li>
-<li>Invalid: 无效数量</li>
-<li>Time: 编译耗时</li>
-<li>FailedType: 失败类型</li>
-<li>FailedMethod: 失败方法的全限定名</li>
-</ul>
-</blockquote>
-<p>-gc</p>
-<p>垃圾回收堆的行为统计， <strong>常用命令</strong></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gc 1262</span><br><span class="line">S0C    S1C     S0U     S1U   EC       EU        OC         OU        PC       PU         YGC    YGCT    FGC    FGCT     GCT   </span><br><span class="line">26112.0 24064.0 6562.5  0.0   564224.0 76274.5   434176.0   388518.3  524288.0 42724.7    320    6.417   1      0.398    6.815</span><br></pre></td></tr></table></figure>
-
-<p><strong>C即Capacity总容量，U即Used已使用的容量</strong></p>
-<blockquote>
-<ul>
-<li>S0C: survivor0区的总容量</li>
-<li>S1C: survivor1区的总容量</li>
-<li>S0U: survivor0区已使用的容量</li>
-<li>S1U: survivor1区已使用的容量</li>
-<li>EC: Eden区总容量</li>
-<li>EU: Eden区已使用的容量</li>
-<li>OC: Old区的总容量</li>
-<li>OU: Old区已使用的容量</li>
-<li>PC: 当前的容量(kb)</li>
-<li>PU: perm区的使用(kb)</li>
-<li>YGC: 新生代垃圾回收次数</li>
-<li>YGCT: 新生代垃圾回收时间</li>
-<li>FGC: 老年代垃圾回收次数</li>
-<li>FGCT: 老年代垃圾回收时间</li>
-<li>GCT: 垃圾回收总消耗时间</li>
-</ul>
-</blockquote>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstat -gc 1262 2000 20</span><br></pre></td></tr></table></figure>
-<p>这个命令意思是每隔2000ms就输出1262的gc情况，一共输出20次</p>
-<p>-gccapacity</p>
-<p>用gc，不够还会输出java堆各区域使用到的最大，最小空间。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gccapacity 1262</span><br><span class="line">NGCMN    NGCMX     NGC    S0C   S1C       EC         OGCMN      OGCMX      OGC        OC       PGCMN    PGCMX     PGC      PC         YGC    FGC </span><br><span class="line">614400.0 614400.0 614400.0 26112.0 24064.0 564224.0   434176.0   434176.0   434176.0   434176.0 524288.0 1048576.0 524288.0 524288.0    320     1 </span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>NGCMN: 新生代占用的最小空间</li>
-<li>NGCMX: 新生代占用的最大空间</li>
-<li>OGCMN: 老年代占用的最小空间</li>
-<li>OGCMX: 老年代占用的最大空间</li>
-<li>OGC: 当前老年代的容量(kb)</li>
-<li>OC: 当前老年代的空间(kb)</li>
-<li>PGCMN: perm占用的最小空间</li>
-<li>PGCMX: perm占用的最大空间</li>
-</ul>
-</blockquote>
-<p>-gcutil</p>
-<p>用-gc，不过输出的是已使用空间占总空间的百分比</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcutil 28920</span><br><span class="line">S0     S1     E      O      P       YGC     YGCT    FGC    FGCT     GCT    LGCC                 GCC                 </span><br><span class="line"> 12.45   0.00  33.85   0.00   4.44      4    0.242     0    0.000    0.242   Allocation Failure   No GC </span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>LGCC: 最近垃圾回收的原因</li>
-<li>GCC: 当前垃圾回收的原因</li>
-</ul>
-</blockquote>
-<p>-gcnew</p>
-<p>统计新生代的行为</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcnew 28920</span><br><span class="line">S0C      S1C      S0U        S1U  TT  MTT  DSS      EC        EU         YGC     YGCT  </span><br><span class="line"> 419392.0 419392.0 52231.8    0.0  6   6    209696.0 3355520.0 1172246.0  4       0.242</span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>TT: Tenuring threshold(提升阈值)</li>
-<li>MTT: 最大的Tenuring threshold</li>
-<li>DSS: survivor区域大小(kb)</li>
-</ul>
-</blockquote>
-<p>-gcnewcapacity</p>
-<p>新生代与其相应的内存空间的统计</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcnewcapacity 28920</span><br><span class="line">NGCMN      NGCMX       NGC      S0CMX     S0C     S1CMX     S1C       ECMX        EC        YGC   FGC </span><br><span class="line"> 4194304.0  4194304.0  4194304.0 419392.0 419392.0 419392.0 419392.0  3355520.0  3355520.0     4     0</span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>NGC: 当前年轻代的容量(kb)</li>
-<li>SOCMX: 最大的survivor0空间(kb)</li>
-<li>SOC: 当前survivor空间(kb)</li>
-<li>ECMX: 最大Eden空间(kb)</li>
-<li>EC: 当前Eden空间(kb)</li>
-</ul>
-</blockquote>
-<p>-gcold</p>
-<p>统计老年代的行为</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstst -gcold 28929</span><br><span class="line">PC       PU        OC           OU       YGC    FGC    FGCT     GCT   </span><br><span class="line">1048576.0  46561.7   6291456.0     0.0      4      0      0.000    0.242</span><br></pre></td></tr></table></figure>
-
-<p>-gcoldcapacity</p>
-<p>统计老年代的大小和空间</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcoldcapacity 28920</span><br><span class="line">OGCMN       OGCMX        OGC         OC         YGC   FGC    FGCT     GCT   </span><br><span class="line">  6291456.0   6291456.0   6291456.0   6291456.0     4     0    0.000    0.242</span><br></pre></td></tr></table></figure>
-
-<p>-gcpermcapacity</p>
-<p>永生代行为统计</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -gcpermcapacity 28920</span><br><span class="line">PGCMN      PGCMX       PGC         PC      YGC   FGC    FGCT     GCT   </span><br><span class="line"> 1048576.0  2097152.0  1048576.0  1048576.0     4     0    0.000    0.242</span><br></pre></td></tr></table></figure>
-
-<p>-printcompilation</p>
-<p>Hotspot编译方法统计</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jstat -printcompilation 28920</span><br><span class="line">Compiled  Size  Type Method</span><br><span class="line">    1291      78     1    java/util/ArrayList indexOf</span><br></pre></td></tr></table></figure>
-<blockquote>
-<ul>
-<li>Compiled: 被执行的编译任务的数量</li>
-<li>Size: 方法字节码的字节数</li>
-<li>Type: 编译类型</li>
-<li>Method: 编译方法的类名和方法名。类名使用&quot;&#x2F;&quot;代替&quot;.&quot;，作为空间分隔符。方法名是给出类的方法名，格式是一致于Hotspot -XX:+PrintComplation选项</li>
-</ul>
-</blockquote>
-<h1 id="jmap"><a href="#jmap" class="headerlink" title="jmap"></a>jmap</h1><p>jmap(JVM Memory Map)命令用于生成Head dump文件，如果不使用这个命令，还可以使用-XX:+HeapDumpOnOutOfMemoryError参数来让虚拟1机出现OOM的时候自动生成dump文件。jmap不仅能生成dump文件，还可以查询finalize执行队列，java堆和永久代的详细信息，如当前使用率，当前使用的是哪种收集器等。</p>
-<h2 id="命令格式-2"><a href="#命令格式-2" class="headerlink" title="命令格式"></a>命令格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap [option] LVMID</span><br></pre></td></tr></table></figure>
-
-<h2 id="option参数-1"><a href="#option参数-1" class="headerlink" title="option参数"></a>option参数</h2><blockquote>
-<ul>
-<li>dump: 生成堆转储快照</li>
-<li>finalizerinfo: 显示F-Queue队列等待Finalize线程执行finalize方法的对象</li>
-<li>heap: 显示java堆详细信息</li>
-<li>histo: 显示堆中对象的统计信息</li>
-<li>permstat: to print permanent generation statistics</li>
-<li>F: 当-dump没有响应时，强制生成dump快照</li>
-</ul>
-</blockquote>
-<h2 id="示例-1"><a href="#示例-1" class="headerlink" title="示例"></a>示例</h2><p>-dump</p>
-<p>常用格式</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jmap -dump:live,format=b,file=&lt;filename&gt; pid</span><br></pre></td></tr></table></figure>
-
-<p>dump堆到文件，format指定输出格式，live指明是活着的对象，file指定文件名</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">jmap -dump:live,format=b,file=dump.hprof 28920</span><br><span class="line">Dumping heap to /home/xxx/dump.hprof ...</span><br><span class="line">Heap dump file created</span><br></pre></td></tr></table></figure>
-<p>dump.hprof这个后缀是为了后续可以直接使用MAT(memory analysis tool)打开。</p>
-<p>-finalizerinfo</p>
-<p>打印等待回收对象的信息</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">jmap -finalizerinfo 28920</span><br><span class="line">Attaching to process ID 28920, please wait...</span><br><span class="line">Debugger attached successfully.</span><br><span class="line">Server compiler detected.</span><br><span class="line">JVM version is 24.71-b01</span><br><span class="line">Number of objects pending for finalization: 0</span><br></pre></td></tr></table></figure>
-<p>可以看到当前F-Queue队列中并没有等待finalizer线程执行finalize方法的对象</p>
-<p>-heap</p>
-<p>打印heap的概要信息，GC使用的算法，heap的配置及wise heap的使用情况，可以用此来判断内存目前的使用情况以及垃圾回收情况</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br></pre></td><td class="code"><pre><span class="line">jmap -heap 28920</span><br><span class="line">Attaching to process ID 28920, please wait...</span><br><span class="line">Debugger attached successfully.</span><br><span class="line">Server compiler detected.</span><br><span class="line">JVM version is 24.71-b01  </span><br><span class="line"></span><br><span class="line">using thread-local object allocation.</span><br><span class="line">Parallel GC with 4 thread(s)//GC 方式  </span><br><span class="line"></span><br><span class="line">Heap Configuration: //堆内存初始化配置</span><br><span class="line"> MinHeapFreeRatio = 0 //对应jvm启动参数-XX:MinHeapFreeRatio设置JVM堆最小空闲比率(default 40)</span><br><span class="line"> MaxHeapFreeRatio = 100 //对应jvm启动参数 -XX:MaxHeapFreeRatio设置JVM堆最大空闲比率(default 70)</span><br><span class="line"> MaxHeapSize      = 2082471936 (1986.0MB) //对应jvm启动参数-XX:MaxHeapSize=设置JVM堆的最大大小</span><br><span class="line"> NewSize          = 1310720 (1.25MB)//对应jvm启动参数-XX:NewSize=设置JVM堆的‘新生代’的默认大小</span><br><span class="line"> MaxNewSize       = 17592186044415 MB//对应jvm启动参数-XX:MaxNewSize=设置JVM堆的‘新生代’的最大大小</span><br><span class="line"> OldSize          = 5439488 (5.1875MB)//对应jvm启动参数-XX:OldSize=&lt;value&gt;:设置JVM堆的‘老生代’的大小</span><br><span class="line"> NewRatio         = 2 //对应jvm启动参数-XX:NewRatio=:‘新生代’和‘老生代’的大小比率</span><br><span class="line"> SurvivorRatio    = 8 //对应jvm启动参数-XX:SurvivorRatio=设置年轻代中Eden区与Survivor区的大小比值 </span><br><span class="line"> PermSize         = 21757952 (20.75MB)  //对应jvm启动参数-XX:PermSize=&lt;value&gt;:设置JVM堆的‘永生代’的初始大小</span><br><span class="line"> MaxPermSize      = 85983232 (82.0MB)//对应jvm启动参数-XX:MaxPermSize=&lt;value&gt;:设置JVM堆的‘永生代’的最大大小</span><br><span class="line"> G1HeapRegionSize = 0 (0.0MB)  </span><br><span class="line"></span><br><span class="line">Heap Usage://堆内存使用情况</span><br><span class="line">PS Young Generation</span><br><span class="line">Eden Space://Eden区内存分布</span><br><span class="line"> capacity = 33030144 (31.5MB)//Eden区总容量</span><br><span class="line"> used     = 1524040 (1.4534378051757812MB)  //Eden区已使用</span><br><span class="line"> free     = 31506104 (30.04656219482422MB)  //Eden区剩余容量</span><br><span class="line"> 4.614088270399305% used //Eden区使用比率</span><br><span class="line">From Space:  //其中一个Survivor区的内存分布</span><br><span class="line"> capacity = 5242880 (5.0MB)</span><br><span class="line"> used     = 0 (0.0MB)</span><br><span class="line"> free     = 5242880 (5.0MB)</span><br><span class="line"> 0.0% used</span><br><span class="line">To Space:  //另一个Survivor区的内存分布</span><br><span class="line"> capacity = 5242880 (5.0MB)</span><br><span class="line"> used     = 0 (0.0MB)</span><br><span class="line"> free     = 5242880 (5.0MB)</span><br><span class="line"> 0.0% used</span><br><span class="line">PS Old Generation //当前的Old区内存分布</span><br><span class="line"> capacity = 86507520 (82.5MB)</span><br><span class="line"> used     = 0 (0.0MB)</span><br><span class="line"> free     = 86507520 (82.5MB)</span><br><span class="line"> 0.0% used</span><br><span class="line">PS Perm Generation//当前的 “永生代” 内存分布</span><br><span class="line"> capacity = 22020096 (21.0MB)</span><br><span class="line"> used     = 2496528 (2.3808746337890625MB)</span><br><span class="line"> free     = 19523568 (18.619125366210938MB)</span><br><span class="line"> 11.337498256138392% used  </span><br><span class="line"></span><br><span class="line">670 interned Strings occupying 43720 bytes.</span><br></pre></td></tr></table></figure>
-<p>可以很清楚的看到java堆中各个区域目前的情况。</p>
-<p>-histo</p>
-<p>打印堆的对象统计，包括对象数，内存大小等等(因为在dump:live前会进行full gc，如果带上live则只统计活对象，因此不加live的堆大小要大于加live堆的大小</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">jmap -histo:live 28920 | more</span><br><span class="line">num     #instances         #bytes  class name</span><br><span class="line">----------------------------------------------</span><br><span class="line">   1:         83613       12012248  &lt;constMethodKlass&gt;</span><br><span class="line">   2:         23868       11450280  [B</span><br><span class="line">   3:         83613       10716064  &lt;methodKlass&gt;</span><br><span class="line">   4:         76287       10412128  [C</span><br><span class="line">   5:          8227        9021176  &lt;constantPoolKlass&gt;</span><br><span class="line">   6:          8227        5830256  &lt;instanceKlassKlass&gt;</span><br><span class="line">   7:          7031        5156480  &lt;constantPoolCacheKlass&gt;</span><br><span class="line">   8:         73627        1767048  java.lang.String</span><br><span class="line">   9:          2260        1348848  &lt;methodDataKlass&gt;</span><br><span class="line">  10:          8856         849296  java.lang.Class</span><br><span class="line">  ....</span><br></pre></td></tr></table></figure>
-<p>仅仅打印了前面10行</p>
-<p>xml class name是对象类型，说明如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">B  byte</span><br><span class="line">C  char</span><br><span class="line">D  double</span><br><span class="line">F  float</span><br><span class="line">I  int</span><br><span class="line">J  long</span><br><span class="line">Z  boolean</span><br><span class="line">[  数组，如[I表示int[]</span><br><span class="line">[L+类名 其他对象</span><br></pre></td></tr></table></figure>
-
-<p>-permstat</p>
-<p>打印java堆内存的永久代保存区域的类加载器的智能统计信息。对于每个类加载器而言，它的名称，活跃度，地址，父类加载器，它所加载的类的数量和大小都会被打印。此外，包含的字符串数量和大小也会被打印。</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">jmap -permstat 28920</span><br><span class="line">Attaching to process ID 28920, please wait...</span><br><span class="line">Debugger attached successfully.</span><br><span class="line">Server compiler detected.</span><br><span class="line">JVM version is 24.71-b01</span><br><span class="line">finding class loader instances ..done.</span><br><span class="line">computing per loader stat ..done.</span><br><span class="line">please wait.. computing liveness.liveness analysis may be inaccurate ...</span><br><span class="line"></span><br><span class="line">class_loader            classes bytes   parent_loader           alive?  type  </span><br><span class="line">&lt;bootstrap&gt;             3111    18154296          null          live    &lt;internal&gt;</span><br><span class="line">0x0000000600905cf8      1       1888    0x0000000600087f08      dead    sun/reflect/DelegatingClassLoader@0x00000007800500a0</span><br><span class="line">0x00000006008fcb48      1       1888    0x0000000600087f08      dead    sun/reflect/DelegatingClassLoader@0x00000007800500a0</span><br><span class="line">0x00000006016db798      0       0       0x00000006008d3fc0      dead    java/util/ResourceBundle$RBClassLoader@0x0000000780626ec0</span><br><span class="line">0x00000006008d6810      1       3056      null          dead    sun/reflect/DelegatingClassLoader@0x00000007800500a0</span><br></pre></td></tr></table></figure>
-
-<p> -F 强制模式。如果指定的pid没有响应，请使用jmap -dump或者jmap -histo选项，此模式下，不支持live子选项。 </p>
-<h1 id="jhat"><a href="#jhat" class="headerlink" title="jhat"></a>jhat</h1><p>jhat(JVM Heap Analysis Tool)命令是和jmap搭配使用的，用来分析jmap生成的dump快照，jhat内置了一个微型的HTTP&#x2F;HTML服务器，生成dump的分析结果后，可以在浏览器中查看，在此需要注意，一般不会直接在服务器上进行分析。因为jhat是一个耗时并且耗费硬件资源的过程，一般把服务器生成的dump文件复制到本地服务器或者其它服务器上进行分析。</p>
-<h2 id="命令格式-3"><a href="#命令格式-3" class="headerlink" title="命令格式"></a>命令格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jhat [dumpfile]</span><br></pre></td></tr></table></figure>
-
-<h2 id="参数-1"><a href="#参数-1" class="headerlink" title="参数"></a>参数</h2><blockquote>
-<ul>
-<li>-stack false|true 关闭对象分配调用栈跟踪(tracking object allocation call statck)。如果分配位置信息在堆转储中不可用，则必须将此标志设置为false。默认值为true</li>
-<li>-refs false|true 关闭对象引用跟踪(tracking of reference to objects). 默认值为true，默认情况下，返回的指针是指向其他特定对象的对象，如反向链接或输入引用(references or incoming references),会统计&#x2F;计算堆中的所有对象。</li>
-<li>-port port-number设置jhat HTTP server的端口号，默认值7000</li>
-<li>-exclude exclude-flie指定对象查询是需要排除的数据成员列表文件(a file that lists data members that should be excluded from the reachable objects query). 例如。如果文件列表列出了java.lang.String.value，那么当从某个特定对象Object o计算可达的对象列表时，引用路径涉及java.lang.String.value的都会被排除。</li>
-<li>-baseline exclude-file指定一个基准堆转储(baseline heap dump). 在两个heap dumps中有相同的Object ID的对象会被标记为不是新的(marked as not being new)。其他对象被标记为新的(new). 在比较两个不同的堆转储时很有用。</li>
-<li>-debug int设置debug级别，0表示不输出调试信息，值越大则表示输出更详细的debug信息</li>
-<li>-version 启动后显示版本信息就退出。</li>
-<li>J<flag> 因为jhat命令实际上会启动一个JVM来执行，通过-J可以在启动JVM时传入一些启动参数，例如：-J-Xmx512m，则指定运行jhat的java虚拟机使用的最大堆内存为512m。如果需要使用多个JVM参数，则传入多个-Jxxxx。</flag></li>
-</ul>
-</blockquote>
-<h2 id="示例-2"><a href="#示例-2" class="headerlink" title="示例"></a>示例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">jhat -J-Xmx512m dum.hprof</span><br><span class="line">eading from dump.hprof...</span><br><span class="line">Dump file created Fri Mar 11 17:13:42 CST 2016</span><br><span class="line">Snapshot read, resolving...</span><br><span class="line">Resolving 271678 objects...</span><br><span class="line">Chasing references, expect 54 dots......................................................</span><br><span class="line">Eliminating duplicate references......................................................</span><br><span class="line">Snapshot resolved.</span><br><span class="line">Started HTTP server on port 7000</span><br><span class="line">Server is ready.</span><br></pre></td></tr></table></figure>
-
-<p>中间的J-Xmx512m是在dump快照很大的情况下分配512m内存去启动HTTP服务器，运行完之后就可以在浏览器打开<span class="exturl" data-url="aHR0cDovL2xvY2FsaG9zdDo3MDAw6L+b6KGM5b+r54Wn5YiG5p6Q5aCG5b+r54Wn5YiG5p6Q5Li76KaB5Zyo5pyA5ZCO6Z2i55qESGVhcA==">http://localhost:7000进行快照分析堆快照分析主要在最后面的Heap<i class="fa fa-external-link-alt"></i></span> Histogram里，里面根据class列出dump时所有存活对象。</p>
-<p><strong>分析同样一个dump快照，MAT需要的额外内存比jhat要小的很多，所以建议使用MAT来进行分析</strong></p>
-<h2 id="分析"><a href="#分析" class="headerlink" title="分析"></a>分析</h2><p>打开浏览器<span class="exturl" data-url="aHR0cDovL2xvY2FsaG9zdDo3MDAwLOivpemhtemdouaPkOS+m+S6huWHoOS4quafpeivouWKn+iDveWPr+S+m+S9v+eUqA==">http://localhost:7000,该页面提供了几个查询功能可供使用<i class="fa fa-external-link-alt"></i></span></p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">All classes including platform</span><br><span class="line">Show all members of the rootset</span><br><span class="line">Show instance counts for all classes (including platform)</span><br><span class="line">Show instance counts for all classes (excluding platform)</span><br><span class="line">Show heap histogram</span><br><span class="line">Show finalizer summary</span><br><span class="line">Execute Object Query Language (OQL) query</span><br></pre></td></tr></table></figure>
-
-<p>一般查看堆异常情况主要看这个两个部分，show instance counts for all classes(excluding platform), 平台外的所有对象信息。如下图：</p>
-<p><img src="http://ityouknow.com/assets/images/2016/jvm-jhat-excluding-paltform.png" loading="lazy"></p>
-<p>show heap histogram以树状图形形式展示堆情况。如下图：</p>
-<p><img src="http://ityouknow.com/assets/images/2016/jvm-jhat-heap-histogram.png" loading="lazy"></p>
-<p>具体排查时需要结合代码，观察是否大量应该被回收的对象在一直被引用或者是否有占用内存特别大的对象无法被回收。</p>
-<p><strong>一般情况下，会down到客户端用工具来分析。</strong></p>
-<h1 id="jstack"><a href="#jstack" class="headerlink" title="jstack"></a>jstack</h1><p>jstack用于生成java虚拟机当前时刻的线程快照，线程快照是当前java虚拟机内每一条线程正在执行的方法堆栈集合，生成线程快照的主要目的是定位出现长时间卡顿的原因，如线程间死锁，死循环，请求外部资源导致的长时间等待等等，线程出现卡顿的时候提供jstack来查看各个线程的调用堆栈，就可以知道没有响应的线程到底在后台做什么事情，或者等待什么资源，如果java程序崩溃生成core文件，jstack工具可以用来获取core文件的java  stack和native stack的信息，从而可以轻松的知道java程序是如果崩溃和在程序何处发生的问题，另外，jstack工具还可以附属到正在运行的java程序中，看到当时的java程序的java stack和native stack的信息，如果现在运行的java程序呈现hung的状态，jstack是非常有用的。</p>
-<h2 id="命令格式-4"><a href="#命令格式-4" class="headerlink" title="命令格式"></a>命令格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jstack [option] LVMID</span><br></pre></td></tr></table></figure>
-
-<h2 id="option参数-2"><a href="#option参数-2" class="headerlink" title="option参数"></a>option参数</h2><blockquote>
-<ul>
-<li>-F: 当正在输出请求不被响应时，强制输出线程堆栈</li>
-<li>-l: 除堆栈外，显示关于锁的附件信息</li>
-<li>-m: 如果调用到本地方法的话，可以显示c&#x2F;c++的堆栈</li>
-</ul>
-</blockquote>
-<h2 id="示例-3"><a href="#示例-3" class="headerlink" title="示例"></a>示例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line">jstack -l 11494 | more</span><br><span class="line">2016-07-28 13:40:04</span><br><span class="line">Full thread dump Java HotSpot(TM) 64-Bit Server VM (24.71-b01 mixed mode):</span><br><span class="line"></span><br><span class="line">&quot;Attach Listener&quot; daemon prio=10 tid=0x00007febb0002000 nid=0x6b6f waiting on condition [0x0000000000000000]</span><br><span class="line">   java.lang.Thread.State: RUNNABLE</span><br><span class="line"></span><br><span class="line">   Locked ownable synchronizers:</span><br><span class="line">        - None</span><br><span class="line"></span><br><span class="line">&quot;http-bio-8005-exec-2&quot; daemon prio=10 tid=0x00007feb94028000 nid=0x7b8c waiting on condition [0x00007fea8f56e000]</span><br><span class="line">java.lang.Thread.State: WAITING (parking)</span><br><span class="line">	at sun.misc.Unsafe.park(Native Method)</span><br><span class="line">	- parking to wait for  &lt;0x00000000cae09b80&gt; (a java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject)</span><br><span class="line">	at java.util.concurrent.locks.LockSupport.park(LockSupport.java:186)</span><br><span class="line">	at java.util.concurrent.locks.AbstractQueuedSynchronizer$ConditionObject.await(AbstractQueuedSynchronizer.java:2043)</span><br><span class="line">	at java.util.concurrent.LinkedBlockingQueue.take(LinkedBlockingQueue.java:442)</span><br><span class="line">	at org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:104)</span><br><span class="line">	at org.apache.tomcat.util.threads.TaskQueue.take(TaskQueue.java:32)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.getTask(ThreadPoolExecutor.java:1068)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1130)</span><br><span class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)</span><br><span class="line">	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)</span><br><span class="line">	at java.lang.Thread.run(Thread.java:745)</span><br><span class="line"></span><br><span class="line">Locked ownable synchronizers:</span><br><span class="line">	- None</span><br><span class="line">  .....</span><br></pre></td></tr></table></figure>
-
-<h2 id="分析-1"><a href="#分析-1" class="headerlink" title="分析"></a>分析</h2><p>这里面有一篇文章解释的很好 <span class="exturl" data-url="aHR0cDovL3d3dy5ob2xsaXNjaHVhbmcuY29tL2FyY2hpdmVzLzExMA==">分析打印出来的文件内容<i class="fa fa-external-link-alt"></i></span></p>
-<h1 id="jinfo"><a href="#jinfo" class="headerlink" title="jinfo"></a>jinfo</h1><p>jinfo(JVM Configuration info) 这个命令作用是实时查看和调整虚拟机运行参数，之前的jps -v命令只能查看到显示指定的参数，如果想要查看未被显示指定的参数的值就需要使用jinfo了。</p>
-<h2 id="命令格式-5"><a href="#命令格式-5" class="headerlink" title="命令格式"></a>命令格式</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">jinfo [oprion] [args] LVMID</span><br></pre></td></tr></table></figure>
-
-<h2 id="oprion参数"><a href="#oprion参数" class="headerlink" title="oprion参数"></a>oprion参数</h2><blockquote>
-<ul>
-<li>-flag: 输出指定args参数的值</li>
-<li>-flags: 不需要args参数，输出所有JVM参数的值</li>
-<li>-sysprops: 属性系统属性，等同于System.getProperties();</li>
-</ul>
-</blockquote>
-<h2 id="示例-4"><a href="#示例-4" class="headerlink" title="示例"></a>示例</h2><figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">jinfo -flag CMSInitiatingOccupancyFraction 11494 </span><br><span class="line">XX:CMSInitiatingOccupancyFraction=80</span><br></pre></td></tr></table></figure>
+          <p>jvm调优的常用命令</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/jvm/learn-jvm-004/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1481,7 +800,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-03-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bgc%E7%AE%97%E6%B3%95%E5%92%8C%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-003/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -1499,7 +818,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-03-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bgc%E7%AE%97%E6%B3%95%E5%92%8C%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/" class="post-title-link" itemprop="url">JVM系列之gc算法和垃圾收集器</a>
+          <a href="/jvm/learn-jvm-003/" class="post-title-link" itemprop="url">JVM系列之gc算法和垃圾收集器</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1510,7 +829,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-03 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-03T00:00:00+08:00">2018-04-03</time>
+      <time title="创建时间：2018-04-03 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-03T15:51:43+08:00">2018-04-03</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1535,7 +854,7 @@
           <p>这篇文章给大家介绍GC都有哪几种算法, 以及JVM都有哪些垃圾收集器, 它们的工作原理。</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/jvm/2018-04-03-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bgc%E7%AE%97%E6%B3%95%E5%92%8C%E5%9E%83%E5%9C%BE%E6%94%B6%E9%9B%86%E5%99%A8/">
+              <a class="btn" href="/jvm/learn-jvm-003/">
                 阅读全文 &raquo;
               </a>
             </div>
@@ -1566,7 +885,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-02-JVM%E7%B3%BB%E5%88%97%E4%B9%8BJVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-002/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -1584,7 +903,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-02-JVM%E7%B3%BB%E5%88%97%E4%B9%8BJVM%E5%86%85%E5%AD%98%E7%BB%93%E6%9E%84/" class="post-title-link" itemprop="url">JVM系列之jvm内存结构</a>
+          <a href="/jvm/learn-jvm-002/" class="post-title-link" itemprop="url">JVM系列之jvm内存结构</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1595,7 +914,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-02 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-02T00:00:00+08:00">2018-04-02</time>
+      <time title="创建时间：2018-04-02 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-02T15:51:43+08:00">2018-04-02</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1617,162 +936,15 @@
     
     
     <div class="post-body" itemprop="articleBody">
-          <p>所有的java开发人员可能会遇到这样的困惑？我该为堆内存设置多大空间呢？OutOfMemoryError的异常到底涉及到运行时数据的那块区域？该怎么解决呢？其实如果你经常解决服务器性能问题，那么这些问题就会变得非常常见，了解JVM内存也是为了服务器出现性能问题的时候可以快速的了解哪块内存区域出现问题，以便于快速的解决生产故障。</p>
-<p>先看一张图，这张图很清晰的说明JVM内存结构布局。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvm03.png" loading="lazy"></p>
-<p>JVM内存结构主要有三大块：堆内存，方法区和栈，堆内存是JVM中最大的一块内存区域，有年轻代和老年代组成，而年轻代内存有被分成三部分: Eden空间，From Survivor空间和To Survivor空间，默认情况下年轻代按照8:1:1的比例来分配；</p>
-<p>方法区存储类信息，常量，静态变量等数据，是线程共享的区域，为与java堆区分，方法区还有一个别名Non-Heap(非堆)；栈有分为java虚拟机栈和本地方法栈主要用于方法的执行。</p>
-<h1 id="JVM内存的参数配置与调优"><a href="#JVM内存的参数配置与调优" class="headerlink" title="JVM内存的参数配置与调优"></a>JVM内存的参数配置与调优</h1><p>在通过一张图来了解如果通过参数来控制各区域的内存大小</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvm04.png" loading="lazy"></p>
-<p>堆内存的接口和内存限制参数</p>
-<p><img src="http://1.file.leanote.top/59dd8e27ab644110ea00037f/1507692006806_6.png?e=1542619030&token=ym9ZIrtxjozPN4G9he3-FHPOPxAe-OQmxzol5EOk:ynl6-k9K6esU6ow1iTUM2oXbw3Q" loading="lazy"></p>
-<p>控制参数：</p>
-<ul>
-<li>-Xms设置堆的最小空间大小</li>
-<li>-Xmx设置堆的最大空间大小</li>
-<li>-XX:NewSize设置新生代最小空间大小</li>
-<li>-XX:MaxNewSize设置新生代最大空间大小</li>
-<li>-XX:PermSize设置永久代最小空间大小</li>
-<li>-XX:MaxPermSize设置永久代最大空间大小</li>
-<li>-Xss设置每个线程的栈空间大小</li>
-</ul>
-<p>JDK8之后JVM没有方法区概念，所以没有PermSize参数设置取而代之的是Metaspace，参数设置为</p>
-<ul>
-<li>-XX:MetaspaceSize, 初始空间大小，达到该值就会触发垃圾收集器进行类型卸载，同时GC会对该值进行调整：如果释放了大量的空间，就会适当降低该值。如果释放了很小的空间，那么在不超过MaxMetaspaceSize时，适当提高该值。</li>
-<li>-XX:MaxMetaspaceSize，最大空间，默认是没有限制的。<blockquote>
-<p>除了上面两个指定大小的选项以外，还有两个GC相关的属性：</p>
-</blockquote>
-</li>
-<li>-XX:MinMetaspaceFreeRatio，在GC之后，最小的metaspace剩余空间容量的百分比，减少为分配空间所导致的垃圾收集</li>
-<li>-XX:MaxMetaspaceFreeRatio，在GC之后，最大的metaspace剩余空间容量的百分比，减少为释放空间所导致的垃圾收集</li>
-</ul>
-<p>没有直接设置老年代的参数，但是可以通过设置堆空间大小和新生代空间大小两个参数来间接控制。</p>
-<blockquote>
-<p>老年代空间大小&#x3D;堆空间大小-新生代空间大小</p>
-</blockquote>
-<p>从更高的一个堆纬度再次来看JVM和系统调用之间的关系</p>
-<p>内存是计算机中运行系统和软件的场所，将内存划分为不同的区域只是人为添加的概念，目的是为了更好的描述Java虚拟机对内存的管理。</p>
-<p><img src="http://www.itmind.net/assets/images/2017/jvm/jvm05.png" loading="lazy"><br><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E5%86%85%E5%AD%98%E5%88%92%E5%88%86.png" loading="lazy"></p>
-<p>方法区和堆内存是所有线程共享的内存区域，而java栈和本地方法栈，程序计数器是线程私有的内存区域。</p>
-<p>下面我们详细介绍每个区域的作用；</p>
-<h1 id="Java堆-Heap"><a href="#Java堆-Heap" class="headerlink" title="Java堆(Heap)"></a>Java堆(Heap)</h1><p>对于大多数应用来说，java堆(Java Heap)是java虚拟机管理内存中最大的一块，Java堆是被所有线程共享的一块内存区域，在虚拟机启动时创建，此内存的唯一目的就是存放对象实例，几乎所有的对象实例都在这里分配内存。</p>
-<p>java堆是垃圾收集器管理的主要区域，因此很多时候也被称为&quot;GC堆&quot;. 如果从内存回收的角度看，由于现在收集器基本上都是采用分代收集算法，所以Java堆中还可以细分为：新生代和老年代；在细分一点的有Eden空间，From Survivor空间和To Survivor空间等。</p>
-<p>根据Java虚拟机规范的规定，Java堆可以处于物理上不连续的内存当中，只要逻辑上是连续的即可，就像我们的磁盘空间一样，在实现时，既可以实现固定大小的，也可以是可扩展的，不过当前主流的虚拟机都是按照可扩展来实现的(通过-Xms和-Xmx控制)。</p>
-<p>如果在堆中没有内存完成实例分配，并且堆内存也无法再扩展时，将会抛出OutOfMemoryError异常。</p>
-<h1 id="方法区-Method-Area"><a href="#方法区-Method-Area" class="headerlink" title="方法区(Method Area)"></a>方法区(Method Area)</h1><p>方法区(Method Area)与堆一样，是各个线程共享的内存区域，它用于存储已被虚拟机加载的类信息，常量，静态变量，即时编译器编译后的代码等数据。虽然Java虚拟机规范把方法区描述成为堆的一个逻辑部分，但是它却有一个别名叫做Non-Heap(非堆)，目前应该是与Java堆区分开来。</p>
-<p>在方法区中，有一部分被称为运行时常量池，常量池除了用于存放在编译期生成的各种字面量和符号引用外，还存储了直接引用。运行时常量池具有动态性，常量并不一定是在编译期才会被放入常量池，在运行期间也有可能有新的常量进入池中，如调用String类的intern()方法就会将字符串对象放入字符串常量池中。</p>
-<p>对于习惯于在HotSpot虚拟机上开发和部署程序的开发者来说，很多人愿意把方法区称之为&quot;永久代&quot;(Permanent Generation), 本质上两者并不等价，仅仅是因为HotSpot虚拟机的设计团队选择把GC分代收集扩展至方法区，或者说使用永久代来实现方法区而已。</p>
-<p>Java虚拟机规范对这个区域的限制非常宽松，除了和Java堆一样不需要连续的内存和可以选择固定大小或者扩展外，还可以选择不实现垃圾收集，相对而言，垃圾收集行为在这个区域是相对比较少出现的，但并非数据进入了方法区就如永久代的名字一样&quot;永久&quot;存在了，这个区域的内存回收目标主要是针对常量池的回收和对类型的卸载，一般来说这个区域的回收成绩比较难以令人满意，尤其是类型的卸载，条件相当苛刻，但是这部分区域的回收确实是有必要的。</p>
-<p>根据Java虚拟机规范的规定，当方法区无法满足内存分配需求时，将会抛出OutOfMemoryError异常。</p>
-<p>方法区有时候被称为持久代(PermGen)</p>
-<p><img src="http://ifeve.com/wp-content/uploads/2015/05/JUtH_20121024_RuntimeDataAreas_2_MemoryModel-1.png" loading="lazy"></p>
-<p>所有的对象在实例化后整个运行周期内，都会被存放在堆内存中，堆内存又被划分为不同的部分：伊甸区(Eden)，幸存者区域(Survivor Space)，老年代(Old Generation Space).</p>
-<p>方法的执行都是伴随着线程的，原始类型的本地变量以及引用都存放在线程栈中，而引用关联的对象比如String，都存放在堆内存中，为了更好的理解上面这段话，我们可以看一个例子：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">import</span> java.text.SimpleDateFormat;</span><br><span class="line"><span class="keyword">import</span> java.util.Date;</span><br><span class="line"><span class="keyword">import</span> org.apache.log4j.Logger;</span><br><span class="line"></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HelloWorld</span> &#123;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">private</span> <span class="keyword">static</span> <span class="type">Logger</span> <span class="variable">LOGGER</span> <span class="operator">=</span> Logger.getLogger(HelloWorld.class.getName());</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">sayHello</span><span class="params">(String message)</span> &#123;</span><br><span class="line">        <span class="type">SimpleDateFormat</span> <span class="variable">formatter</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">SimpleDateFormat</span>(<span class="string">&quot;dd.MM.YYYY&quot;</span>);</span><br><span class="line">        <span class="type">String</span> <span class="variable">today</span> <span class="operator">=</span> formatter.format(<span class="keyword">new</span> <span class="title class_">Date</span>());</span><br><span class="line">        LOGGER.info(today + <span class="string">&quot;: &quot;</span> + message);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>这段程序的数据在内存中的存放如下：</p>
-<p><img src="http://ifeve.com/wp-content/uploads/2015/05/JUtH_20121024_RuntimeDataAreas_4_MemoryModel.png" loading="lazy"></p>
-<p>通过JConsole工具可以查看运行中的java程序的一些信息，堆内存分配，线程的数量以及加载的类的个数：</p>
-<p><img src="http://ifeve.com/wp-content/uploads/2015/05/JUtH_20121024_RuntimeDataAreas_5_JConsole.png" loading="lazy"></p>
-<h1 id="程序计数器-Program-Counter-Register"><a href="#程序计数器-Program-Counter-Register" class="headerlink" title="程序计数器(Program Counter Register)"></a>程序计数器(Program Counter Register)</h1><p>程序计数器(Program Counter Register)是一块较小的内存空间，它的作用可以看做是当前线程所执行的字节码的行号指示器，在虚拟机的概念模型中(仅是概念模型，各种虚拟机可能会通过一些更高效的方式去实现), 字节码解释器工作时就是通过改变这个计数器的值来获取下一条需要执行的字节码指令，多支，循环，调转，异常处理，线程恢复等基础功能都需要依赖这个计数器来完成。</p>
-<p>由于java虚拟机的多线程是通过线程轮流切换并分配处理器执行时间的方式来实现的，在任何一个确定的时刻，一个处理器(对于多核处理器来说是一个内核)只会执行一条线程中的指令。因此，为了线程切换后恢复到正确的执行位置，每条线程都需要有一个独立的计数器，各条线程之间的计数器互不影响，独立存储，我们称这类内存区域为线程私有的内存。</p>
-<p>如果线程正在执行的是一个Java方法，这个计数器记录的值是正在执行的虚拟机字节码指定的地址。如果正在执行的是native方法，这个计时器值为空(undefined)。</p>
-<p><strong>此内存区域是唯一一个在Java虚拟机规范中没有规定任何OutOfMemoryError异常的区域。</strong></p>
-<h1 id="JVM栈-JVM-Stacks"><a href="#JVM栈-JVM-Stacks" class="headerlink" title="JVM栈(JVM Stacks)"></a>JVM栈(JVM Stacks)</h1><p>与程序计数器一样，Java虚拟机栈(java virtual machine stacks)也是线程私有的，<strong>它的生命周期与线程相同，虚拟机栈描述的是Java方法执行的内存模型</strong>，每个方法被执行的时候都会同时创建一个栈桢(stack frame)用于存储局部变量表，操作栈，动态链接，方法出口等信息，** 每一个方法被调用直至执行完成的过程，对应着一个栈桢在虚拟机栈中从入栈到出栈的过程。**<br>局部变量表存放了编译期可知的各种基本数据类型(boolean、byte、char、short、int、float、long、double)、对象引用(referencel类型，它不等同于对象本身，根据不同的虚拟机实现，它可能是一个指向对象起始值的引用指针，也可能是指向一个代表对象地址的句柄或者其它与此对象相关的位置)和returnAddress类型(指向了一条字节码指令的地址)。</p>
-<p>其中64位长度的long和double类型的数据会占用2个局部变量空间(slot)，其余的数据类型只占用1个slot，局部变量表所需要的内存空间在编译期完成分配，当进入一个方法时，这个方法需要在帧中分配多大的局部变量表空间是完全确定的，在方法运行期间不会改变局部变量表的大小。</p>
-<p>栈这种数据结构，特点是后进先出(LIFO)， 栈中的数据元素就是栈桢。下图就是栈桢这样数据在java栈中的结构图</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%A0%88%E5%B8%A7%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84.png" loading="lazy"></p>
-<p>在java虚拟机规范中，对这个区域规范了两种异常情况：如果线程请求的栈深度大于虚拟机所允许的深度，将抛出StackOverflowError异常；如果虚拟机栈可以动态扩展(当前大部分java虚拟机都是动态可扩展的，只不过java虚拟机规范中也允许固定长度的虚拟机栈)，当扩展时无法申请到足够的内存时会抛出OutOfMemoryError异常。</p>
-<h1 id="本地方法栈-Native-Method-Stacks"><a href="#本地方法栈-Native-Method-Stacks" class="headerlink" title="本地方法栈(Native Method Stacks)"></a>本地方法栈(Native Method Stacks)</h1><p>本地方法栈(native method stacks)与虚拟机栈所发挥的作用是非常相似的，其区别不够是虚拟机栈为虚拟机执行java方法(也就是字节码)服务，而本地方法栈则是为虚拟机提供调用native方法的服务。虚拟机规范中对本地方法栈中的方法使用的语言，使用方式与数据结构并没有强制规定，因此具体的虚拟机可以自由实现它，甚至有的虚拟机(譬如Hotspot虚拟机)直接就把本地方法栈和虚拟机栈合二为一，与虚拟机栈一样，本地方法栈区域也会抛出StackOverflowError和OutOfMemoryError异常。</p>
-<h1 id="直接内存"><a href="#直接内存" class="headerlink" title="直接内存"></a>直接内存</h1><p>直接内存并不在Java虚拟机管理的内存区域内，也不是Java虚拟机规范中定义的内存区域，直接内存是java程序不经过java虚拟机分配，直接使用外部主机的物理内存，这在一些场景中(如文件复制)可能提高性能，但是在使用过程中，也需要注意内存大小的限制(包括物理和系统级的限制)，否则也会抛出OutOfMemoryError异常。</p>
-<h1 id="内存异常"><a href="#内存异常" class="headerlink" title="内存异常"></a>内存异常</h1><p>虽然说有Java虚拟机帮助我们管理内存，但在管理过程中仍然有内存异常发生的可能，具体的说就是，除了前面内存划分中说到的程序计数器外，其他区域都有OutOfMemoryError异常发生的可能。</p>
-<p>我们可以给java虚拟机设置参数来模拟这些异常的发生，不同的java虚拟机运行结果可能不同，这里使用的是orcale公司的虚拟机。</p>
-<blockquote>
-<p>特别说明：下面如果没有特殊说明，默认使用的是JDK8的虚拟机</p>
-</blockquote>
-<h2 id="java堆内存异常"><a href="#java堆内存异常" class="headerlink" title="java堆内存异常"></a>java堆内存异常</h2><p>Java堆是用于存储对象实例的，所以只要不断地创建对象，来把java堆区域填满，并且保证垃圾回收机制不能清除这些对象，就可以模拟出java堆内存的异常。</p>
-<p>模拟程序代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> java.util.ArrayList;</span><br><span class="line"><span class="keyword">import</span> java.util.List;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * 模拟java堆内存异常</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">HeapOOM</span> &#123;</span><br><span class="line">    <span class="comment">// 声明静态内部类，声明周期和外部类一样，使垃圾收集器无法回收这些对象占用的内存空间</span></span><br><span class="line">    <span class="keyword">static</span> <span class="keyword">class</span> <span class="title class_">OOMObject</span> &#123;&#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args &#123;</span></span><br><span class="line"><span class="params">        List&lt;OOMObject&gt; objs = new ArrayList&lt;&gt;()</span>;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span> (<span class="literal">true</span>) &#123;</span><br><span class="line">            objs.add(<span class="keyword">new</span> <span class="title class_">OOMObject</span>());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>这里使用MAT(Memory Analyzer Tools)内存分析插件来对内存异常进行分析，IDE使用的是Eclipse，当然idea可以是可以安装的。</p>
-<p>在eclipse的debug配置页面，设置jvm参数</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/Debug%E8%AE%BE%E7%BD%AE.jpg" loading="lazy"></p>
-<p>jvm debug参数设置如下：<br>-verbose:gc -Xms20M -Xmx20M -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError -XX:+HeapDumpPath&#x3D;D:\workspace\java\dump</p>
-<p>参数说明：</p>
-<p>-Xms和-Xmx参数表示的是设置java堆的最小值和最大值，这里都是20M，-XX后面可以添加一些额外的设置，PrintGCDetails表示打印出来垃圾收集时的详细信息，HeapDumpOnOutOfMemoryError表示发送OutOfMemoryError错误时记录内存快照，HempDumpPath后面是存放内存快照文件的地址。</p>
-<p>debug结果如下：</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/Java%E5%A0%86%E5%BC%82%E5%B8%B8%E8%BF%90%E8%A1%8C%E7%BB%93%E6%9E%9C.jpg" loading="lazy"></p>
-<p>从上图中可以看出，java堆内存(Heap space)出现了OutOfMemoryError的错误，并且在我们指定的文件夹中生成了内存异常时的快照文件，在使用MAT内存分析工具之前，我们还要知道内存溢出和内存泄漏的区别。我们在前面没有将OutOfMemoryError错误翻译成内存泄漏或内存异常错误。而是使用原本的英文，也是为了准确性考虑，因为内存泄漏和内存溢出都只是导致异常出血的原因，该事情的结果才产生了OutOfMemoryError错误。</p>
-<p><strong>内存泄漏和内存溢出的区别：</strong></p>
-<ul>
-<li>内存泄漏是指程序员在申请内存后，无法释放已申请的内存空间，内存泄漏会导致内存资源耗光，通俗的说就是对象站着内存空间无法归还给系统。</li>
-<li>内存溢出是指程序员申请内存使用时，发现内存空间不能满足使用，很常见的例子就是在存一个很大数时超过了该数值类型的最大值，通俗的说就是程序使用内存空间时发现无法满足自己的要求。</li>
-</ul>
-<p>知道了内存泄漏和内存溢出的区别，我们再来使用MAT工具分析内存快照，首先调出MAT视图，然后在&quot;File&quot;选项中选择&quot;Open Heap Dump&quot;打开内存快照文件。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E8%B0%83%E5%87%BAMAT%E8%A7%86%E5%9B%BE.jpg" loading="lazy"><br><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%89%93%E5%BC%80%E5%86%85%E5%AD%98%E5%BF%AB%E7%85%A7%E6%96%87%E4%BB%B6.jpg" loading="lazy"></p>
-<p>打开快照文件后，可以清晰的看出内存异常问题存在的地方(problem suscept)。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E5%86%85%E5%AD%98%E5%BF%AB%E7%85%A7.jpg" loading="lazy"></p>
-<p>点击Details可以看出具体的细节。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E5%85%B7%E4%BD%93%E7%BB%86%E8%8A%82.jpg" loading="lazy"></p>
-<p>可以看到OOMOnject占用的内存空间很大，查看该对象是否有到GC Roots的引用链，导致垃圾收集器无法回收对象占用的内存空间。这里可以看到由于内存空间被占用后无法回收导致的OutOfMemoryError异常，异常产生的原因是内存泄漏。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%9F%A5%E7%9C%8B%E6%B3%84%E9%9C%B2%E5%AF%B9%E8%B1%A1%E5%88%B0GCRoots%E7%9A%84%E5%BC%95%E7%94%A8%E9%93%BE.gif" loading="lazy"></p>
-<h2 id="栈内存异常"><a href="#栈内存异常" class="headerlink" title="栈内存异常"></a>栈内存异常</h2><p>在Hotspot虚拟机中并不区分java虚拟机栈和本地方法栈，栈的容量可以通过-Xss参数来设定。</p>
-<p>在java虚拟机规范中描述了两种栈出现的异常：</p>
-<ul>
-<li>如果线程请求的栈深度大于虚拟机所允许的深度，抛出StackOverflowError异常。</li>
-<li>如果虚拟机栈在动态扩展时无法申请到足够的内存，抛出OutOfMemoryError异常。</li>
-</ul>
-<p>栈的深度是由栈的内存空间决定的，请求的栈越深，也即是已经使用栈空间占用越大，所以上面规定的两种异常都是有重叠之处的，一种异常也可能会导致另外一种异常的发生，到底是栈的内存空间大小引起的内存异常还是已使用的栈内存空间太大引起的内存异常。</p>
-<p>减少栈内存的容量和定义大量的局部变量来增加栈桢中局部变量表的长度，在理论上都是可以产生StackOverflowError异常和OutOfMemory异常的。</p>
-<p>但是下面的代码只能产生StackOverflowError异常。</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 栈StackOverflowError异常</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">JVMStackSOF</span> &#123;</span><br><span class="line">    <span class="keyword">private</span> <span class="type">int</span> <span class="variable">stackLength</span> <span class="operator">=</span> <span class="number">1</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 递归函数</span></span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">void</span> <span class="title function_">stackLeak</span><span class="params">()</span> &#123;</span><br><span class="line">        stackLength++;</span><br><span class="line">        </span><br><span class="line">        stackLeak();</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> &#123;</span><br><span class="line">        <span class="type">JVMStackSOF</span> <span class="variable">sof</span> <span class="operator">=</span> <span class="keyword">new</span> <span class="title class_">JVMStackSOF</span>();</span><br><span class="line">        <span class="keyword">try</span> &#123;</span><br><span class="line">            sof.stackLeak();</span><br><span class="line">        &#125; <span class="keyword">catch</span>(Exception e) &#123;</span><br><span class="line">            e.printStackTrace();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>debug的参数为：-verbose:gc -Xss128K -XX:+PrintGCDetails -XX:+HeapDumpOnOutOfMemoryError -XX:+HeapDumpPath&#x3D;D:\worksapce\java\dump</p>
-<p>debug结果如下：只产生了StackOverflowError异常。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%A0%88%E5%BC%82%E5%B8%B8%E7%BB%93%E6%9E%9C1.jpg" loading="lazy"></p>
-<p>而在多线程环境中测试，才可以模拟出OutOfMemoryError异常。</p>
-<p><strong>特别提醒：此代码运行时会导致系统假死，具有一定的风险性，请在运行前保存好其他文件。</strong></p>
-<p>代码如下：</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line">// 栈OutOfMemoryError异常</span><br><span class="line">public class JVMStackOOM &#123;</span><br><span class="line">    private void dontStop() &#123;</span><br><span class="line">        while(true)&#123;&#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    // 危险代码请勿随便尝试</span><br><span class="line">    public void stackLeakByThread() &#123;</span><br><span class="line">        // 死循环不断创建线程</span><br><span class="line">        while(true) &#123;</span><br><span class="line">            new Thread(()-&gt; doneStop()).start();</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    public static void main(String[] args) &#123;</span><br><span class="line">        JVMStackOOM oom = new JVMStackOOM();</span><br><span class="line">        oom.stackLeakByThread();</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p>由于在做这项危险的测试时，系统死掉了，所以笔者并没有得出实际结果，根据&lt;&lt;深入理解java虚拟机：JVM高级特性和最佳实践&gt;&gt;，这里给出理论结果，也可以在虚拟机系统中尝试运行此代码，但也可能会出现外部系统假死的情况，读者可以自己去尝试。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%A0%88%E5%BC%82%E5%B8%B8%E7%BB%93%E6%9E%9C2.jpg" loading="lazy"></p>
-<h2 id="方法区内存异常"><a href="#方法区内存异常" class="headerlink" title="方法区内存异常"></a>方法区内存异常</h2><p>方法区有运行时常量池，如果向常量池中添加大量的内容，就可以导致方法区内存异常，可以通过-XX:PermSize和-XX:MaxPermSize来限制方法区的大小，进而限制常量池的容量，常量池在编译期可以放入常量，在运行时可以再添加新的常量，因为不存在内存被占用无法回收，所以这里的异常不是内存泄漏导致的，而是内存溢出。</p>
-<p>代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">RuntimeConstantPoolOOM</span> &#123;</span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] agrs)</span> &#123;</span><br><span class="line">        List&lt;String&gt; strs = <span class="keyword">new</span> <span class="title class_">ArrayList</span>&lt;&gt;();</span><br><span class="line">        <span class="type">int</span> <span class="variable">i</span> <span class="operator">=</span> <span class="number">0</span>;</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">            list.add(String.of(i++).intern());</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>经过实际测试，发现JDK6会出现下面内存异常的情况，而在JDK7和JDK8中，发现垃圾收集器会不断的回收常量池的旧常量所占用的内存，以便新的常量可以进入，从而避免了常量池内存异常发生，这说明新版本的JDK对这部分做了优化。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%96%B9%E6%B3%95%E5%8C%BA%E5%B8%B8%E9%87%8F%E6%B1%A0%E5%86%85%E5%AD%98%E5%BC%82%E5%B8%B8.jpg" loading="lazy"></p>
-<p>方法区用来存放类的相关信息，如类名，访问修饰符，常量池，字段描述，方法描述等，是方法区内存异常的大致思路是产生大量的类填满方法区，直到方法区内存溢出。由于实验操作起来比较麻烦。可以通过字节码增强技术，直接操作字节码来动态的生成大量的类，比较没有测试过，所以这里也是使用书中的运行结果。</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E6%96%B9%E6%B3%95%E5%8C%BA%E5%86%85%E5%AD%98%E5%BC%82%E5%B8%B8.jpg" loading="lazy"></p>
-<h2 id="直接内存异常"><a href="#直接内存异常" class="headerlink" title="直接内存异常"></a>直接内存异常</h2><p>直接内存的大小可以通过 -XX:MaxDirectMemorySize来指定，如果不指定默认是和java堆的最大值(-Xmx)一样，可以通过使用Unsafe类申请内存，有该类的使用限制，只有引导类的加载器才会返回对象实例，所以只能通过反射来获取Unsafe类的实例，但是在Eclipse中导入该类的包会报错，解决方法参考文章</p>
-<p><span class="exturl" data-url="aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3lhb2NoYW5nbGlhbmcxNTkvYXJ0aWNsZS9kZXRhaWxzLzUwNTU2Nzcy">elipse中解决import sun.misc.Unsafe报错的方法<i class="fa fa-external-link-alt"></i></span></p>
-<p>代码如下：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 模拟自己内存异常</span></span><br><span class="line"><span class="keyword">public</span> <span class="keyword">class</span> <span class="title class_">DirectMemoryOOM</span> &#123;</span><br><span class="line">    pivate <span class="keyword">static</span> <span class="type">final</span> <span class="variable">_1Mb</span> <span class="operator">=</span> <span class="number">1024</span> * <span class="number">1024</span>;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title function_">main</span><span class="params">(String[] args)</span> <span class="keyword">throws</span> Exception &#123;</span><br><span class="line">        <span class="type">Field</span> <span class="variable">field</span> <span class="operator">=</span> Unsafe.class.getDeclaredFields()[<span class="number">0</span>];</span><br><span class="line">        f.setAccessible(<span class="literal">true</span>);</span><br><span class="line">        <span class="type">Unsafe</span> <span class="variable">safe</span> <span class="operator">=</span> (Unsafe)field.get(<span class="literal">null</span>);</span><br><span class="line">        <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</span><br><span class="line">            <span class="comment">// 申请内存</span></span><br><span class="line">            safe.allocateMemory(_1Mb);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-
-<p>debug参数： -verbose:gc -Xmx20M -Xms20M -XX:MaxDirectMemorySize&#x3D;100M -XX:+PrintGCDetails</p>
-<p>由于在eclipse中使用jdk1.6和jdk1.7运行该程序时会直接闪退，无法得到输出的异常，所以直接在控制台中使用jdk1.8编译运行该程序。运行结果如下：</p>
-<p><img src="https://wenshixin.gitee.io/blog/2018/08/28/Java%E8%99%9A%E6%8B%9F%E6%9C%BA%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86/%E7%9B%B4%E6%8E%A5%E5%86%85%E5%AD%98%E5%BC%82%E5%B8%B8.jpg" loading="lazy"></p>
-<p><strong>注意：模拟内存异常是一件危险的事情，所以务必在测试前保存好各种文件，以免造成文件内容丢失.</strong></p>
-<h1 id="JVM那个区域出现的OutOfMemoryError"><a href="#JVM那个区域出现的OutOfMemoryError" class="headerlink" title="JVM那个区域出现的OutOfMemoryError"></a>JVM那个区域出现的OutOfMemoryError</h1><p>对内存结构清晰的认识同样可以帮助理解不同的OutOfMemoryError：</p>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">&quot;main&quot;</span>: java.lang.OutOfMemoryError: java heap space</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>原因：</strong> 对象不能分配到堆内存中</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">&quot;main&quot;</span>: java.lang.OutOfMemoryError: PerGen space</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>原因：</strong> 类或方法不能被加载到持久代，他可能出现在一个程序加载很多类的时候，比如引用了很多第三方的库；</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">&quot;main&quot;</span>: java.lang.OutOfMemoryError：Requested array size exceeds VM limit</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>原因：</strong> 创建的数组大于堆内存的空间</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">&quot;main&quot;</span>：java.lang.OutOfMemoryError：request &lt;size&gt; bytes <span class="keyword">for</span> &lt;reason&gt;，Out of swap space?</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>原因：</strong> 本地方法内存分配失败，JNI，本地库和java虚拟机都会从本地堆中分配内存空间。</p>
-</blockquote>
-<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">Exception in thread <span class="string">&quot;main&quot;</span>：java.lang.OutOfMemoryError：&lt;reason&gt; &lt;satck trace&gt;(navite method)</span><br></pre></td></tr></table></figure>
-<blockquote>
-<p><strong>原因：</strong> 同样也是本地方法内存分配失败，只不过是JNI或者本地方法或者java虚拟机发现</p>
-</blockquote>
-
+          <p>jvm内存结构</p>
+          <!--noindex-->
+            <div class="post-button">
+              <a class="btn" href="/jvm/learn-jvm-002/">
+                阅读全文 &raquo;
+              </a>
+            </div>
+          <!--/noindex-->
+        
       
     </div>
 
@@ -1798,7 +970,7 @@
   
 
   <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="">
-    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/2018-04-01-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/jvm/learn-jvm-001/">
 
     <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
       <meta itemprop="image" content="/images/logo.svg">
@@ -1816,7 +988,7 @@
     </span>
       <header class="post-header">
         <h2 class="post-title" itemprop="name headline">
-          <a href="/jvm/2018-04-01-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/" class="post-title-link" itemprop="url">JVM系列之java类加载机制</a>
+          <a href="/jvm/learn-jvm-001/" class="post-title-link" itemprop="url">JVM系列之java类加载机制</a>
         </h2>
 
         <div class="post-meta-container">
@@ -1827,7 +999,7 @@
       </span>
       <span class="post-meta-item-text">发表于</span>
 
-      <time title="创建时间：2018-04-01 00:00:00" itemprop="dateCreated datePublished" datetime="2018-04-01T00:00:00+08:00">2018-04-01</time>
+      <time title="创建时间：2018-04-01 15:51:43" itemprop="dateCreated datePublished" datetime="2018-04-01T15:51:43+08:00">2018-04-01</time>
     </span>
     <span class="post-meta-item">
       <span class="post-meta-item-icon">
@@ -1852,7 +1024,7 @@
           <p>类加载机制的奥妙</p>
           <!--noindex-->
             <div class="post-button">
-              <a class="btn" href="/jvm/2018-04-01-JVM%E7%B3%BB%E5%88%97%E4%B9%8Bjava%E7%B1%BB%E5%8A%A0%E8%BD%BD%E6%9C%BA%E5%88%B6/">
+              <a class="btn" href="/jvm/learn-jvm-001/">
                 阅读全文 &raquo;
               </a>
             </div>
