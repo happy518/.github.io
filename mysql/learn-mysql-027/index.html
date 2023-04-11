@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#222" media="(prefers-color-scheme: dark)"><meta name="generator" content="Hexo 6.3.0">
+
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+  <meta name="google-site-verification" content="5AUIVYTbHIAuz-eQtxSfZbWW5eg9_EVZMSQycIuXrG0">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic%7CInconsolata:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.3.0/css/all.min.css" integrity="sha256-/4UQcSmErDzPCMAiuOiWPVVsNN2s3ZY/NsmXNcj0IFc=" crossorigin="anonymous">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.1.1/animate.min.css" integrity="sha256-PR7ttpcvz8qrF57fur/yAx1qXMFJeJFiA6pSzWi0OIE=" crossorigin="anonymous">
+
+<script class="next-config" data-name="main" type="application/json">{"hostname":"theme-next.js.org","root":"/","images":"/images","scheme":"Gemini","darkmode":true,"version":"8.15.0","exturl":true,"sidebar":{"position":"left","display":"post","padding":18,"offset":12},"copycode":{"enable":true,"style":"default"},"bookmark":{"enable":false,"color":"#222","save":"auto"},"mediumzoom":true,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"stickytabs":false,"motion":{"enable":true,"async":true,"transition":{"menu_item":"fadeInDown","post_block":"fadeIn","post_header":"fadeInDown","post_body":"fadeInDown","coll_header":"fadeInLeft","sidebar":"fadeInUp"}},"prism":false,"i18n":{"placeholder":"搜索...","empty":"没有找到任何搜索结果：${query}","hits_time":"找到 ${hits} 个搜索结果（用时 ${time} 毫秒）","hits":"找到 ${hits} 个搜索结果"},"path":"/search.json","localsearch":{"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false}}</script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/config.min.js"></script>
+
+    <meta name="description" content="mysql锁详细介绍">
+<meta property="og:type" content="article">
+<meta property="og:title" content="mysql学习笔记-mysql锁详细介绍">
+<meta property="og:url" content="https://theme-next.js.org/mysql/learn-mysql-027/index.html">
+<meta property="og:site_name" content="亦彤blog">
+<meta property="og:description" content="mysql锁详细介绍">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-027/image-20230410144413286.png">
+<meta property="article:published_time" content="2023-04-07T15:04:53.000Z">
+<meta property="article:modified_time" content="2023-04-10T09:12:58.358Z">
+<meta property="article:author" content="yangpengbing">
+<meta property="article:tag" content="mysql5.7">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://theme-next.js.org/mysql/learn-mysql-027/image-20230410144413286.png">
+
+
+<link rel="canonical" href="https://theme-next.js.org/mysql/learn-mysql-027/">
+
+
+
+<script class="next-config" data-name="page" type="application/json">{"sidebar":"","isHome":false,"isPost":true,"lang":"zh-CN","comments":true,"permalink":"https://theme-next.js.org/mysql/learn-mysql-027/","path":"mysql/learn-mysql-027/","title":"mysql学习笔记-mysql锁详细介绍"}</script>
+
+<script class="next-config" data-name="calendar" type="application/json">""</script>
+<title>mysql学习笔记-mysql锁详细介绍 | 亦彤blog</title>
+  
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-43861RVV8R"></script>
+  <script class="next-config" data-name="google_analytics" type="application/json">{"tracking_id":"G-43861RVV8R","only_pageview":false}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/analytics/google-analytics.min.js"></script>
+
+
+
+
+
+
+
+
+  <noscript>
+    <link rel="stylesheet" href="/css/noscript.css">
+  </noscript>
+<link rel="alternate" href="/atom.xml" title="亦彤blog" type="application/atom+xml">
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" class="use-motion">
+  <div class="headband"></div>
+
+  <main class="main">
+    <div class="column">
+      <header class="header" itemscope itemtype="http://schema.org/WPHeader"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏" role="button">
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+        <span class="toggle-line"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <i class="logo-line"></i>
+      <p class="site-title">亦彤blog</p>
+      <i class="logo-line"></i>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger" aria-label="搜索" role="button">
+        <i class="fa fa-search fa-fw fa-lg"></i>
+    </div>
+  </div>
+</div>
+
+
+
+<nav class="site-nav">
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">59</span></a></li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+</nav>
+
+
+
+  <div class="search-pop-overlay">
+    <div class="popup search-popup"><div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocapitalize="off" maxlength="80"
+           placeholder="搜索..." spellcheck="false"
+           type="search" class="search-input">
+  </div>
+  <span class="popup-btn-close" role="button">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div class="search-result-container no-result">
+  <div class="search-result-icon">
+    <i class="fa fa-spinner fa-pulse fa-5x"></i>
+  </div>
+</div>
+
+    </div>
+  </div>
+
+</header>
+        
+  
+  <aside class="sidebar">
+
+    <div class="sidebar-inner sidebar-nav-active sidebar-toc-active">
+      <ul class="sidebar-nav">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <div class="sidebar-panel-container">
+        <!--noindex-->
+        <div class="post-toc-wrap sidebar-panel">
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E9%94%81%E4%BB%8B%E7%BB%8D"><span class="nav-number">1.</span> <span class="nav-text">mysql锁介绍</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E9%94%81"><span class="nav-number">1.1.</span> <span class="nav-text">什么是锁</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%AF%8F%E4%B8%AA%E6%95%B0%E6%8D%AE%E5%BA%93%E7%9A%84%E9%94%81%E5%AE%9E%E7%8E%B0%E5%AE%8C%E5%85%A8%E4%B8%8D%E5%90%8C"><span class="nav-number">1.2.</span> <span class="nav-text">每个数据库的锁实现完全不同</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#latch"><span class="nav-number">1.3.</span> <span class="nav-text">latch</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E7%9A%84%E5%8C%BA%E5%88%AB"><span class="nav-number">1.4.</span> <span class="nav-text">锁的区别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E6%9F%A5%E7%9C%8B%E9%94%81%E4%BF%A1%E6%81%AF"><span class="nav-number">2.</span> <span class="nav-text">mysql查看锁信息</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E9%94%81%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.</span> <span class="nav-text">mysql锁的类型</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%8F%E5%90%91%E9%94%81%E4%BB%8B%E7%BB%8D"><span class="nav-number">3.1.</span> <span class="nav-text">意向锁介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%84%8F%E5%90%91%E9%94%81%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.2.</span> <span class="nav-text">意向锁的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%8A%A0%E9%94%81%E4%BB%A5%E5%8F%8A%E6%9F%A5%E7%9C%8B"><span class="nav-number">3.3.</span> <span class="nav-text">加锁以及查看</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E9%94%81%E4%B8%8E%E5%B9%B6%E5%8F%91"><span class="nav-number">4.</span> <span class="nav-text">锁与并发</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">4.1.</span> <span class="nav-text">事务隔离级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E4%B8%AD%E9%AA%8C%E8%AF%81%E8%84%8F%E8%AF%BB"><span class="nav-number">4.2.</span> <span class="nav-text">mysql中验证脏读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E4%B8%AD%E9%AA%8C%E8%AF%81%E4%B8%8D%E5%8F%AF%E9%87%8D%E5%A4%8D%E8%AF%BB"><span class="nav-number">4.3.</span> <span class="nav-text">mysql中验证不可重复读</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E4%B8%AD%E9%AA%8C%E8%AF%81%E5%B9%BB%E8%AF%BB"><span class="nav-number">4.4.</span> <span class="nav-text">mysql中验证幻读</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#innodb%E4%B8%AD%E9%94%81%E7%9A%84%E7%AE%97%E6%B3%95"><span class="nav-number">5.</span> <span class="nav-text">innodb中锁的算法</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#record-lock"><span class="nav-number">5.1.</span> <span class="nav-text">record lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#gap-lock"><span class="nav-number">5.2.</span> <span class="nav-text">gap lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#next-key-lock"><span class="nav-number">5.3.</span> <span class="nav-text">next-key lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%94%81%E4%B8%8E%E9%9A%94%E7%A6%BB%E7%BA%A7%E5%88%AB"><span class="nav-number">5.4.</span> <span class="nav-text">锁与隔离级别</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#next-key-lock%E4%BC%98%E5%8C%96%E4%B8%BArecord-lock"><span class="nav-number">5.5.</span> <span class="nav-text">next-key lock优化为record lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E9%9D%9E%E5%94%AF%E4%B8%80%E7%B4%A2%E5%BC%95%E7%9A%84%E7%AD%89%E5%80%BC%E6%9F%A5%E8%AF%A2"><span class="nav-number">5.6.</span> <span class="nav-text">非唯一索引的等值查询</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%81%87%E5%A6%82RR%E6%B2%A1%E6%9C%89Gap-lock"><span class="nav-number">5.7.</span> <span class="nav-text">假如RR没有Gap lock</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95%E4%B8%8E%E9%94%81"><span class="nav-number">5.8.</span> <span class="nav-text">二级索引与锁</span></a></li></ol></li></ol></div>
+        </div>
+        <!--/noindex-->
+
+        <div class="site-overview-wrap sidebar-panel">
+          <div class="site-author animated" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="yangpengbing"
+      src="/images/logo.svg">
+  <p class="site-author-name" itemprop="name">yangpengbing</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap animated">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+        <a href="/archives/">
+          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-categories">
+          <a href="/categories/">
+        <span class="site-state-item-count">10</span>
+        <span class="site-state-item-name">分类</span></a>
+      </div>
+      <div class="site-state-item site-state-tags">
+          <a href="/tags/">
+        <span class="site-state-item-count">20</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author animated">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;happy518"><i class="fab fa-github fa-fw"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/atom.xml" title="RSS → &#x2F;atom.xml" rel="noopener me"><i class="fa fa-rss fa-fw"></i></a>
+      </span>
+  </div>
+  <div class="cc-license animated" itemprop="license">
+    <span class="exturl cc-opacity" data-url="aHR0cHM6Ly9jcmVhdGl2ZWNvbW1vbnMub3JnL2xpY2Vuc2VzL2J5LW5jLXNhLzQuMC8="><img src="https://cdnjs.cloudflare.com/ajax/libs/creativecommons-vocabulary/2020.11.3/assets/license_badges/big/by_nc_sa.svg" alt="Creative Commons"></span>
+  </div>
+<div class="cc-license animated" itemprop="sponsor">
+  <span class="exturl cc-opacity" title="Deploy with Netlify → https://www.netlify.com" data-url="aHR0cHM6Ly93d3cubmV0bGlmeS5jb20="><img width="120" src="https://www.netlify.com/img/global/badges/netlify-dark.svg" alt="Netlify"></span>
+</div>
+
+        </div>
+      </div>
+    </div>
+
+    
+  </aside>
+
+
+    </div>
+
+    <div class="main-inner post posts-expand">
+
+
+  
+
+
+<div class="post-block">
+  
+  
+
+  <article itemscope itemtype="http://schema.org/Article" class="post-content" lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://theme-next.js.org/mysql/learn-mysql-027/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/logo.svg">
+      <meta itemprop="name" content="yangpengbing">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="亦彤blog">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="post" itemscope itemtype="http://schema.org/CreativeWork">
+      <meta itemprop="name" content="mysql学习笔记-mysql锁详细介绍 | 亦彤blog">
+      <meta itemprop="description" content="mysql锁详细介绍">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          mysql学习笔记-mysql锁详细介绍
+        </h1>
+
+        <div class="post-meta-container">
+          <div class="post-meta">
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-calendar"></i>
+      </span>
+      <span class="post-meta-item-text">发表于</span>
+
+      <time title="创建时间：2023-04-07 23:04:53" itemprop="dateCreated datePublished" datetime="2023-04-07T23:04:53+08:00">2023-04-07</time>
+    </span>
+    <span class="post-meta-item">
+      <span class="post-meta-item-icon">
+        <i class="far fa-folder"></i>
+      </span>
+      <span class="post-meta-item-text">分类于</span>
+        <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+          <a href="/categories/mysql/" itemprop="url" rel="index"><span itemprop="name">mysql</span></a>
+        </span>
+    </span>
+
+  
+</div>
+
+            <div class="post-description">mysql锁详细介绍</div>
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+        <h2 id="mysql锁介绍"><a href="#mysql锁介绍" class="headerlink" title="mysql锁介绍"></a>mysql锁介绍</h2><h3 id="什么是锁"><a href="#什么是锁" class="headerlink" title="什么是锁"></a>什么是锁</h3><ul>
+<li>对共享资源进行并发访问</li>
+<li>提供数据的完整性和一致性</li>
+</ul>
+<h3 id="每个数据库的锁实现完全不同"><a href="#每个数据库的锁实现完全不同" class="headerlink" title="每个数据库的锁实现完全不同"></a>每个数据库的锁实现完全不同</h3><ul>
+<li>MyISAM表锁</li>
+<li>InnoDB行锁</li>
+<li>MSSQL行级锁 with 锁升级</li>
+</ul>
+<h3 id="latch"><a href="#latch" class="headerlink" title="latch"></a>latch</h3><ul>
+<li>mutex</li>
+<li>rw-lock</li>
+</ul>
+<h3 id="锁的区别"><a href="#锁的区别" class="headerlink" title="锁的区别"></a>锁的区别</h3><table>
+<thead>
+<tr>
+<th></th>
+<th>lock</th>
+<th>latch</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>对象</td>
+<td>事务</td>
+<td>线程</td>
+</tr>
+<tr>
+<td>保护</td>
+<td>数据库内容</td>
+<td>内存数据结构</td>
+</tr>
+<tr>
+<td>持续时间</td>
+<td>整个事务过程</td>
+<td>临界资源</td>
+</tr>
+<tr>
+<td>模式</td>
+<td>行锁，表锁，意向锁</td>
+<td>读写锁，互斥锁</td>
+</tr>
+<tr>
+<td>死锁</td>
+<td>通过waits for graph，time out等机制进行死锁检测与处理</td>
+<td>无死锁检测与处理机制，仅通过应用程序加锁的顺序(latch leveling)保证无死锁的情况发生</td>
+</tr>
+<tr>
+<td>存在于</td>
+<td>lock manager的哈希表中</td>
+<td>每个数据结构对象中</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>latch是针对程序内部资源(比如，全局变量)锁的定义，而这里的lock针对的是数据库的事务</p>
+<p>lock是有latch来保证和实现的</p>
+</blockquote>
+<h2 id="mysql查看锁信息"><a href="#mysql查看锁信息" class="headerlink" title="mysql查看锁信息"></a>mysql查看锁信息</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 主要是给内核开发人员给予帮助</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb mutex;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------+-----------------------------+----------+</span></span><br><span class="line"><span class="operator">|</span> Type   <span class="operator">|</span> Name                        <span class="operator">|</span> Status   <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+-----------------------------+----------+</span></span><br><span class="line"><span class="operator">|</span> InnoDB <span class="operator">|</span> rwlock: log0log.cc:<span class="number">846</span>      <span class="operator">|</span> waits<span class="operator">=</span><span class="number">2</span>  <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> InnoDB <span class="operator">|</span> sum rwlock: buf0buf.cc:<span class="number">1462</span> <span class="operator">|</span> waits<span class="operator">=</span><span class="number">94</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------+-----------------------------+----------+</span></span><br></pre></td></tr></table></figure>
+
+<h2 id="mysql锁的类型"><a href="#mysql锁的类型" class="headerlink" title="mysql锁的类型"></a>mysql锁的类型</h2><p>S行级共享锁，X行级排它锁，IS意向共享锁，IX意向排它锁，AI自增锁</p>
+<h3 id="意向锁介绍"><a href="#意向锁介绍" class="headerlink" title="意向锁介绍"></a>意向锁介绍</h3><ul>
+<li>揭示下一层请求的锁类型</li>
+<li>IS：事务想要获得一张表中某几行的共享锁</li>
+<li>IX：事务想要获得一张表中某几行的排他锁</li>
+<li>innodb存储引擎中意向锁都是表锁</li>
+</ul>
+<img src="/mysql/learn-mysql-027/image-20230410144413286.png" alt="image-20230410144413286" style="zoom:50%;">
+
+<ol>
+<li><p>假设有事务tx1，需要对记录A进行加X锁：</p>
+<blockquote>
+<ul>
+<li>在该记录所在数据库上加一把意向锁IX</li>
+<li>在记录所在的表上加一把意向锁IX</li>
+<li>在记录所在的页上加一把意向锁IX</li>
+<li>最后在该记录A上加一把X锁</li>
+</ul>
+</blockquote>
+</li>
+<li><p>假设此时有事务tx2需要对记录B(假设和记录A在同一个页中)加S锁</p>
+<blockquote>
+<ul>
+<li>在该记录所在数据库上加一把意向锁IS</li>
+<li>在该记录所在表上加一把意向锁IS</li>
+<li>在该记录所在的页上加一把意向锁IS</li>
+<li>最后在该记录B上加一把S锁</li>
+</ul>
+</blockquote>
+</li>
+<li><p>假设此时有事务tx3需要在记录A上加S锁</p>
+<blockquote>
+<ul>
+<li>在该记录所在的数据库上加一把意向锁IS</li>
+<li>在该记录所在的表上加一把意向锁IS</li>
+<li>在该记录所在的页上加一把意向锁IS</li>
+<li>发现该记录被tx1事务锁定，那么tx3需要等待，直到tx1进行commit</li>
+</ul>
+</blockquote>
+</li>
+<li><p>总结：</p>
+<blockquote>
+<ul>
+<li>加锁是从上往下，一层一层加锁的</li>
+<li>意向锁都是相互兼容的，因为意向锁表示的是下一层在请求什么类型的锁</li>
+</ul>
+</blockquote>
+</li>
+<li><p>锁兼容</p>
+<table>
+<thead>
+<tr>
+<th>锁兼容</th>
+<th>IX</th>
+<th>X</th>
+<th>IS</th>
+<th>S</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>IX</td>
+<td>兼容</td>
+<td>冲突</td>
+<td>兼容</td>
+<td>冲突</td>
+</tr>
+<tr>
+<td>X</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>冲突</td>
+</tr>
+<tr>
+<td>IS</td>
+<td>兼容</td>
+<td>冲突</td>
+<td>兼容</td>
+<td>兼容</td>
+</tr>
+<tr>
+<td>S</td>
+<td>冲突</td>
+<td>冲突</td>
+<td>兼容</td>
+<td>兼容</td>
+</tr>
+</tbody></table>
+</li>
+</ol>
+<h3 id="意向锁的作用"><a href="#意向锁的作用" class="headerlink" title="意向锁的作用"></a>意向锁的作用</h3><ul>
+<li>意向锁是为了实现多粒度的锁，表示在数据库中不但可以实现行级别的锁，还可以实现页级别的锁，以及数据库级别的锁</li>
+<li>如果没有意向锁的话，当你去锁一张表的时候，需要对表下单所有记录都进行加锁操作，且对其他事务刚刚插入进来的记录(游标已经扫过的范围)就没发在上面加锁了，此时就没有实现锁表的功能</li>
+<li>上述锁的操作都是在内存中完成的，不会存放在数据库中，且大部分加的都是意向锁，都是兼容的，锁释放操作则是从记录开始从下往上进行释放的</li>
+<li>innodb没有数据库级别的锁，页没有页级别的锁(innodb只能在表和记录上加锁)，所以innodb的意向锁只能加在表上，即innodb存储引擎中意向锁都是表锁</li>
+</ul>
+<h3 id="加锁以及查看"><a href="#加锁以及查看" class="headerlink" title="加锁以及查看"></a>加锁以及查看</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">desc</span> db_join_test.tbl_join_test_1;</span><br><span class="line"><span class="operator">+</span><span class="comment">-------+---------+------+-----+---------+-------+</span></span><br><span class="line"><span class="operator">|</span> Field <span class="operator">|</span> Type    <span class="operator">|</span> <span class="keyword">Null</span> <span class="operator">|</span> Key <span class="operator">|</span> <span class="keyword">Default</span> <span class="operator">|</span> Extra <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+---------+------+-----+---------+-------+</span></span><br><span class="line"><span class="operator">|</span> a     <span class="operator">|</span> <span class="type">int</span>(<span class="number">11</span>) <span class="operator">|</span> <span class="keyword">NO</span>   <span class="operator">|</span> PRI <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> b     <span class="operator">|</span> <span class="type">int</span>(<span class="number">11</span>) <span class="operator">|</span> YES  <span class="operator">|</span>     <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span>  <span class="operator">|</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">-------+---------+------+-----+---------+-------+</span></span><br><span class="line"></span><br><span class="line"><span class="comment">-- 开启一个事务</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">begin</span>;</span><br><span class="line"><span class="comment">-- 对记录a=2添加排他锁</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> db_join_test.tbl_join_test_1 <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">2</span> <span class="keyword">for</span> <span class="keyword">update</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br><span class="line"><span class="operator">|</span> a <span class="operator">|</span> b  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端2</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> engine innodb status;</span><br><span class="line"></span><br><span class="line">TRANSACTIONS                                                                                                                                           </span><br><span class="line"><span class="comment">------------                                                                                                                                           </span></span><br><span class="line">Trx id counter <span class="number">2190086</span>                                                                                                                                 </span><br><span class="line">Purge done <span class="keyword">for</span> trx<span class="string">&#x27;s n:o &lt; 0 undo n:o &lt; 0 state: running but idle                                                                                      </span></span><br><span class="line"><span class="string">History list length 0                                                                                                                                  </span></span><br><span class="line"><span class="string">LIST OF TRANSACTIONS FOR EACH SESSION:                                                                                                                 </span></span><br><span class="line"><span class="string">---TRANSACTION 562947983244024, not started                                                                                                            </span></span><br><span class="line"><span class="string">0 lock struct(s), heap size 1136, 0 row lock(s)                                                                                                        </span></span><br><span class="line"><span class="string">---TRANSACTION 2190084, ACTIVE 249 sec                                                                                                                 </span></span><br><span class="line"><span class="string">2 lock struct(s), heap size 1136, 1 row lock(s)                                                                                                        </span></span><br><span class="line"><span class="string">MySQL thread id 2, OS thread handle 281466160628160, query id 26 172.19.0.1 hadoop                                                                     </span></span><br><span class="line"><span class="string">TABLE LOCK table `db_join_test`.`tbl_join_test_1` trx id 2190084 lock mode IX                                                                          </span></span><br><span class="line"><span class="string">RECORD LOCKS space id 105 page no 3 n bits 72 index PRIMARY of table `db_join_test`.`tbl_join_test_1` trx id 2190084 lock_mode X locks rec but not gap </span></span><br><span class="line"><span class="string">Record lock, heap no 3 PHYSICAL RECORD: n_fields 4; compact format; info bits 0                                                                        </span></span><br><span class="line"><span class="string">0: len 4; hex 80000002; asc     ;;                                                                                                                    </span></span><br><span class="line"><span class="string">1: len 6; hex 000000216514; asc    !e ;;                                                                                                              </span></span><br><span class="line"><span class="string">2: len 7; hex b10000016a011c; asc     j  ;;                                                                                                           </span></span><br><span class="line"><span class="string">3: len 4; hex 8000000b; asc     ;;     </span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ul>
+<li>上面的信息需要开启参数 innodb_status_output_locks， 可以在配置文件中设置打开，不会影响运行时的性能，只有在show engine innodb status时才会用到 </li>
+<li>需要修改mysql数据库的默认事务提交 autocommit &#x3D; 0</li>
+</ul>
+<p>TABLE LOCK table <code>db_join_test</code>.<code>tbl_join_test_1</code> trx id 2190084 lock mode IX说明在表上加了意向锁IX(table lock)</p>
+<p>X lockc rec but not gap就是记录锁(record lock)</p>
+<p>record lock表示锁定是记录</p>
+<p>heap no 3 PHYSICAL RECORD: n_fields 4;表示锁住记录的heap no为3的记录物理记录，有4个列组成</p>
+<p>compact format;表示的是记录存储格式 (Dynamic其实也是compact的格式)</p>
+<p>info bits 0表示这条记录没有被删除，非0表示被修改或者删除</p>
+</blockquote>
+<ul>
+<li><p>INNODB_TRX查看</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1</span></span><br><span class="line"><span class="comment">-- 开启一个事务</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">begin</span>;</span><br><span class="line"><span class="comment">-- 对记录a=2添加排他锁</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> db_join_test.tbl_join_test_1 <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">2</span> <span class="keyword">for</span> <span class="keyword">update</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br><span class="line"><span class="operator">|</span> a <span class="operator">|</span> b  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端2</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.innodb_trx;</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">1.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">trx_id                     <span class="operator">|</span> <span class="number">2190086</span></span><br><span class="line">trx_state                  <span class="operator">|</span> <span class="keyword">RUNNING</span></span><br><span class="line">trx_started                <span class="operator">|</span> <span class="number">2023</span><span class="number">-04</span><span class="number">-10</span> <span class="number">07</span>:<span class="number">36</span>:<span class="number">50</span></span><br><span class="line">trx_requested_lock_id      <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">trx_wait_started           <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">trx_weight                 <span class="operator">|</span> <span class="number">2</span></span><br><span class="line">trx_mysql_thread_id        <span class="operator">|</span> <span class="number">2</span></span><br><span class="line">trx_query                  <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">trx_operation_state        <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">trx_tables_in_use          <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">trx_tables_locked          <span class="operator">|</span> <span class="number">1</span></span><br><span class="line">trx_lock_structs           <span class="operator">|</span> <span class="number">2</span></span><br><span class="line">trx_lock_memory_bytes      <span class="operator">|</span> <span class="number">1136</span></span><br><span class="line">trx_rows_locked            <span class="operator">|</span> <span class="number">1</span></span><br><span class="line">trx_rows_modified          <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">trx_concurrency_tickets    <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">trx_isolation_level        <span class="operator">|</span> READ COMMITTED</span><br><span class="line">trx_unique_checks          <span class="operator">|</span> <span class="number">1</span></span><br><span class="line">trx_foreign_key_checks     <span class="operator">|</span> <span class="number">1</span></span><br><span class="line">trx_last_foreign_key_error <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">trx_adaptive_hash_latched  <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">trx_adaptive_hash_timeout  <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">trx_is_read_only           <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">trx_autocommit_non_locking <span class="operator">|</span> <span class="number">0</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol>
+<li>trx_query: 事务运行的sql语句，这里是null，因为它是指当前运行的sql语句，如果运行完了，就看不到了</li>
+<li>trx_tables_locked：1表锁IX</li>
+<li>trx_lock_structs：2总共有2把锁</li>
+<li>trx_rows_locked：1记录锁</li>
+<li>trx_isolation_level：READ COMMITTED当前数据库隔离级别RC</li>
+</ol>
+</blockquote>
+</li>
+<li><p>INNODB_LOCKS和INNODB_LOCK_WAITS</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1</span></span><br><span class="line"><span class="comment">-- 开启一个事务</span></span><br><span class="line"><span class="comment">-- 对记录a=2添加排他锁</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> db_join_test.tbl_join_test_1 <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">2</span> <span class="keyword">for</span> <span class="keyword">update</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br><span class="line"><span class="operator">|</span> a <span class="operator">|</span> b  <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">2</span> <span class="operator">|</span> <span class="number">11</span> <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">---+----+</span></span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端2</span></span><br><span class="line"><span class="comment">-- 对记录a=2添加共享锁</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> db_join_test.tbl_join_test_1 <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">2</span> lock <span class="keyword">in</span> share mode;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端3</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.`INNODB_LOCKS`;</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">1.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">lock_id     <span class="operator">|</span> <span class="number">562947983244024</span>:<span class="number">105</span>:<span class="number">3</span>:<span class="number">3</span></span><br><span class="line">lock_trx_id <span class="operator">|</span> <span class="number">562947983244024</span></span><br><span class="line">lock_mode   <span class="operator">|</span> S</span><br><span class="line">lock_type   <span class="operator">|</span> RECORD</span><br><span class="line">lock_table  <span class="operator">|</span> `db_join_test`.`tbl_join_test_1`</span><br><span class="line">lock_index  <span class="operator">|</span> <span class="keyword">PRIMARY</span></span><br><span class="line">lock_space  <span class="operator">|</span> <span class="number">105</span></span><br><span class="line">lock_page   <span class="operator">|</span> <span class="number">3</span></span><br><span class="line">lock_rec    <span class="operator">|</span> <span class="number">3</span></span><br><span class="line">lock_data   <span class="operator">|</span> <span class="number">2</span></span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">2.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">lock_id     <span class="operator">|</span> <span class="number">2190087</span>:<span class="number">105</span>:<span class="number">3</span>:<span class="number">3</span></span><br><span class="line">lock_trx_id <span class="operator">|</span> <span class="number">2190087</span></span><br><span class="line">lock_mode   <span class="operator">|</span> X</span><br><span class="line">lock_type   <span class="operator">|</span> RECORD</span><br><span class="line">lock_table  <span class="operator">|</span> `db_join_test`.`tbl_join_test_1`</span><br><span class="line">lock_index  <span class="operator">|</span> <span class="keyword">PRIMARY</span></span><br><span class="line">lock_space  <span class="operator">|</span> <span class="number">105</span></span><br><span class="line">lock_page   <span class="operator">|</span> <span class="number">3</span></span><br><span class="line">lock_rec    <span class="operator">|</span> <span class="number">3</span></span><br><span class="line">lock_data   <span class="operator">|</span> <span class="number">2</span></span><br><span class="line"></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> information_schema.`INNODB_LOCK_WAITS` \G;</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">1.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">requesting_trx_id <span class="operator">|</span> <span class="number">562947983244024</span></span><br><span class="line">requested_lock_id <span class="operator">|</span> <span class="number">562947983244024</span>:<span class="number">105</span>:<span class="number">3</span>:<span class="number">3</span></span><br><span class="line">blocking_trx_id   <span class="operator">|</span> <span class="number">2190087</span></span><br><span class="line">blocking_lock_id  <span class="operator">|</span> <span class="number">2190087</span>:<span class="number">105</span>:<span class="number">3</span>:<span class="number">3</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol>
+<li>需要在终端2中设置innodb_lock_wait_timeout(锁等待时间)长一点，如果时间太短，可能看不到信息</li>
+<li>终端2sql会hang住，因为终端1的sql还没有commit</li>
+<li>lock_id是由txid，space，page_no，heap_no组成</li>
+</ol>
+</blockquote>
+</li>
+<li><p>mysql5.7的sys数据库中查看</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1和终端2根上面保存一直</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> sys.innodb_lock_waits;</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">1.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">wait_started                 <span class="operator">|</span> <span class="number">2023</span><span class="number">-04</span><span class="number">-10</span> <span class="number">08</span>:<span class="number">06</span>:<span class="number">24</span></span><br><span class="line">wait_age                     <span class="operator">|</span> <span class="number">0</span>:<span class="number">01</span>:<span class="number">50</span></span><br><span class="line">wait_age_secs                <span class="operator">|</span> <span class="number">110</span></span><br><span class="line">locked_table                 <span class="operator">|</span> `db_join_test`.`tbl_join_test_1`</span><br><span class="line">locked_index                 <span class="operator">|</span> <span class="keyword">PRIMARY</span></span><br><span class="line">locked_type                  <span class="operator">|</span> RECORD</span><br><span class="line">waiting_trx_id               <span class="operator">|</span> <span class="number">2190106</span></span><br><span class="line">waiting_trx_started          <span class="operator">|</span> <span class="number">2023</span><span class="number">-04</span><span class="number">-10</span> <span class="number">07</span>:<span class="number">55</span>:<span class="number">34</span></span><br><span class="line">waiting_trx_age              <span class="operator">|</span> <span class="number">0</span>:<span class="number">12</span>:<span class="number">40</span></span><br><span class="line">waiting_trx_rows_locked      <span class="operator">|</span> <span class="number">2</span></span><br><span class="line">waiting_trx_rows_modified    <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">waiting_pid                  <span class="operator">|</span> <span class="number">5</span></span><br><span class="line">waiting_query                <span class="operator">|</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> db_join_test.tbl ... <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">2</span> lock <span class="keyword">in</span> share mode</span><br><span class="line">waiting_lock_id              <span class="operator">|</span> <span class="number">2190106</span>:<span class="number">105</span>:<span class="number">3</span>:<span class="number">3</span></span><br><span class="line">waiting_lock_mode            <span class="operator">|</span> S</span><br><span class="line">blocking_trx_id              <span class="operator">|</span> <span class="number">2190087</span></span><br><span class="line">blocking_pid                 <span class="operator">|</span> <span class="number">2</span></span><br><span class="line">blocking_query               <span class="operator">|</span> <span class="operator">&lt;</span><span class="keyword">null</span><span class="operator">&gt;</span></span><br><span class="line">blocking_lock_id             <span class="operator">|</span> <span class="number">2190087</span>:<span class="number">105</span>:<span class="number">3</span>:<span class="number">3</span></span><br><span class="line">blocking_lock_mode           <span class="operator">|</span> X</span><br><span class="line">blocking_trx_started         <span class="operator">|</span> <span class="number">2023</span><span class="number">-04</span><span class="number">-10</span> <span class="number">07</span>:<span class="number">54</span>:<span class="number">39</span></span><br><span class="line">blocking_trx_age             <span class="operator">|</span> <span class="number">0</span>:<span class="number">13</span>:<span class="number">35</span></span><br><span class="line">blocking_trx_rows_locked     <span class="operator">|</span> <span class="number">1</span></span><br><span class="line">blocking_trx_rows_modified   <span class="operator">|</span> <span class="number">0</span></span><br><span class="line">sql_kill_blocking_query      <span class="operator">|</span> KILL QUERY <span class="number">2</span></span><br><span class="line">sql_kill_blocking_connection <span class="operator">|</span> KILL <span class="number">2</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<blockquote>
+<p>锁都是锁在索引上的，无论是聚集索引还是辅助索引，通过locked_index进行查看</p>
+<p>当超过innodb_lock_wait_timeout设置的阈值，等待请求的事务就会抱超时，在某些业务场景下，锁超时是无法避免的</p>
+</blockquote>
+<h2 id="锁与并发"><a href="#锁与并发" class="headerlink" title="锁与并发"></a>锁与并发</h2><p>locking(锁)，concurrency control(并发控制)，isolation(隔离级别)，serializability(序列化)</p>
+<p>以上四个概念其实在数据库中讲的就是同一个概念：锁是用来实现并发控制，并发控制是用来实现隔离级别，隔离级别是通过锁来实现的，锁的目的是为了使事务之间执行是序列化的</p>
+<h3 id="事务隔离级别"><a href="#事务隔离级别" class="headerlink" title="事务隔离级别"></a>事务隔离级别</h3><table>
+<thead>
+<tr>
+<th>隔离级别</th>
+<th>隔离级别的值</th>
+<th>导致的问题</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Read-Uncommitted</td>
+<td>0</td>
+<td>导致脏读</td>
+</tr>
+<tr>
+<td>Read-Committed</td>
+<td>1</td>
+<td>避免了脏读，允许不可重复读和幻读</td>
+</tr>
+<tr>
+<td>Repeatable-Read</td>
+<td>2</td>
+<td>避免了脏读。不可重复读，允许幻读</td>
+</tr>
+<tr>
+<td>Serializable</td>
+<td>3</td>
+<td>串行化读，事务只能一个一个执行，避免了脏读，不可重复读，幻读。执行效率慢，使用时慎重。</td>
+</tr>
+</tbody></table>
+<ul>
+<li><p>脏读： 一个事务对数据进行了增删改，但未提交，另一个事务可以读取到未被提交的数据，如果第一个事务这时候回滚了，那么第二个事务就读到了脏数据。</p>
+</li>
+<li><p>不可重复读：一个事务中发生了两次读操作，第一个读操作和第二次读操作之间，另外一个事务对数据进行了修改，这个两次读取的数据是不一致的。</p>
+</li>
+<li><p>幻读：第一个事务对一定范围的数据进行批量修改，第二个事务在这个范围增加了一条数据，这个时候第一个事务就会丢失对新增数据的修改。</p>
+</li>
+</ul>
+<blockquote>
+<ol>
+<li>不可重复读诗事务并发带来的问题，可重复读是事务隔离级别</li>
+<li>隔离级别越高，越能保证数据的完整性和一致性，但是对并发性能的影响也越大。大多数的数据库默认隔离级别是Read-Committed，比如SqlServer, Oracle。少数数据库默认隔离级别为Repeatable-Read。比如 Mysql InnoDB</li>
+<li>隔离级别越低，事务请求的锁越少，或者保持锁的时间就越短</li>
+<li>隔离性：一个事务所在的修改，对其他事务是不可见的，好似是串行执行的</li>
+</ol>
+</blockquote>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1</span></span><br><span class="line"><span class="comment">-- 创建事务隔离级别测试的数据库和表</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> database db_tranction_test;</span><br><span class="line">mysql<span class="operator">&gt;</span> use db_tranction_test;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tbl_trx(a <span class="type">int</span> <span class="keyword">primary</span> key, b <span class="type">int</span>, c <span class="type">int</span>);</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端2</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">begin</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl_trx(a, b, c) <span class="keyword">select</span> <span class="number">1</span>, <span class="number">2</span>, <span class="number">3</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_trx;</span><br></pre></td></tr></table></figure>
+
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端3</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">begin</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl_trx(a, b, c) <span class="keyword">select</span> <span class="number">4</span>, <span class="number">5</span>, <span class="number">6</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_trx;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">commit</span>;</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<ol>
+<li>终端3在commit之前，查询不大终端2中的数据，在终端2中也查询不到终端3中的数据</li>
+<li>终端3在commit之后，查询不大终端2中的数据，而终端2中可以查询到终端3中的数据</li>
+<li>其实是不符合隔离性要求的，查询数据库的事务隔离级别select @@transaction_isolation</li>
+<li>一般线上环境使用Read-Commited</li>
+</ol>
+</blockquote>
+<h3 id="mysql中验证脏读"><a href="#mysql中验证脏读" class="headerlink" title="mysql中验证脏读"></a>mysql中验证脏读</h3><h3 id="mysql中验证不可重复读"><a href="#mysql中验证不可重复读" class="headerlink" title="mysql中验证不可重复读"></a>mysql中验证不可重复读</h3><h3 id="mysql中验证幻读"><a href="#mysql中验证幻读" class="headerlink" title="mysql中验证幻读"></a>mysql中验证幻读</h3><h2 id="innodb中锁的算法"><a href="#innodb中锁的算法" class="headerlink" title="innodb中锁的算法"></a>innodb中锁的算法</h2><h3 id="record-lock"><a href="#record-lock" class="headerlink" title="record lock"></a>record lock</h3><h3 id="gap-lock"><a href="#gap-lock" class="headerlink" title="gap lock"></a>gap lock</h3><h3 id="next-key-lock"><a href="#next-key-lock" class="headerlink" title="next-key lock"></a>next-key lock</h3><h3 id="锁与隔离级别"><a href="#锁与隔离级别" class="headerlink" title="锁与隔离级别"></a>锁与隔离级别</h3><h3 id="next-key-lock优化为record-lock"><a href="#next-key-lock优化为record-lock" class="headerlink" title="next-key lock优化为record lock"></a>next-key lock优化为record lock</h3><h3 id="非唯一索引的等值查询"><a href="#非唯一索引的等值查询" class="headerlink" title="非唯一索引的等值查询"></a>非唯一索引的等值查询</h3><h3 id="假如RR没有Gap-lock"><a href="#假如RR没有Gap-lock" class="headerlink" title="假如RR没有Gap lock"></a>假如RR没有Gap lock</h3><h3 id="二级索引与锁"><a href="#二级索引与锁" class="headerlink" title="二级索引与锁"></a>二级索引与锁</h3>
+    </div>
+
+    
+    
+    
+
+    <footer class="post-footer">
+          <div class="post-tags">
+              <a href="/tags/mysql5-7/" rel="tag"># mysql5.7</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-item">
+                <a href="/mysql/learn-mysql-026/" rel="prev" title="mysql学习笔记-mysql的join算法">
+                  <i class="fa fa-chevron-left"></i> mysql学习笔记-mysql的join算法
+                </a>
+            </div>
+            <div class="post-nav-item">
+            </div>
+          </div>
+    </footer>
+  </article>
+</div>
+
+
+
+
+
+
+</div>
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+
+
+<div class="copyright">
+  &copy; 2014 – 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">NexT</span>
+</div>
+  <div class="powered-by">由 <span class="exturl" data-url="aHR0cHM6Ly9oZXhvLmlv">Hexo</span> & <a href="https://theme-next.js.org/">NexT.Gemini</a> 强力驱动
+  </div><div class="footer-custom">
+Website source code <span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hleG8tbmV4dC9oZXhvLW5leHQuZ2l0aHViLmlv">here</span>
+</div>
+
+
+    </div>
+  </footer>
+
+  
+  <div class="back-to-top" role="button" aria-label="返回顶部">
+    <i class="fa fa-arrow-up fa-lg"></i>
+    <span>0%</span>
+  </div>
+
+  <span class="exturl github-corner" data-url="aHR0cHM6Ly9naXRodWIuY29tL2hhcHB5NTE4" title="Follow me on GitHub" aria-label="Follow me on GitHub"><svg width="80" height="80" viewBox="0 0 250 250" aria-hidden="true"><path d="M0,0 L115,115 L130,115 L142,142 L250,250 L250,0 Z"></path><path d="M128.3,109.0 C113.8,99.7 119.0,89.6 119.0,89.6 C122.0,82.7 120.5,78.6 120.5,78.6 C119.2,72.0 123.4,76.3 123.4,76.3 C127.3,80.9 125.5,87.3 125.5,87.3 C122.9,97.6 130.6,101.9 134.4,103.2" fill="currentColor" style="transform-origin: 130px 106px;" class="octo-arm"></path><path d="M115.0,115.0 C114.9,115.1 118.7,116.5 119.8,115.4 L133.7,101.6 C136.9,99.2 139.9,98.4 142.2,98.6 C133.8,88.0 127.5,74.4 143.8,58.0 C148.5,53.4 154.0,51.2 159.7,51.0 C160.3,49.4 163.2,43.6 171.4,40.1 C171.4,40.1 176.1,42.5 178.8,56.2 C183.1,58.6 187.2,61.8 190.9,65.4 C194.5,69.0 197.7,73.2 200.1,77.6 C213.8,80.2 216.3,84.9 216.3,84.9 C212.7,93.1 206.9,96.0 205.4,96.6 C205.1,102.4 203.0,107.8 198.3,112.5 C181.9,128.9 168.3,122.5 157.7,114.1 C157.9,116.9 156.7,120.9 152.7,124.9 L141.0,136.5 C139.8,137.7 141.6,141.9 141.8,141.8 Z" fill="currentColor" class="octo-body"></path></svg></span>
+
+<noscript>
+  <div class="noscript-warning">Theme NexT works best with JavaScript enabled</div>
+</noscript>
+
+
+  
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.1/anime.min.js" integrity="sha256-XL2inqUJaslATFnHdJOi9GfQ60on8Wx1C2H8DYiN1xY=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/next-theme-pjax/0.6.0/pjax.min.js" integrity="sha256-vxLn1tSKWD4dqbMRyv940UYw4sXgMtYcK6reefzZrao=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/medium-zoom/1.0.8/medium-zoom.min.js" integrity="sha256-7PhEpEWEW0XXQ0k6kQrPKwuoIomz8R8IYyuU1Qew4P8=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/comments.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/utils.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/motion.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/next-boot.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/pjax.min.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-generator-searchdb/1.4.1/search.js" integrity="sha256-1kfA5uHPf65M5cphT2dvymhkuyHPQp5A53EGZOnOLmc=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/search/local-search.min.js"></script>
+
+
+  <script class="next-config" data-name="mermaid" type="application/json">{"enable":true,"theme":{"light":"default","dark":"dark"},"js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mermaid/9.4.0/mermaid.min.js","integrity":"sha256-3JloMMI/ZQx6ryuhhZTsQJQmGAkXeni6PkshX7UUO2s="}}</script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/tags/mermaid.min.js"></script>
+
+
+
+  
+
+
+
+
+  
+
+  <script class="next-config" data-name="enableMath" type="application/json">false</script><script class="next-config" data-name="mathjax" type="application/json">{"enable":true,"tags":"ams","js":{"url":"https://cdnjs.cloudflare.com/ajax/libs/mathjax/3.2.2/es5/tex-mml-chtml.js","integrity":"sha256-MASABpB4tYktI2Oitl4t+78w/lyA+D7b/s9GEP0JOGI="}}</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/hexo-theme-next/8.15.0/third-party/math/mathjax.min.js"></script>
+
+
+
+</body>
+</html>

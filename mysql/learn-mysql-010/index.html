@@ -36,7 +36,7 @@
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/image-20230403152941958.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/image-20230403153906397.png">
 <meta property="article:published_time" content="2022-03-23T15:56:59.000Z">
-<meta property="article:modified_time" content="2023-04-06T08:15:58.967Z">
+<meta property="article:modified_time" content="2023-04-10T10:00:31.686Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="mysql5.7">
 <meta name="twitter:card" content="summary">
@@ -102,7 +102,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">58</span></a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">59</span></a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
         </a>
@@ -153,7 +153,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">1.</span> <span class="nav-text">索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="nav-number">2.</span> <span class="nav-text">二叉树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Btree-x2F-B-tree"><span class="nav-number">3.</span> <span class="nav-text">Btree&#x2F;B+tree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E7%B4%A2%E5%BC%95"><span class="nav-number">4.</span> <span class="nav-text">mysql索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secondary-index-%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="nav-number">5.</span> <span class="nav-text">secondary index(二级索引)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#multi-range-read-MRR"><span class="nav-number">6.</span> <span class="nav-text">multi range read(MRR)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%82B-tree%E7%9A%84%E9%AB%98%E5%BA%A6"><span class="nav-number">7.</span> <span class="nav-text">求B+tree的高度</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">1.</span> <span class="nav-text">索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="nav-number">2.</span> <span class="nav-text">二叉树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Btree-x2F-B-tree"><span class="nav-number">3.</span> <span class="nav-text">Btree&#x2F;B+tree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E7%B4%A2%E5%BC%95"><span class="nav-number">4.</span> <span class="nav-text">mysql索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#clustered-index-%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95"><span class="nav-number">5.</span> <span class="nav-text">clustered index(聚集索引)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secondary-index-%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="nav-number">6.</span> <span class="nav-text">secondary index(二级索引)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#multi-range-read-MRR"><span class="nav-number">7.</span> <span class="nav-text">multi range read(MRR)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%82B-tree%E7%9A%84%E9%AB%98%E5%BA%A6"><span class="nav-number">8.</span> <span class="nav-text">求B+tree的高度</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -168,7 +168,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -691,13 +691,23 @@ end</pre>
 <p>如果索引也上能确定的话，就用索引。</p>
 </li>
 </ul>
+<h2 id="clustered-index-聚集索引"><a href="#clustered-index-聚集索引" class="headerlink" title="clustered index(聚集索引)"></a>clustered index(聚集索引)</h2><ul>
+<li>clustered index介绍</li>
+</ul>
+<p>叶子节点存储所有记录数据(all row data)</p>
+<img src="/mysql/learn-mysql-010/image-20230403152453462.png" alt="image-20230403152453462" style="zoom:50%;">
+
+<blockquote>
+<p>每个innodb表中都有一个特殊的索引，成为聚集索引，用于存储行数据，通常聚集索引与主键同义。</p>
+<ul>
+<li>primary key在表中定义a列时，innodb将其作为聚集索引，应该为每个表定义定义一个主键，如果没有逻辑唯一且非空的列或列集作为主键的话，则新增一个自增列，自动递增值时唯一的，并在插入时自动添加</li>
+<li>如果没有primary key为表定义a，innodb则使用定一个非空的unique为聚集索引</li>
+<li>如果没有索引primary key，也没有非空的unique索引，innobd则生成一个隐藏的聚集索引GEN_CLUST_INDEX，row ID是一个6字节的字段，按row id在物理上是按照插入顺序排列的</li>
+</ul>
+</blockquote>
 <h2 id="secondary-index-二级索引"><a href="#secondary-index-二级索引" class="headerlink" title="secondary index(二级索引)"></a>secondary index(二级索引)</h2><ul>
 <li><p>secondary index介绍</p>
 <ul>
-<li><p>clustered index(聚集索引)</p>
-<p>叶子节点存储所有记录数据(all row data)</p>
-<img src="/mysql/learn-mysql-010/image-20230403152453462.png" alt="image-20230403152453462" style="zoom:50%;">
-</li>
 <li><p>secondary index(二级索引)</p>
 <ul>
 <li><p>也称为非聚集索引，辅助索引</p>

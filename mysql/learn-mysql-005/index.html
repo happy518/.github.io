@@ -29,7 +29,7 @@
 <meta property="og:description" content="详细介绍mysql的数据类型">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-03-15T15:14:09.000Z">
-<meta property="article:modified_time" content="2022-03-19T15:42:17.923Z">
+<meta property="article:modified_time" content="2023-04-10T10:00:29.646Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="mysql5.7">
 <meta name="twitter:card" content="summary">
@@ -94,7 +94,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">58</span></a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">59</span></a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
         </a>
@@ -160,7 +160,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">58</span>
+          <span class="site-state-item-count">59</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -354,8 +354,26 @@
 </li>
 </ul>
 <blockquote>
-<p>AUTO_INCREMENT是实例启动时，取当前表的最大值，然后+1即为下次自增的值。(MAX + 1)</p>
+<p>innodb_autoinc_lock_mode：{0|1|2}: 分别表示的是传统，连续，交错。mysql5.7中默认是1，有AI锁</p>
 </blockquote>
+<ul>
+<li><p>innodb auto increment计数器初始化</p>
+<blockquote>
+<ul>
+<li><p>如果为表指定auto_increment列，则innodb数据字典表中包含一个为自动递增计数器的特殊计数器，用于为该列分配新增，该计数器仅存在内存中，而不存在于磁盘上</p>
+</li>
+<li><p>要在服务器重启启动后初始化自动递增计数器，innodb在第一次插入包含列的表时执行与以下语句等同</p>
+</li>
+</ul>
+<p>select max(ai_col) from table_name for update;</p>
+<ul>
+<li>当auto_increment整数列用完时，后续insert操作返回重复键错误</li>
+<li>当你重启mysql服务器时，innodb可能会重复使用为列生成但从未存储过的旧值auto_increment(即，在回滚的旧事务期间生成的值)</li>
+<li>auto_increment的值不一定连续，因为如果回滚了，页没有重启的情况下，下次插入就会跳过回滚的值</li>
+</ul>
+</blockquote>
+</li>
+</ul>
 </li>
 </ol>
 <h2 id="数字类型"><a href="#数字类型" class="headerlink" title="数字类型"></a>数字类型</h2><ol>
