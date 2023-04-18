@@ -32,7 +32,7 @@
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401231917442.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401232957861.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401233221806.png">
-<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230401233740442.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/56f3d82ecebb4d189028e50312b0c519.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/innodb-buffer-pool-list.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230402224313552.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230402225556931.png">
@@ -40,7 +40,7 @@
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230403110338141.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-024/image-20230403115403008.png">
 <meta property="article:published_time" content="2023-04-01T15:03:36.000Z">
-<meta property="article:modified_time" content="2023-04-03T04:20:58.274Z">
+<meta property="article:modified_time" content="2023-04-14T15:01:56.787Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="mysql5.7">
 <meta name="twitter:card" content="summary">
@@ -106,7 +106,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">59</span></a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">60</span></a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
         </a>
@@ -172,7 +172,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-count">60</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -326,25 +326,31 @@
 <li><p><strong>buffer pool的管理</strong></p>
 <ul>
 <li><p>buffer pool的组成</p>
-<p><img src="/mysql/learn-mysql-024/image-20230401233740442.png" alt="image-20230401233740442" loading="lazy"></p>
+<p><img src="/mysql/learn-mysql-024/56f3d82ecebb4d189028e50312b0c519.png" alt="img" loading="lazy"></p>
+<p>buffer pool被分为一个一个的page，使用hash表和多个链表来管理这些page</p>
 <ul>
-<li><p>free list</p>
+<li><p>free list(空闲的缓冲页)</p>
 <blockquote>
 <p>buffer pool刚启动时，有一个16k的空白页，这些页存放(链表串联)在free list中</p>
 </blockquote>
 </li>
-<li><p>lru list</p>
+<li><p>lru list(已经使用的缓冲页)</p>
 <blockquote>
 <p>当读取一个数据页的时候，就从free list中取出一个页，存入数据，并将该页放入到lru list中</p>
 </blockquote>
 </li>
-<li><p>flush list</p>
+<li><p>flush list(已经被修改过的缓冲页)</p>
 <blockquote>
 <ol>
 <li>当lru list中的页第一次被修改了，将该页的指针(page number)放入到flush list(只要修改过，就放入，不管修改次数)</li>
 <li>flush list中包含脏页(数据经过修改，但是未刷入磁盘的页)</li>
 <li>flush list中存放的不是一个页，而是页的指针(page number)</li>
 </ol>
+</blockquote>
+</li>
+<li><p>hash表中key是由表空间+页号(space+page_no)组成，value表示该key对应的缓冲页的地址</p>
+<blockquote>
+<p>通过key计算hash值，通过hash值去hash表中查找，通过查找结果判断数据页是否已经加载到buffer pool中。存在，说明已经加载过，不存在，需要从磁盘中读取加载到内存中</p>
 </blockquote>
 </li>
 </ul>

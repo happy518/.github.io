@@ -34,9 +34,10 @@
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/image-20230403152453462.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/image-20230403152903138.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/image-20230403152941958.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/20210908213037.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-010/image-20230403153906397.png">
 <meta property="article:published_time" content="2022-03-23T15:56:59.000Z">
-<meta property="article:modified_time" content="2023-04-10T10:00:31.686Z">
+<meta property="article:modified_time" content="2023-04-17T15:05:41.435Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="mysql5.7">
 <meta name="twitter:card" content="summary">
@@ -102,7 +103,7 @@
 
 
 <nav class="site-nav">
-  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">59</span></a></li>
+  <ul class="main-menu menu"><li class="menu-item menu-item-home"><a href="/" rel="section"><i class="fa fa-bell fa-fw"></i>首页</a></li><li class="menu-item menu-item-about"><a href="/about/" rel="section"><i class="fa fa-user fa-fw"></i>关于</a></li><li class="menu-item menu-item-archives"><a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>归档<span class="badge">60</span></a></li>
       <li class="menu-item menu-item-search">
         <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
         </a>
@@ -153,7 +154,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">1.</span> <span class="nav-text">索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="nav-number">2.</span> <span class="nav-text">二叉树</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Btree-x2F-B-tree"><span class="nav-number">3.</span> <span class="nav-text">Btree&#x2F;B+tree</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E7%B4%A2%E5%BC%95"><span class="nav-number">4.</span> <span class="nav-text">mysql索引</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#clustered-index-%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95"><span class="nav-number">5.</span> <span class="nav-text">clustered index(聚集索引)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secondary-index-%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="nav-number">6.</span> <span class="nav-text">secondary index(二级索引)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#multi-range-read-MRR"><span class="nav-number">7.</span> <span class="nav-text">multi range read(MRR)</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%82B-tree%E7%9A%84%E9%AB%98%E5%BA%A6"><span class="nav-number">8.</span> <span class="nav-text">求B+tree的高度</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95"><span class="nav-number">1.</span> <span class="nav-text">索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">1.1.</span> <span class="nav-text">索引的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E5%88%86%E6%9F%A5%E6%89%BE"><span class="nav-number">1.2.</span> <span class="nav-text">二分查找</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="nav-number">2.</span> <span class="nav-text">二叉树</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">2.1.</span> <span class="nav-text">二叉树的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91"><span class="nav-number">2.2.</span> <span class="nav-text">平衡二叉树</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E9%81%8D%E5%8E%86"><span class="nav-number">2.3.</span> <span class="nav-text">平衡二叉树的遍历</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E4%BA%8C%E5%8F%89%E6%A0%91%E7%9A%84%E6%97%8B%E8%BD%AC"><span class="nav-number">2.4.</span> <span class="nav-text">平衡二叉树的旋转</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B9%B3%E8%A1%A1%E6%A0%91%E6%97%8B%E8%BD%AC"><span class="nav-number">2.5.</span> <span class="nav-text">平衡树旋转</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Btree-x2F-B-tree"><span class="nav-number">3.</span> <span class="nav-text">Btree&#x2F;B+tree</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Btree%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">3.1.</span> <span class="nav-text">Btree的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-tree%E7%9A%84%E5%AE%9A%E4%B9%89"><span class="nav-number">3.2.</span> <span class="nav-text">B+tree的定义</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-tree%E7%9A%84%E4%BD%9C%E7%94%A8"><span class="nav-number">3.3.</span> <span class="nav-text">B+tree的作用</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-tree%E7%9A%84%E6%93%8D%E4%BD%9C"><span class="nav-number">3.4.</span> <span class="nav-text">B+tree的操作</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-tree%E7%9A%84%E6%89%87%E5%87%BA-fan-out"><span class="nav-number">3.5.</span> <span class="nav-text">B+tree的扇出(fan out)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#B-tree%E5%AD%98%E5%82%A8%E6%95%B0%E6%8D%AE%E4%B8%BE%E4%BE%8B"><span class="nav-number">3.6.</span> <span class="nav-text">B+tree存储数据举例</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E7%B4%A2%E5%BC%95"><span class="nav-number">4.</span> <span class="nav-text">mysql索引</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E5%88%9B%E5%BB%BA%E7%B4%A2%E5%BC%95"><span class="nav-number">4.1.</span> <span class="nav-text">mysql创建索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mysql%E6%9F%A5%E7%9C%8B%E7%B4%A2%E5%BC%95"><span class="nav-number">4.2.</span> <span class="nav-text">mysql查看索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Cardinality-%E5%9F%BA%E6%95%B0"><span class="nav-number">4.3.</span> <span class="nav-text">Cardinality(基数)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A4%8D%E5%90%88%E7%B4%A2%E5%BC%95"><span class="nav-number">4.4.</span> <span class="nav-text">复合索引</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#clustered-index-%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95"><span class="nav-number">5.</span> <span class="nav-text">clustered index(聚集索引)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#clustered-index%E4%BB%8B%E7%BB%8D"><span class="nav-number">5.1.</span> <span class="nav-text">clustered index介绍</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#secondary-index-%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="nav-number">6.</span> <span class="nav-text">secondary index(二级索引)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#secondary-index%E4%BB%8B%E7%BB%8D"><span class="nav-number">6.1.</span> <span class="nav-text">secondary index介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#secondary-index%E5%9B%9E%E8%A1%A8"><span class="nav-number">6.2.</span> <span class="nav-text">secondary index回表</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8"><span class="nav-number">6.3.</span> <span class="nav-text">索引下推</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8"><span class="nav-number">6.3.1.</span> <span class="nav-text">什么是索引下推</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%E7%9A%84%E5%8E%9F%E7%90%86"><span class="nav-number">6.3.2.</span> <span class="nav-text">索引下推的原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%B4%A2%E5%BC%95%E4%B8%8B%E6%8E%A8%E4%BD%BF%E7%94%A8%E6%9D%A1%E4%BB%B6"><span class="nav-number">6.3.3.</span> <span class="nav-text">索引下推使用条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%9B%B8%E5%85%B3%E5%8F%82%E6%95%B0"><span class="nav-number">6.3.4.</span> <span class="nav-text">相关参数</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E8%A1%A8%E7%9A%84%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="nav-number">6.4.</span> <span class="nav-text">堆表的二级索引</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A0%86%E8%A1%A8%E5%92%8CIOT%E8%A1%A8%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95%E5%AF%B9%E6%AF%94"><span class="nav-number">6.5.</span> <span class="nav-text">堆表和IOT表二级索引对比</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#index-with-included-colnum-%E5%90%AB%E5%88%97%E7%B4%A2%E5%BC%95"><span class="nav-number">6.6.</span> <span class="nav-text">index with included colnum(含列索引)</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#multi-range-read-MRR"><span class="nav-number">7.</span> <span class="nav-text">multi range read(MRR)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9B%9E%E8%A1%A8%E7%9A%84%E4%BB%A3%E4%BB%B7"><span class="nav-number">7.1.</span> <span class="nav-text">回表的代价</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#mrr%E4%BB%8B%E7%BB%8D"><span class="nav-number">7.2.</span> <span class="nav-text">mrr介绍</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E6%B1%82B-tree%E7%9A%84%E9%AB%98%E5%BA%A6"><span class="nav-number">8.</span> <span class="nav-text">求B+tree的高度</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8innodb-space%E6%9F%A5%E7%9C%8Bb-tree%E7%9A%84%E9%AB%98%E5%BA%A6"><span class="nav-number">8.1.</span> <span class="nav-text">使用innodb_space查看b+tree的高度</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8mysql%E7%9A%84information-schema%E5%92%8Chexdump%E6%9F%A5%E7%9C%8Bb-tree%E7%9A%84%E9%AB%98%E5%BA%A6"><span class="nav-number">8.2.</span> <span class="nav-text">使用mysql的information_schema和hexdump查看b+tree的高度</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -168,7 +169,7 @@
   <nav class="site-state">
       <div class="site-state-item site-state-posts">
         <a href="/archives/">
-          <span class="site-state-item-count">59</span>
+          <span class="site-state-item-count">60</span>
           <span class="site-state-item-name">日志</span>
         </a>
       </div>
@@ -272,14 +273,10 @@
     
     
     <div class="post-body" itemprop="articleBody">
-        <h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><ol>
-<li><p>索引的定义</p>
-<blockquote>
+        <h2 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h2><h3 id="索引的定义"><a href="#索引的定义" class="headerlink" title="索引的定义"></a>索引的定义</h3><blockquote>
 <p>索引是对记录安装一个或者多个字段进行排序的一种方式。对表中的某个字段建立索引会创建另一种数据结构，其中保存着字段的值，每个值又指向与它相关的记录。这种索引的数据结构是经过排序的，因而可以对其执行二分查找。且性能较高。</p>
 </blockquote>
-</li>
-<li><p>二分查找</p>
-<blockquote>
+<h3 id="二分查找"><a href="#二分查找" class="headerlink" title="二分查找"></a>二分查找</h3><blockquote>
 <p>二分查找法(binary search)也称为折半查找法，用来查找一组有序的记录数组中的某一记录，其基本思想是:将记录按有序化(递增或递减)排列，在查找过程中采用跳跃式方式查找，即先以有序数列的中点位置作为比较对象，如果要找的元素值小于该中点元素，则将待查序列缩小为左半部分，否则为右半部分。通过一次比较，将查找区间缩小一半。(O(logN)的时间复杂度)</p>
 </blockquote>
 <p>给出一个例子，提供的数据是已经排好序的，且查找数字48</p>
@@ -329,11 +326,7 @@
 <li><p>mid&#x3D;7对应的数据是48，48&#x3D;48，查询结束</p>
 </li>
 </ul>
-</li>
-</ol>
-<h2 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h2><ol>
-<li><p>二叉树的定义</p>
-<ul>
+<h2 id="二叉树"><a href="#二叉树" class="headerlink" title="二叉树"></a>二叉树</h2><h3 id="二叉树的定义"><a href="#二叉树的定义" class="headerlink" title="二叉树的定义"></a>二叉树的定义</h3><ul>
 <li><p>每个节点至多只有两颗子树</p>
 </li>
 <li><p>二叉树的子树有左右之分，次序不能颠倒</p>
@@ -343,8 +336,6 @@
 <li><p>一颗深度为k，且root到k-1层的节点树都达到最大，第k层的所有节点都连续集中在最左边，此时为完全二叉树(complete tree)</p>
 </li>
 </ul>
-</li>
-</ol>
 <pre class="mermaid">graph TB;
 完全二叉树
 
@@ -398,16 +389,12 @@ D-->H</pre>
 7-->14
 7-->15</pre>
 
-<ol start="2">
-<li><p>平衡二叉树</p>
-<ul>
+<h3 id="平衡二叉树"><a href="#平衡二叉树" class="headerlink" title="平衡二叉树"></a>平衡二叉树</h3><ul>
 <li><p>左子树和右子树都是平衡二叉树</p>
 </li>
 <li><p>左子树和右子树的高度差绝对值不超过1</p>
 </li>
 </ul>
-</li>
-</ol>
 <pre class="mermaid">graph TB;
 平衡二叉树
 
@@ -440,9 +427,7 @@ D-->H</pre>
 7-->6
 7-->8</pre>
 
-<ol start="3">
-<li><p>平衡二叉树的遍历</p>
-<p>以上面平衡二叉树为例，进行遍历</p>
+<h3 id="平衡二叉树的遍历"><a href="#平衡二叉树的遍历" class="headerlink" title="平衡二叉树的遍历"></a>平衡二叉树的遍历</h3><p>以上面平衡二叉树为例，进行遍历</p>
 <ul>
 <li><p>前序：6, 3, 2, 5, 7, 8(ROOT节点在开头，中-左-右顺序)</p>
 </li>
@@ -455,11 +440,7 @@ D-->H</pre>
 <p>可以通过前序和中序或者是后序和中序来推导一棵树</p>
 <p>前序或者后序用来得到ROOT节点，中序可以区分左右子树</p>
 </blockquote>
-</li>
-<li><p>平衡二叉树的旋转</p>
-</li>
-</ol>
-<pre class="mermaid">graph TB;
+<h3 id="平衡二叉树的旋转"><a href="#平衡二叉树的旋转" class="headerlink" title="平衡二叉树的旋转"></a>平衡二叉树的旋转</h3><pre class="mermaid">graph TB;
 
 subgraph 插入新健值3
     i_2((2))
@@ -488,8 +469,7 @@ subgraph 平衡二叉树
     5-->9
 end</pre>
 
-<p>平衡树旋转</p>
-<pre class="mermaid">graph TD;
+<h3 id="平衡树旋转"><a href="#平衡树旋转" class="headerlink" title="平衡树旋转"></a>平衡树旋转</h3><pre class="mermaid">graph TD;
 subgraph 左旋一次
     2((2))
     1((1))
@@ -522,9 +502,7 @@ end</pre>
 <blockquote>
 <p>需要通过旋转(左旋和右旋)来维护平衡二叉树的平衡，左添加和删除时候需要有额外的开销</p>
 </blockquote>
-<h2 id="Btree-x2F-B-tree"><a href="#Btree-x2F-B-tree" class="headerlink" title="Btree&#x2F;B+tree"></a>Btree&#x2F;B+tree</h2><ol>
-<li><p>Btree的定义</p>
-<p>阶为M(节点上关键字keys的个数)的Btree的定义</p>
+<h2 id="Btree-x2F-B-tree"><a href="#Btree-x2F-B-tree" class="headerlink" title="Btree&#x2F;B+tree"></a>Btree&#x2F;B+tree</h2><h3 id="Btree的定义"><a href="#Btree的定义" class="headerlink" title="Btree的定义"></a>Btree的定义</h3><p>阶为M(节点上关键字keys的个数)的Btree的定义</p>
 <ul>
 <li><p>每个节点最多有M个孩子</p>
 </li>
@@ -539,9 +517,7 @@ end</pre>
 <li><p>Btree树中的非叶子节点也包含了数据部分</p>
 </li>
 </ul>
-</li>
-<li><p>B+tree的定义</p>
-<p>在Btree树的基础上，B+tree树做了如下改进</p>
+<h3 id="B-tree的定义"><a href="#B-tree的定义" class="headerlink" title="B+tree的定义"></a>B+tree的定义</h3><p>在Btree树的基础上，B+tree树做了如下改进</p>
 <ul>
 <li><p>数据只存储在叶子节点上，非叶子节点只保存索引信息</p>
 <ul>
@@ -557,9 +533,7 @@ end</pre>
 </ul>
 </li>
 </ul>
-</li>
-<li><p>B+tree的作用</p>
-<ul>
+<h3 id="B-tree的作用"><a href="#B-tree的作用" class="headerlink" title="B+tree的作用"></a>B+tree的作用</h3><ul>
 <li><p>在块设备上，通过B+tree可以有效的存储数据</p>
 </li>
 <li><p>所有记录都存储在叶子节点上，非叶子节点存储索引信息</p>
@@ -567,9 +541,7 @@ end</pre>
 <li><p>B+tree含有非常高的扇出(fanout)，通常超过100，在查找一个记录时，可以有效的减少IO操作</p>
 </li>
 </ul>
-</li>
-<li><p>B+tree的操作</p>
-<ul>
+<h3 id="B-tree的操作"><a href="#B-tree的操作" class="headerlink" title="B+tree的操作"></a>B+tree的操作</h3><ul>
 <li><p>B+tree的插入</p>
 <p>B+tree的插入必须保证插入后叶子节点的记录依然排序</p>
 <p><img src="/mysql/learn-mysql-010/b+tree_insert.png" loading="lazy"></p>
@@ -584,9 +556,7 @@ end</pre>
 <p><img src="/mysql/learn-mysql-010/b+tree_delete.png" loading="lazy"></p>
 </li>
 </ul>
-</li>
-<li><p>B+tree的扇出(fan out)</p>
-<ul>
+<h3 id="B-tree的扇出-fan-out"><a href="#B-tree的扇出-fan-out" class="headerlink" title="B+tree的扇出(fan out)"></a>B+tree的扇出(fan out)</h3><ul>
 <li><p>B+tree图例</p>
 <p><img src="/mysql/learn-mysql-010/b+tree_fanout.png" loading="lazy"></p>
 </li>
@@ -603,9 +573,7 @@ end</pre>
 <p>扇出 是每个索引节点(Non-LeafPage)指向每个叶子节点(LeafPage)的指针</p>
 <p>扇出数 &#x3D; 索引节点(Non-LeafPage)可存储的最大关键字个数 + 1 图例中的索引节点(Non-LeafPage)最大可以存放4个关键字，但实际使用了3个;</p>
 </blockquote>
-</li>
-<li><p>B+tree存储数据举例</p>
-<p>假设B+树中页的大小是16K，每行记录是200Byte大小，求出树的高度为1，2，3，4时，分别可以存储多少条记录。</p>
+<h3 id="B-tree存储数据举例"><a href="#B-tree存储数据举例" class="headerlink" title="B+tree存储数据举例"></a>B+tree存储数据举例</h3><p>假设B+树中页的大小是16K，每行记录是200Byte大小，求出树的高度为1，2，3，4时，分别可以存储多少条记录。</p>
 <ul>
 <li><p>查看数据表中每行记录的平均大小</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">show</span> <span class="keyword">table</span> status <span class="keyword">like</span> &quot;%employees%&quot;\G;</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span> <span class="number">1.</span> <span class="type">row</span> <span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">Name: employees</span><br><span class="line">Engine: InnoDB</span><br><span class="line">Version: <span class="number">10</span></span><br><span class="line">Row_format: <span class="keyword">Dynamic</span></span><br><span class="line"><span class="keyword">Rows</span>: <span class="number">298124</span></span><br><span class="line">Avg_row_length: <span class="number">51</span> <span class="comment">-- 平均长度为51个字节</span></span><br><span class="line">Data_length: <span class="number">15245312</span></span><br><span class="line">Max_data_length: <span class="number">0</span></span><br><span class="line">Index_length: <span class="number">0</span></span><br><span class="line">Data_free: <span class="number">0</span></span><br><span class="line">Auto_increment: <span class="keyword">NULL</span></span><br><span class="line">Create_time: <span class="number">2015</span><span class="number">-12</span><span class="number">-02</span> <span class="number">21</span>:<span class="number">32</span>:<span class="number">02</span> </span><br><span class="line">Update_time: <span class="keyword">NULL</span></span><br><span class="line">Check_time: <span class="keyword">NULL</span></span><br><span class="line"><span class="keyword">Collation</span>: utf8mb4_general_ci</span><br><span class="line">Checksum: <span class="keyword">NULL</span></span><br><span class="line">Create_options:</span><br><span class="line">Comment:</span><br><span class="line"><span class="number">1</span> <span class="type">row</span> <span class="keyword">in</span> <span class="keyword">set</span> (<span class="number">0.00</span> sec)</span><br></pre></td></tr></table></figure>
@@ -636,16 +604,10 @@ end</pre>
 <p>上述的8000W等数据只是一个理论值。线上实际使用单个页的记录数字要乘以70%，即第二层需要70% x 70% ，依次类推。<br>因此在数据库中，B+树的高度一般都在2<del>4层，这也就是说查找某一键值的行记录时最多只需要2到4次IO，2</del>4次的IO意味着查询时间只需0.02~0.04秒(假设IOPS&#x3D;100，当前SSD可以达到50000IOPS)。</p>
 </blockquote>
 <p>从5.7开始，页的预留大小可以设置了，以减少split操作的概率(空间换时间)</p>
-</li>
-</ol>
-<h2 id="mysql索引"><a href="#mysql索引" class="headerlink" title="mysql索引"></a>mysql索引</h2><ol>
-<li><p>mysql创建索引</p>
-<blockquote>
+<h2 id="mysql索引"><a href="#mysql索引" class="headerlink" title="mysql索引"></a>mysql索引</h2><h3 id="mysql创建索引"><a href="#mysql创建索引" class="headerlink" title="mysql创建索引"></a>mysql创建索引</h3><blockquote>
 <p>alter table test_index_1 add index idx_a (a);</p>
 </blockquote>
-</li>
-<li><p>mysql查看索引</p>
-<blockquote>
+<h3 id="mysql查看索引"><a href="#mysql查看索引" class="headerlink" title="mysql查看索引"></a>mysql查看索引</h3><blockquote>
 <ol>
 <li><p>show index from orders\G</p>
 </li>
@@ -655,9 +617,7 @@ end</pre>
 </li>
 </ol>
 </blockquote>
-</li>
-<li><p>Cardinality(基数)</p>
-<p>Cardinality表示该索引列上有多少不同的记录，这个是一个预估的值，是采样得到的(由InnoDB触发，采样20个页，进行预估)，该值越大越好，即当Cardinality &#x2F; RowNumber越接近1越好。表示该列是高选择性的。</p>
+<h3 id="Cardinality-基数"><a href="#Cardinality-基数" class="headerlink" title="Cardinality(基数)"></a>Cardinality(基数)</h3><p>Cardinality表示该索引列上有多少不同的记录，这个是一个预估的值，是采样得到的(由InnoDB触发，采样20个页，进行预估)，该值越大越好，即当Cardinality &#x2F; RowNumber越接近1越好。表示该列是高选择性的。</p>
 <p>• 高选择性:身份证 、手机号码、姓名、订单号等 </p>
 <p>• 低选择性:性别、年龄等</p>
 <p>即该列是否适合创建索引，就看该字段是否具有高选择性</p>
@@ -667,19 +627,21 @@ end</pre>
 <p>对应当前例子</p>
 <p>第一个索引(Seq_in_index &#x3D; 1)的 Cardinality 的值表示 当前列(l_orderkey) 的不重复的值，<br>第二个索引(Seq_in_index &#x3D; 2)的 Cardinality 的值表示 前两列(l_orderkey)和(l_linenumber) 不重复的值</p>
 </blockquote>
-</li>
-<li><p>复合索引</p>
-<ul>
+<h3 id="复合索引"><a href="#复合索引" class="headerlink" title="复合索引"></a>复合索引</h3><ul>
 <li>创建表和保存数据</li>
 </ul>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建表</span></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> tbl_test_index(a <span class="type">int</span>, b <span class="type">int</span>, c <span class="type">int</span>);</span><br><span class="line"><span class="comment">-- 保存数据</span></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> tbl_test_index (a, b, c) <span class="keyword">values</span> (<span class="number">1</span>, <span class="number">1</span>, <span class="number">10</span>), (<span class="number">1</span>, <span class="number">2</span>, <span class="number">9</span>), (<span class="number">2</span>, <span class="number">1</span>, <span class="number">8</span>), (<span class="number">2</span>, <span class="number">4</span>, <span class="number">15</span>), (<span class="number">3</span>, <span class="number">1</span>, <span class="number">6</span>), (<span class="number">3</span>, <span class="number">2</span>, <span class="number">17</span>);</span><br></pre></td></tr></table></figure></li>
-</ol>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 创建表</span></span><br><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> tbl_test_index(a <span class="type">int</span>, b <span class="type">int</span>, c <span class="type">int</span>);</span><br><span class="line"><span class="comment">-- 保存数据</span></span><br><span class="line"><span class="keyword">insert</span> <span class="keyword">into</span> tbl_test_index (a, b, c) <span class="keyword">values</span> (<span class="number">1</span>, <span class="number">1</span>, <span class="number">10</span>), (<span class="number">1</span>, <span class="number">2</span>, <span class="number">9</span>), (<span class="number">2</span>, <span class="number">1</span>, <span class="number">8</span>), (<span class="number">2</span>, <span class="number">4</span>, <span class="number">15</span>), (<span class="number">3</span>, <span class="number">1</span>, <span class="number">6</span>), (<span class="number">3</span>, <span class="number">2</span>, <span class="number">17</span>);</span><br></pre></td></tr></table></figure>
+
 <ul>
 <li><p>创建a和b的联合索引(两列的联合索引)</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tbl_test_index <span class="keyword">add</span> index idx_a_b(a, b);</span><br></pre></td></tr></table></figure>
 </li>
 <li><p>验证是否命中索引</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="number">1.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">1</span>; <span class="operator">/</span><span class="operator">/</span> 命中a索引</span><br><span class="line"><span class="number">2.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">and</span> b <span class="operator">=</span> <span class="number">2</span>; <span class="operator">/</span><span class="operator">/</span> 命中a和b</span><br><span class="line"><span class="number">3.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">or</span> b <span class="operator">=</span> <span class="number">2</span>; <span class="operator">/</span><span class="operator">/</span> 没有命中索引</span><br><span class="line"><span class="number">4.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> b <span class="operator">=</span> <span class="number">2</span>; <span class="operator">/</span><span class="operator">/</span> 没用命中索引</span><br><span class="line"><span class="number">5.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> a <span class="operator">=</span> <span class="number">1</span> <span class="keyword">and</span> b <span class="operator">&gt;</span> <span class="number">2</span>; <span class="operator">/</span><span class="operator">/</span> 命中a和b</span><br><span class="line"><span class="number">6.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> a <span class="operator">&gt;</span> <span class="number">1</span> <span class="keyword">and</span> b <span class="operator">&gt;</span> <span class="number">2</span>; <span class="operator">/</span><span class="operator">/</span> 没有命中索引</span><br><span class="line"><span class="number">7.</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> a <span class="operator">!=</span> <span class="number">2</span> <span class="keyword">and</span> b <span class="operator">=</span> <span class="number">2</span>; <span class="operator">/</span><span class="operator">/</span> 没有命中索引</span><br><span class="line"><span class="number">8.</span> <span class="keyword">select</span> a, b <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> b <span class="operator">&gt;</span> <span class="number">1</span> <span class="keyword">and</span> b <span class="operator">&lt;=</span> <span class="number">3</span>; <span class="operator">/</span><span class="operator">/</span> 命中索引 覆盖索引</span><br><span class="line"><span class="number">9.</span> <span class="keyword">select</span> <span class="built_in">count</span>(<span class="number">1</span>) <span class="keyword">from</span> tbl_test_index <span class="keyword">where</span> b <span class="operator">&gt;</span> <span class="number">1</span> <span class="keyword">and</span> b <span class="operator">&lt;=</span> <span class="number">3</span>; <span class="operator">/</span><span class="operator">/</span> 命中索引，覆盖索引</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>针对select a, b from tbl_test_index where b &gt; 1 and b &lt;&#x3D; 3; 这个sql为啥会走覆盖索引，因为根据联合索引就能获取需要的数据，不需要回表，a是有序的，a和b是有序的，但是b是无序的，如果sql是： select a, b from tbl_test_index where b &gt; 1 and b &lt;&#x3D; 3 order by b desc的话，执行计划提示 using filesort</p>
+</blockquote>
 </li>
 <li><p>创建a,b,c三列的联合索引</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 删除两列的联合索引</span></span><br><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tbl_test_index <span class="keyword">drop</span> index idx_a_b;</span><br><span class="line"><span class="comment">-- 创建三列的联合索引</span></span><br><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tbl_test_index <span class="keyword">add</span> index idx_a_b_c(a, b, c);</span><br><span class="line"><span class="comment">-- 验证</span></span><br><span class="line"><span class="keyword">show</span> index <span class="keyword">from</span> tbl_test_index;</span><br><span class="line"><span class="comment">-- 表新增一列</span></span><br><span class="line"><span class="keyword">alter</span> <span class="keyword">table</span> tbl_test_index <span class="keyword">add</span> <span class="keyword">column</span> d <span class="type">int</span> <span class="keyword">default</span> <span class="number">0</span>;</span><br></pre></td></tr></table></figure>
@@ -691,10 +653,7 @@ end</pre>
 <p>如果索引也上能确定的话，就用索引。</p>
 </li>
 </ul>
-<h2 id="clustered-index-聚集索引"><a href="#clustered-index-聚集索引" class="headerlink" title="clustered index(聚集索引)"></a>clustered index(聚集索引)</h2><ul>
-<li>clustered index介绍</li>
-</ul>
-<p>叶子节点存储所有记录数据(all row data)</p>
+<h2 id="clustered-index-聚集索引"><a href="#clustered-index-聚集索引" class="headerlink" title="clustered index(聚集索引)"></a>clustered index(聚集索引)</h2><h3 id="clustered-index介绍"><a href="#clustered-index介绍" class="headerlink" title="clustered index介绍"></a>clustered index介绍</h3><p>叶子节点存储所有记录数据(all row data)</p>
 <img src="/mysql/learn-mysql-010/image-20230403152453462.png" alt="image-20230403152453462" style="zoom:50%;">
 
 <blockquote>
@@ -705,11 +664,7 @@ end</pre>
 <li>如果没有索引primary key，也没有非空的unique索引，innobd则生成一个隐藏的聚集索引GEN_CLUST_INDEX，row ID是一个6字节的字段，按row id在物理上是按照插入顺序排列的</li>
 </ul>
 </blockquote>
-<h2 id="secondary-index-二级索引"><a href="#secondary-index-二级索引" class="headerlink" title="secondary index(二级索引)"></a>secondary index(二级索引)</h2><ul>
-<li><p>secondary index介绍</p>
-<ul>
-<li><p>secondary index(二级索引)</p>
-<ul>
+<h2 id="secondary-index-二级索引"><a href="#secondary-index-二级索引" class="headerlink" title="secondary index(二级索引)"></a>secondary index(二级索引)</h2><h3 id="secondary-index介绍"><a href="#secondary-index介绍" class="headerlink" title="secondary index介绍"></a>secondary index介绍</h3><ul>
 <li><p>也称为非聚集索引，辅助索引</p>
 </li>
 <li><p>叶子节点存储的是索引和主键信息</p>
@@ -721,32 +676,65 @@ end</pre>
 </li>
 </ul>
 <img src="/mysql/learn-mysql-010/image-20230403152903138.png" alt="image-20230403152903138" style="zoom:50%;">
-</li>
-<li><p>secondary index查找数据</p>
-<img src="/mysql/learn-mysql-010/image-20230403152941958.png" alt="image-20230403152941958" style="zoom:50%;"></li>
+
+<ul>
+<li>secondary index查找数据</li>
 </ul>
-</li>
-<li><p>secondary index回表</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> userinfo &#123;</span><br><span class="line">	userid <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span> auto_increment,</span><br><span class="line">	username varchat(<span class="number">30</span>),</span><br><span class="line">	registdate datetime,</span><br><span class="line">	email <span class="type">varchar</span>(<span class="number">50</span>),</span><br><span class="line">	<span class="keyword">primary</span> key(userid),</span><br><span class="line">	<span class="keyword">unique</span> key idx_username(username), </span><br><span class="line">	key idx_registdate(registdate)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<img src="/mysql/learn-mysql-010/image-20230403152941958.png" alt="image-20230403152941958" style="zoom:50%;">
+
+<h3 id="secondary-index回表"><a href="#secondary-index回表" class="headerlink" title="secondary index回表"></a>secondary index回表</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">create</span> <span class="keyword">table</span> userinfo &#123;</span><br><span class="line">	userid <span class="type">int</span> <span class="keyword">not</span> <span class="keyword">null</span> auto_increment,</span><br><span class="line">	username varchat(<span class="number">30</span>),</span><br><span class="line">	registdate datetime,</span><br><span class="line">	email <span class="type">varchar</span>(<span class="number">50</span>),</span><br><span class="line">	<span class="keyword">primary</span> key(userid),</span><br><span class="line">	<span class="keyword">unique</span> key idx_username(username), </span><br><span class="line">	key idx_registdate(registdate)</span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <ol>
 <li>假设查找username为tom，先找二级索引idx_username，通过key为tom，得到对应的primary key：userid_a</li>
-<li>得到userid_a后，再去找聚集索引中userid_a的记录(row data)&#x2F;</li>
+<li>得到userid_a后，再去找聚集索引中userid_a的记录(row data)</li>
 <li>上诉一个通过二级索引得到数据(row data)的查找过程，即为回表</li>
 <li>上述过程是mysql自动完成的</li>
 </ol>
 </blockquote>
-</li>
-<li><p>堆表的二级索引</p>
-<ul>
+<h3 id="索引下推"><a href="#索引下推" class="headerlink" title="索引下推"></a>索引下推</h3><h4 id="什么是索引下推"><a href="#什么是索引下推" class="headerlink" title="什么是索引下推"></a>什么是索引下推</h4><blockquote>
+<p>索引下推(index condition pushdown)，简称ICP，是mysql5.6的新特性，它能减少回表查询次数，提高查询效率</p>
+</blockquote>
+<h4 id="索引下推的原理"><a href="#索引下推的原理" class="headerlink" title="索引下推的原理"></a>索引下推的原理</h4><p>我们先了解下mysql的大概架构</p>
+<p><img src="/mysql/learn-mysql-010/20210908213037.png" alt="MySQL大概架构" loading="lazy"></p>
+<p>mysql服务层负责sql语法解析，生成执行计划等，并调用存储引擎去执行数据等存储和检索</p>
+<p>索引下推的下推其实就是将部分上层(服务层)负责的事情，叫给了下层(引擎层)去处理。</p>
+<p>我们看下没有使用ICP的情况下，mysql的查询：</p>
+<ol>
+<li>存储引擎读取索引记录</li>
+<li>根据索引中的主键值，定位并读取完整的行记录</li>
+<li>存储引擎把记录交给server层去检索该记录是否满足where条件</li>
+</ol>
+<p>使用ICP的情况下，查询过程：</p>
+<ol>
+<li>存储引擎读取索引记录(不是完整的行记录)</li>
+<li>判断where条件部分是否用索引的列来做检查，条件不满足，则处理下一行索引记录</li>
+<li>条件满足，使用索引中的主键值去定位并读取完整的行记录(就是所谓的回表)</li>
+<li>存储引擎把记录交给server层去检测该记录是否满足where条件</li>
+</ol>
+<h4 id="索引下推使用条件"><a href="#索引下推使用条件" class="headerlink" title="索引下推使用条件"></a>索引下推使用条件</h4><ul>
+<li>只能用于range，ref，eq_ref，ref_or_null</li>
+<li>只能用于innodb和MyISAM存储引擎及其分区表</li>
+<li>对innodb存储引擎来说，索引下推适用于二级索引</li>
+<li>引用了子查询条件不能下推</li>
+<li>引用了存储函数条件不能下推，因为存储引擎无法调用存储函数</li>
+</ul>
+<blockquote>
+<p>索引下推的目的是为了减少回表次数，也就是减少IO操作，对于innodb的聚集索引，数据和索引在一起，不存在回表</p>
+</blockquote>
+<h4 id="相关参数"><a href="#相关参数" class="headerlink" title="相关参数"></a>相关参数</h4><p>索引下推默认是开启的，可以使用optimizer_switch来控制是否开启</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> @<span class="variable">@optimizer</span>_switch;</span><br><span class="line"><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span>[ <span class="number">1.</span> <span class="type">row</span> ]<span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span><span class="operator">*</span></span><br><span class="line">@<span class="variable">@optimizer</span>_switch <span class="operator">|</span> index_merge<span class="operator">=</span><span class="keyword">on</span>,index_merge_union<span class="operator">=</span><span class="keyword">on</span>,index_merge_sort_union<span class="operator">=</span><span class="keyword">on</span>,index_merge_intersection<span class="operator">=</span><span class="keyword">on</span>,engine_condition_pushdown<span class="operator">=</span><span class="keyword">on</span>,index_condition_pushdown<span class="operator">=</span><span class="keyword">on</span>,mrr<span class="operator">=</span><span class="keyword">on</span>,mrr_cost_based<span class="operator">=</span><span class="keyword">on</span>,block_nested_loop<span class="operator">=</span><span class="keyword">on</span>,batched_key_access<span class="operator">=</span>off,materialization<span class="operator">=</span><span class="keyword">on</span>,semijoin<span class="operator">=</span><span class="keyword">on</span>,loosescan<span class="operator">=</span><span class="keyword">on</span>,firstmatch<span class="operator">=</span><span class="keyword">on</span>,duplicateweedout<span class="operator">=</span><span class="keyword">on</span>,subquery_materialization_cost_based<span class="operator">=</span><span class="keyword">on</span>,use_index_extensions<span class="operator">=</span><span class="keyword">on</span>,condition_fanout_filter<span class="operator">=</span><span class="keyword">on</span>,derived_merge<span class="operator">=</span><span class="keyword">on</span>,prefer_ordering_index<span class="operator">=</span><span class="keyword">on</span></span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>其中index_condition_pushdown&#x3D;on｜off</p>
+</blockquote>
+<h3 id="堆表的二级索引"><a href="#堆表的二级索引" class="headerlink" title="堆表的二级索引"></a>堆表的二级索引</h3><ul>
 <li>在堆表中，是没有聚集索引的，所有的索引都是二级索引</li>
 <li>索引的叶子节点存放的是key和指向堆中记录的指针(物理位置)</li>
 </ul>
 <img src="/mysql/learn-mysql-010/image-20230403153906397.png" alt="image-20230403153906397" style="zoom:50%;">
-</li>
-<li><p>堆表和IOT表二级索引对比</p>
-<ul>
+
+<h3 id="堆表和IOT表二级索引对比"><a href="#堆表和IOT表二级索引对比" class="headerlink" title="堆表和IOT表二级索引对比"></a>堆表和IOT表二级索引对比</h3><ul>
 <li>堆表中二级索引不需要回表，且查找速度和主键索引一致，因为两者的叶子节点存放的都是指向数据的指针，反之，IOT表的二级索引查找需要回表</li>
 <li>堆表中某条记录(row data)发生更新且无法原地更新时，该记录(row data)的物理地址将发生改变，此时，所有索引中对该记录的指针都需要更新(代价较大)，反之，IOT表中记录更新，且主键没有更新时，二级索引都无需更新</li>
 <li>IOT表内是有序的，页与页之间也是有序的，做range查询很快。</li>
@@ -755,20 +743,14 @@ end</pre>
 <p>实际数据库设计中，堆表的数据无法原地更新时，且在一个页内有剩余空间时，原来数据的空间位置不会释放，而是使用指针指向新的位置，此时该记录对应的所有索引就无需更改了</p>
 <p>如果页内没有剩余空间，所有的索引还是需要更新一遍</p>
 </blockquote>
-</li>
-<li><p>index with included colnum(含列索引)</p>
-<ul>
+<h3 id="index-with-included-colnum-含列索引"><a href="#index-with-included-colnum-含列索引" class="headerlink" title="index with included colnum(含列索引)"></a>index with included colnum(含列索引)</h3><ul>
 <li><p>在上面给出的 userinfo 的例􏰄中，如果要查找某个 用户的email ，需要回表，如何不回表进行查询呢?</p>
 <blockquote>
 <p>1。使用复合索引，unique key idx_username(username, email)</p>
 </blockquote>
 </li>
 </ul>
-</li>
-</ul>
-<h2 id="multi-range-read-MRR"><a href="#multi-range-read-MRR" class="headerlink" title="multi range read(MRR)"></a>multi range read(MRR)</h2><ul>
-<li><p>回表的代价</p>
-<figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 给employees增加一列索引</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">alter</span> <span class="keyword">table</span> employees <span class="keyword">add</span> index idx_date (hire_date);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询语句1</span></span><br><span class="line"><span class="comment">-- 主键查找1w条数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> employees <span class="keyword">where</span> emp_no <span class="keyword">between</span> <span class="number">10000</span> <span class="keyword">and</span> <span class="number">20000</span>;</span><br><span class="line"><span class="comment">-- 查询语句2</span></span><br><span class="line"><span class="comment">-- 每次查询需要回表</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> employees <span class="keyword">where</span> hire_date <span class="operator">&gt;=</span> <span class="string">&#x27;1990-01-01&#x27;</span> limit <span class="number">10000</span>;</span><br></pre></td></tr></table></figure>
+<h2 id="multi-range-read-MRR"><a href="#multi-range-read-MRR" class="headerlink" title="multi range read(MRR)"></a>multi range read(MRR)</h2><h3 id="回表的代价"><a href="#回表的代价" class="headerlink" title="回表的代价"></a>回表的代价</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 给employees增加一列索引</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">alter</span> <span class="keyword">table</span> employees <span class="keyword">add</span> index idx_date (hire_date);</span><br><span class="line"></span><br><span class="line"><span class="comment">-- 查询语句1</span></span><br><span class="line"><span class="comment">-- 主键查找1w条数据</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> employees <span class="keyword">where</span> emp_no <span class="keyword">between</span> <span class="number">10000</span> <span class="keyword">and</span> <span class="number">20000</span>;</span><br><span class="line"><span class="comment">-- 查询语句2</span></span><br><span class="line"><span class="comment">-- 每次查询需要回表</span></span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> <span class="operator">*</span> <span class="keyword">from</span> employees <span class="keyword">where</span> hire_date <span class="operator">&gt;=</span> <span class="string">&#x27;1990-01-01&#x27;</span> limit <span class="number">10000</span>;</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>对于查询语句1，假设一页有100条数据，则需要100次IO</p>
@@ -781,9 +763,7 @@ end</pre>
 </ul>
 <p>在mysql5.6之前，时间使用过程中，优化器可能会直接选择扫表，而不会进行如此多的回表操作</p>
 </blockquote>
-</li>
-<li><p>mrr介绍</p>
-<blockquote>
+<h3 id="mrr介绍"><a href="#mrr介绍" class="headerlink" title="mrr介绍"></a>mrr介绍</h3><blockquote>
 <p>mrr是针对物理访问，随机转顺序，空间换时间</p>
 </blockquote>
 <ul>
@@ -814,18 +794,12 @@ end</pre>
 <p>如果强制开启MRR，某些sql语句下，性能可能会变差，因为MRR需要排序，假如排序的时间超过了执行的时间，那么性能就会降低</p>
 <p>optimizer_switch可以是全局的，也可以是会话级别的</p>
 </blockquote>
-</li>
-</ul>
-<h2 id="求B-tree的高度"><a href="#求B-tree的高度" class="headerlink" title="求B+tree的高度"></a>求B+tree的高度</h2><ul>
-<li><p>使用innodb_space查看b+tree的高度</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">shell&gt; </span><span class="language-bash">innodb_space -s ibdata1 -T tbl_innodb_ruby/t_people space-index-pages-summary | <span class="built_in">head</span> -n 10 | sed <span class="string">&#x27;s/[,#$@!%~ ][ ]*/\t/g&#x27;</span> | sed <span class="string">&#x27;s/\t/,/g&#x27;</span> | sed <span class="string">&#x27;s/.$//&#x27;</span> | csvlook</span></span><br><span class="line"></span><br><span class="line">| page | index | level |   data |   free | records |</span><br><span class="line">| ---- | ----- | ----- | ------ | ------ | ------- |</span><br><span class="line">|    3 |    85 |     2 |     52 | 16,200 |       4 |</span><br><span class="line">|    4 |    86 |     2 |     60 | 16,192 |       3 |</span><br><span class="line">|    5 |    85 |     0 |  7,483 |  8,705 |     139 |</span><br><span class="line">|    6 |    85 |     0 | 15,066 |  1,050 |     279 |</span><br><span class="line">|    7 |    85 |     0 | 15,120 |    996 |     280 |</span><br><span class="line">|    8 |    85 |     0 | 15,066 |  1,050 |     279 |</span><br><span class="line">|    9 |    85 |     0 | 15,066 |  1,050 |     279 |</span><br><span class="line">|   10 |    86 |     0 |  8,384 |  7,644 |     524 |</span><br><span class="line">|   11 |    86 |     0 | 13,168 |  2,768 |     823 |</span><br></pre></td></tr></table></figure>
+<h2 id="求B-tree的高度"><a href="#求B-tree的高度" class="headerlink" title="求B+tree的高度"></a>求B+tree的高度</h2><h3 id="使用innodb-space查看b-tree的高度"><a href="#使用innodb-space查看b-tree的高度" class="headerlink" title="使用innodb_space查看b+tree的高度"></a>使用innodb_space查看b+tree的高度</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">shell&gt; </span><span class="language-bash">innodb_space -s ibdata1 -T tbl_innodb_ruby/t_people space-index-pages-summary | <span class="built_in">head</span> -n 10 | sed <span class="string">&#x27;s/[,#$@!%~ ][ ]*/\t/g&#x27;</span> | sed <span class="string">&#x27;s/\t/,/g&#x27;</span> | sed <span class="string">&#x27;s/.$//&#x27;</span> | csvlook</span></span><br><span class="line"></span><br><span class="line">| page | index | level |   data |   free | records |</span><br><span class="line">| ---- | ----- | ----- | ------ | ------ | ------- |</span><br><span class="line">|    3 |    85 |     2 |     52 | 16,200 |       4 |</span><br><span class="line">|    4 |    86 |     2 |     60 | 16,192 |       3 |</span><br><span class="line">|    5 |    85 |     0 |  7,483 |  8,705 |     139 |</span><br><span class="line">|    6 |    85 |     0 | 15,066 |  1,050 |     279 |</span><br><span class="line">|    7 |    85 |     0 | 15,120 |    996 |     280 |</span><br><span class="line">|    8 |    85 |     0 | 15,066 |  1,050 |     279 |</span><br><span class="line">|    9 |    85 |     0 | 15,066 |  1,050 |     279 |</span><br><span class="line">|   10 |    86 |     0 |  8,384 |  7,644 |     524 |</span><br><span class="line">|   11 |    86 |     0 | 13,168 |  2,768 |     823 |</span><br></pre></td></tr></table></figure>
 
 <blockquote>
 <p>其中level+1就是b+tree的高度，其中page3是聚集索引的root页，4是辅助索引的root页，可以使用innodb_space -s ibdata1 -T tbl_innodb_ruby&#x2F;t_people -p 3 page-account</p>
 </blockquote>
-</li>
-<li><p>使用mysql的information_schema和hexdump查看b+tree的高度</p>
-<ul>
+<h3 id="使用mysql的information-schema和hexdump查看b-tree的高度"><a href="#使用mysql的information-schema和hexdump查看b-tree的高度" class="headerlink" title="使用mysql的information_schema和hexdump查看b+tree的高度"></a>使用mysql的information_schema和hexdump查看b+tree的高度</h3><ul>
 <li><p>首先查看聚集索引root页的page_no</p>
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">select</span> t.name,i.name, i.index_id, i.type, i.space, i.page_no <span class="keyword">from</span> innodb_sys_indexes <span class="keyword">as</span> i, innodb_sys_tables <span class="keyword">as</span> t <span class="keyword">where</span> t.table_id <span class="operator">=</span> i.table_id <span class="keyword">and</span> i.space <span class="operator">&lt;&gt;</span> <span class="number">0</span> <span class="keyword">and</span> t.name <span class="keyword">like</span> <span class="string">&#x27;tbl_innodb_ruby%&#x27;</span>;</span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------+-------------+----------+------+-------+---------+</span></span><br><span class="line"><span class="operator">|</span> name                     <span class="operator">|</span> name        <span class="operator">|</span> index_id <span class="operator">|</span> type <span class="operator">|</span> space <span class="operator">|</span> page_no <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------+-------------+----------+------+-------+---------+</span></span><br><span class="line"><span class="operator">|</span> tbl_innodb_ruby<span class="operator">/</span>t_people <span class="operator">|</span> <span class="keyword">PRIMARY</span>     <span class="operator">|</span> <span class="number">85</span>       <span class="operator">|</span> <span class="number">3</span>    <span class="operator">|</span> <span class="number">53</span>    <span class="operator">|</span> <span class="number">3</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> tbl_innodb_ruby<span class="operator">/</span>t_people <span class="operator">|</span> idx_user_id <span class="operator">|</span> <span class="number">86</span>       <span class="operator">|</span> <span class="number">0</span>    <span class="operator">|</span> <span class="number">53</span>    <span class="operator">|</span> <span class="number">4</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> tbl_innodb_ruby<span class="operator">/</span>t_user   <span class="operator">|</span> <span class="keyword">PRIMARY</span>     <span class="operator">|</span> <span class="number">75</span>       <span class="operator">|</span> <span class="number">3</span>    <span class="operator">|</span> <span class="number">48</span>    <span class="operator">|</span> <span class="number">3</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">|</span> tbl_innodb_ruby<span class="operator">/</span>t_user   <span class="operator">|</span> idx_user_id <span class="operator">|</span> <span class="number">76</span>       <span class="operator">|</span> <span class="number">0</span>    <span class="operator">|</span> <span class="number">48</span>    <span class="operator">|</span> <span class="number">4</span>       <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">--------------------------+-------------+----------+------+-------+---------+</span></span><br></pre></td></tr></table></figure>
 
@@ -837,11 +811,9 @@ end</pre>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">shell&gt; </span><span class="language-bash">hexdump -s 49216 -n 2 -C tbl_innodb_ruby/t_people.ibd</span></span><br><span class="line">0000c040  00 02                                             |..|</span><br><span class="line">0000c042</span><br></pre></td></tr></table></figure>
 
 <blockquote>
-<p>其中49216的计算规则：3 * innobd_page_size + 64 &#x3D; 3 * 16 * 1024 + 64 &#x3D; 49216</p>
+<p>其中49216的计算规则：root page_no * innobd_page_size + 64 &#x3D; 3 * 16 * 1024 + 64 &#x3D; 49216</p>
 <p>其中02表示的就是聚聚索引的高度为2，因为聚集索引的叶子节点level是0，所以b+tree的高度是2+1&#x3D;3</p>
 </blockquote>
-</li>
-</ul>
 </li>
 </ul>
 
