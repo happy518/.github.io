@@ -38,7 +38,7 @@
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-013/database_filesystem_disk.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-013/mysql_o_direct.png">
 <meta property="article:published_time" content="2022-03-29T14:58:41.000Z">
-<meta property="article:modified_time" content="2023-03-08T07:25:41.214Z">
+<meta property="article:modified_time" content="2023-04-18T04:18:42.714Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="mysql5.7">
 <meta name="twitter:card" content="summary">
@@ -155,7 +155,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#iostat"><span class="nav-number">1.</span> <span class="nav-text">iostat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98"><span class="nav-number">2.</span> <span class="nav-text">磁盘</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E7%9A%84IO%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5"><span class="nav-number">3.</span> <span class="nav-text">mysql的IO使用情况</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sysbench"><span class="nav-number">4.</span> <span class="nav-text">sysbench</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#iostat"><span class="nav-number">1.</span> <span class="nav-text">iostat</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#%E7%A3%81%E7%9B%98"><span class="nav-number">2.</span> <span class="nav-text">磁盘</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%9A%84%E8%AE%BF%E9%97%AE%E6%A8%A1%E5%BC%8F"><span class="nav-number">2.1.</span> <span class="nav-text">磁盘的访问模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E7%A3%81%E7%9B%98%E7%9A%84%E5%88%86%E7%B1%BB"><span class="nav-number">2.2.</span> <span class="nav-text">磁盘的分类</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E6%8F%90%E5%8D%87IOPS%E6%80%A7%E8%83%BD%E7%9A%84%E6%89%8B%E6%AE%B5"><span class="nav-number">2.3.</span> <span class="nav-text">提升IOPS性能的手段</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#RAID%E7%B1%BB%E5%88%AB"><span class="nav-number">2.4.</span> <span class="nav-text">RAID类别</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#mysql%E7%9A%84IO%E4%BD%BF%E7%94%A8%E6%83%85%E5%86%B5"><span class="nav-number">3.</span> <span class="nav-text">mysql的IO使用情况</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AD%98%E5%82%A8%E7%BB%93%E6%9E%84%E5%AF%B9%E5%BA%94%E5%85%B3%E7%B3%BB"><span class="nav-number">3.1.</span> <span class="nav-text">存储结构对应关系</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#O-DIRECT"><span class="nav-number">3.2.</span> <span class="nav-text">O_DIRECT</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#sysbench"><span class="nav-number">4.</span> <span class="nav-text">sysbench</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.1.</span> <span class="nav-text">基本介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BD%BF%E7%94%A8%E6%96%B9%E6%B3%95%E4%BB%8B%E7%BB%8D"><span class="nav-number">4.2.</span> <span class="nav-text">使用方法介绍</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%B8%B8%E7%94%A8%E6%B5%8B%E8%AF%95%E8%84%9A%E6%9C%AC"><span class="nav-number">4.3.</span> <span class="nav-text">常用测试脚本</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%AE%89%E8%A3%85"><span class="nav-number">4.4.</span> <span class="nav-text">安装</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%A6%82%E4%BD%95%E5%88%86%E6%9E%90mysql%E5%9F%BA%E5%87%86%E6%B5%8B%E8%AF%95%E7%BB%93%E6%9E%9C"><span class="nav-number">4.5.</span> <span class="nav-text">如何分析mysql基准测试结果</span></a></li></ol></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -407,9 +407,7 @@
 <li><p>%util<br>◦ 磁盘是否空闲;不能简单的等同于IO的使用率;该值可以解释为磁盘是否繁忙 ◦ 如果该值100% 不能简单的等同于磁盘的负载满了，达到了瓶颈<br>◦ 需要综合 avgqu-sz 、 await 等其他指标进行综合判断磁盘是否达到瓶颈</p>
 </li>
 </ul>
-<h2 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h2><ol>
-<li><p>磁盘的访问模式</p>
-<ul>
+<h2 id="磁盘"><a href="#磁盘" class="headerlink" title="磁盘"></a>磁盘</h2><h3 id="磁盘的访问模式"><a href="#磁盘的访问模式" class="headerlink" title="磁盘的访问模式"></a>磁盘的访问模式</h3><ul>
 <li><p>顺序访问</p>
 <ul>
 <li><p>顺序的访问磁盘上的块;</p>
@@ -432,9 +430,7 @@
 <p>拷贝文件属于顺序访问，数据库中访问数据属于随机访问</p>
 <p>数据库对数据的访问做了优化，把随机访问转成顺序访问</p>
 </blockquote>
-</li>
-<li><p>磁盘的分类</p>
-<ul>
+<h3 id="磁盘的分类"><a href="#磁盘的分类" class="headerlink" title="磁盘的分类"></a>磁盘的分类</h3><ul>
 <li><p>HDD</p>
 <ul>
 <li><p>盘片通过旋转，磁头进行定位，读取数据;</p>
@@ -510,9 +506,7 @@
 </blockquote>
 </li>
 </ul>
-</li>
-<li><p>提升IOPS性能的手段</p>
-<ul>
+<h3 id="提升IOPS性能的手段"><a href="#提升IOPS性能的手段" class="headerlink" title="提升IOPS性能的手段"></a>提升IOPS性能的手段</h3><ul>
 <li><p>通过 RAID 技术</p>
 <ul>
 <li><p>功耗较高  </p>
@@ -540,23 +534,15 @@
 </ul>
 </li>
 </ul>
-</li>
-<li><p>RAID类别</p>
-<p><img src="/mysql/learn-mysql-013/raid_0.png" loading="lazy"></p>
+<h3 id="RAID类别"><a href="#RAID类别" class="headerlink" title="RAID类别"></a>RAID类别</h3><p><img src="/mysql/learn-mysql-013/raid_0.png" loading="lazy"></p>
 <p><img src="/mysql/learn-mysql-013/raid_1.png" loading="lazy"></p>
 <p><img src="/mysql/learn-mysql-013/raid_5.png" loading="lazy"></p>
 <p><img src="/mysql/learn-mysql-013/raid_6.png" loading="lazy"></p>
 <p><img src="/mysql/learn-mysql-013/raid_1_0.png" loading="lazy"></p>
 <p><img src="/mysql/learn-mysql-013/raid_5_0.png" loading="lazy"></p>
-</li>
-</ol>
 <h2 id="mysql的IO使用情况"><a href="#mysql的IO使用情况" class="headerlink" title="mysql的IO使用情况"></a>mysql的IO使用情况</h2><p>通过threads表中的信息，结合iotop -u mysql的输出，就可以知道某个线程的io使用情况</p>
-<ol>
-<li><p>存储结构对应关系</p>
-<p><img src="/mysql/learn-mysql-013/database_filesystem_disk.png" loading="lazy"></p>
-</li>
-<li><p>O_DIRECT</p>
-<ul>
+<h3 id="存储结构对应关系"><a href="#存储结构对应关系" class="headerlink" title="存储结构对应关系"></a>存储结构对应关系</h3><p><img src="/mysql/learn-mysql-013/database_filesystem_disk.png" loading="lazy"></p>
+<h3 id="O-DIRECT"><a href="#O-DIRECT" class="headerlink" title="O_DIRECT"></a>O_DIRECT</h3><ul>
 <li><p>fwrite &#x2F; fsync</p>
 <ul>
 <li><p>fwrite 是把数据写入文件系统层(Filesystem)(可能有cache)，并不能保证写入Disk</p>
@@ -572,13 +558,93 @@
 <p><img src="/mysql/learn-mysql-013/mysql_o_direct.png" loading="lazy"></p>
 </li>
 </ul>
-</li>
-</ol>
-<h2 id="sysbench"><a href="#sysbench" class="headerlink" title="sysbench"></a>sysbench</h2><ol>
-<li><p>安装</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">brew install sysbench</span></span><br></pre></td></tr></table></figure>
-</li>
-<li><p>测试</p>
+<h2 id="sysbench"><a href="#sysbench" class="headerlink" title="sysbench"></a>sysbench</h2><p>qps：query pre second</p>
+<p>tps：transaction pre second</p>
+<h3 id="基本介绍"><a href="#基本介绍" class="headerlink" title="基本介绍"></a>基本介绍</h3><ul>
+<li>简单高效的基准测试工具</li>
+<li>oracle官方也使用该工具对mysql进行测试</li>
+<li>根据互联网应用特点进行测试</li>
+<li>可以根据某个具体操作进行测试</li>
+<li>还支持oracle和postgreSql测试</li>
+<li>提供大量的速率和延迟的统计数据，包括延迟的百分比和柱状图</li>
+<li>即使有成千上万的并发线程，开销也很低，sysbench能够每秒产生和跟踪数以亿计的事件</li>
+</ul>
+<h3 id="使用方法介绍"><a href="#使用方法介绍" class="headerlink" title="使用方法介绍"></a>使用方法介绍</h3><p>sysbench测试三部曲：prepare --&gt; run --&gt; cleanup</p>
+<h3 id="常用测试脚本"><a href="#常用测试脚本" class="headerlink" title="常用测试脚本"></a>常用测试脚本</h3><p>sysbench内置脚本存放在 $SYSBENCH_HOME&#x2F;share&#x2F;sysbench目录下</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">ll *lua</span></span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.4K  4 24  2020 bulk_insert.lua</span><br><span class="line">-rw-r--r--  1 yangyitong  wheel    14K  4 24  2020 oltp_common.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.3K  4 24  2020 oltp_delete.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   2.4K  4 24  2020 oltp_insert.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.2K  4 24  2020 oltp_point_select.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.6K  4 24  2020 oltp_read_only.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.8K  4 24  2020 oltp_read_write.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.1K  4 24  2020 oltp_update_index.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.1K  4 24  2020 oltp_update_non_index.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.4K  4 24  2020 oltp_write_only.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   1.9K  4 24  2020 select_random_points.lua</span><br><span class="line">-rwxr-xr-x  1 yangyitong  wheel   2.1K  4 24  2020 select_random_ranges.lua</span><br></pre></td></tr></table></figure>
+
+<table>
+<thead>
+<tr>
+<th>脚本名称</th>
+<th>说明</th>
+<th>sql语句</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>bulk_insert.lua</td>
+<td>批量插入测试</td>
+<td>INSERT INTO sbtest1 VALUES(?, ?),(?, ?),(?, ?),(?, ?)</td>
+</tr>
+<tr>
+<td>oltp_delete.lua</td>
+<td>删除测试</td>
+<td>DELETE FROM sbtest1 WHERE id&#x3D;?</td>
+</tr>
+<tr>
+<td>oltp_insert.lua</td>
+<td>插入测试</td>
+<td>INSERT INTO sbtest1 (id, k, c, pad) VALUES (?, ?, ?, ?)</td>
+</tr>
+<tr>
+<td>oltp_point_select.lua</td>
+<td>基于主键进行查询</td>
+<td>SELECT c FROM sbtest1 WHERE id&#x3D;?</td>
+</tr>
+<tr>
+<td>oltp_read_only.lua</td>
+<td>只读测试</td>
+<td>SELECT c FROM sbtest1 WHERE id&#x3D;? # 默认会执行 10 次，由 --point_selects 选项控制。<br>SELECT c FROM sbtest1 WHERE id BETWEEN ? AND ? <br>SELECT SUM(k) FROM sbtest1 WHERE id BETWEEN ? AND ? <br>SELECT c FROM sbtest1 WHERE id BETWEEN ? AND ? ORDER BY c <br>SELECT DISTINCT c FROM sbtest1 WHERE id BETWEEN ? AND ? ORDER BY c</td>
+</tr>
+<tr>
+<td>oltp_read_write.lua</td>
+<td>读写测试</td>
+<td>SELECT c FROM sbtest1 WHERE id&#x3D;? # 默认会执行 10 次，由 --point_selects 选项控制。 <br>SELECT c FROM sbtest1 WHERE id BETWEEN ? AND ? <br>SELECT SUM(k) FROM sbtest1 WHERE id BETWEEN ? AND ? <br>SELECT c FROM sbtest1 WHERE id BETWEEN ? AND ? ORDER BY c <br>SELECT DISTINCT c FROM sbtest1 WHERE id BETWEEN ? AND ? ORDER BY c <br>UPDATE sbtest1 SET k&#x3D;k+1 WHERE id&#x3D;? UPDATE sbtest1 SET c&#x3D;? WHERE id&#x3D;? <br>DELETE FROM sbtest1 WHERE id&#x3D;? <br>INSERT INTO sbtest1 (id, k, c, pad) VALUES (?, ?, ?, ?)</td>
+</tr>
+<tr>
+<td>oltp_update_index.lua</td>
+<td>基于主键进行更新，更新的是索引字段</td>
+<td>UPDATE sbtest1 SET k&#x3D;k+1 WHERE id&#x3D;?</td>
+</tr>
+<tr>
+<td>oltp_update_non_index.lua</td>
+<td>基于主键进行更新，更新的是非索引字段</td>
+<td>UPDATE sbtest1 SET c&#x3D;? WHERE id&#x3D;?</td>
+</tr>
+<tr>
+<td>oltp_write_only.lua</td>
+<td>只写测试</td>
+<td>UPDATE sbtest1 SET k&#x3D;k+1 WHERE id&#x3D;? <br>UPDATE sbtest1 SET c&#x3D;? WHERE id&#x3D;? <br>DELETE FROM sbtest1 WHERE id&#x3D;? <br>INSERT INTO sbtest1 (id, k, c, pad) VALUES (?, ?, ?, ?)</td>
+</tr>
+<tr>
+<td>select_random_points.lua</td>
+<td>基于索引进行随机查询</td>
+<td>SELECT id, k, c, pad FROM sbtest1 WHERE k IN (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)</td>
+</tr>
+<tr>
+<td>select_random_ranges.lua</td>
+<td>基于索引进行随机范围查询</td>
+<td>SELECT count(k) FROM sbtest1 WHERE k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ? OR k BETWEEN ? AND ?</td>
+</tr>
+</tbody></table>
+<blockquote>
+<p>sysbench查看帮助</p>
+<p>cd $SYSBENCH_HOME&#x2F;share&#x2F;sysbench &amp;&amp; sysbench oltp_insert.lua help</p>
+</blockquote>
+<h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">brew install sysbench</span></span><br></pre></td></tr></table></figure>
+
+<ol>
+<li><p>测试fileio</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">sysbench --file-num=4 --file-total-size=10G --file-block-size=8192 --file-test-mode=rndrw --time=600 --threads=16  --report-interval=10 fileio prepare</span></span><br></pre></td></tr></table></figure>
 
 <blockquote>
@@ -588,6 +654,18 @@
 <li><p>测试mysql</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">&gt; </span><span class="language-bash">sysbench /opt/homebrew/Cellar/sysbench/1.0.20_1/share/sysbench/oltp_insert.lua --mysql-host=127.0.0.1 --mysql-port=3306 --mysql-user=root  --mysql-password=<span class="string">&#x27;admin123&#x27;</span> --mysql-db=sbtest --db-driver=mysql  --tables=1 --table-size=10000000 --report-interval=10 --threads=16 --time=120 cleanup</span></span><br></pre></td></tr></table></figure></li>
 </ol>
+<h3 id="如何分析mysql基准测试结果"><a href="#如何分析mysql基准测试结果" class="headerlink" title="如何分析mysql基准测试结果"></a>如何分析mysql基准测试结果</h3><p>下面我们分析下 oltp_read_write 场景下的压测结果。注：右滑可以看到每个指标的具体含义。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br></pre></td><td class="code"><pre><span class="line">Threads started!</span><br><span class="line"></span><br><span class="line">[ 10s ] thds: 64 tps: 5028.08 qps: 100641.26 (r/w/o: 70457.59/20121.51/10062.16) lat (ms,95%): 17.32 err/s: 0.00 reconn/s: 0.00</span><br><span class="line"><span class="meta prompt_"># </span><span class="language-bash">thds 是并发线程数。tps 是每秒事务数。qps 是每秒操作数，等于 r（读操作）加上 w（写操作）加上 o（其他操作，主要包括 BEGIN 和 COMMIT）。lat 是延迟，(ms,95%) 是 95% 的查询时间小于或等于该值，单位毫秒。err/s 是每秒错误数。reconn/s 是每秒重试的次数。</span></span><br><span class="line">[ 20s ] thds: 64 tps: 5108.93 qps: 102192.09 (r/w/o: 71533.28/20440.64/10218.17) lat (ms,95%): 17.32 err/s: 0.00 reconn/s: 0.00</span><br><span class="line">[ 30s ] thds: 64 tps: 5126.50 qps: 102505.50 (r/w/o: 71756.30/20496.60/10252.60) lat (ms,95%): 17.32 err/s: 0.00 reconn/s: 0.00</span><br><span class="line">[ 40s ] thds: 64 tps: 5144.50 qps: 102907.20 (r/w/o: 72034.07/20583.72/10289.41) lat (ms,95%): 17.01 err/s: 0.00 reconn/s: 0.00</span><br><span class="line">[ 50s ] thds: 64 tps: 5137.29 qps: 102739.80 (r/w/o: 71916.99/20548.64/10274.17) lat (ms,95%): 17.01 err/s: 0.00 reconn/s: 0.00</span><br><span class="line">[ 60s ] thds: 64 tps: 4995.38 qps: 99896.35 (r/w/o: 69925.98/19979.61/9990.75) lat (ms,95%): 17.95 err/s: 0.00 reconn/s: 0.00</span><br><span class="line">SQL statistics:</span><br><span class="line">    queries performed:</span><br><span class="line">        read:                            4276622 # 读操作的数量</span><br><span class="line">        write:                           1221892 # 写操作的数量</span><br><span class="line">        other:                           610946  # 其它操作的数量</span><br><span class="line">        total:                           6109460 # 总的操作数量，total = read + write + other</span><br><span class="line">    transactions:                        305473 (5088.63 per sec.)    # 总的事务数（每秒事务数）</span><br><span class="line">    queries:                             6109460 (101772.64 per sec.) # 总的操作数（每秒操作数）</span><br><span class="line">    ignored errors:                      0      (0.00 per sec.)       # 忽略的错误数（每秒忽略的错误数）</span><br><span class="line">    reconnects:                          0      (0.00 per sec.)       # 重试次数（每秒重试的次数）</span><br><span class="line"></span><br><span class="line">General statistics:</span><br><span class="line">    total time:                          60.0301s  # 总的执行时间</span><br><span class="line">    total number of events:              305473    # 执行的 event 的数量</span><br><span class="line">                                                   # 在 oltp_read_write 中，默认参数下，一个 event 其实就是一个事务</span><br><span class="line"></span><br><span class="line">Latency (ms):</span><br><span class="line">         min:                                    5.81 # 最小耗时</span><br><span class="line">         avg:                                   12.57 # 平均耗时</span><br><span class="line">         max:                                  228.87 # 最大耗时</span><br><span class="line">         95th percentile:                       17.32 # 95% event 的执行耗时</span><br><span class="line">         sum:                              3840044.28 # 总耗时</span><br><span class="line"></span><br><span class="line">Threads fairness:</span><br><span class="line">    events (avg/stddev):           4773.0156/30.77  # 平均每个线程执行 event 的数量</span><br><span class="line">                                                    # stddev 是标准差，值越小，代表结果越稳定。</span><br><span class="line">    execution time (avg/stddev):   60.0007/0.01     # 平均每个线程的执行时间</span><br></pre></td></tr></table></figure>
+
+<blockquote>
+<p>输出中，重点关注三个指标：</p>
+<ol>
+<li>每秒事务数，即我们常说的 TPS。</li>
+<li>每秒操作数，即我们常说的 QPS。</li>
+<li>95% event 的执行耗时。</li>
+</ol>
+<p>TPS 和 QPS 反映了系统的吞吐量，越大越好。执行耗时代表了事务的执行时长，越小越好。在一定范围内，并发线程数指定得越大，TPS 和 QPS 也会越高。</p>
+</blockquote>
 
     </div>
 

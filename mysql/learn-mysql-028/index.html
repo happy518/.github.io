@@ -33,8 +33,11 @@
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-028/image-20230417153252127.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-028/image-20230417155505713.png">
 <meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-028/image-20230417163111697.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-028/image-20230418102806037.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-028/image-20230418143254209.png">
+<meta property="og:image" content="https://theme-next.js.org/mysql/learn-mysql-028/image-20230418144323657.png">
 <meta property="article:published_time" content="2023-04-17T06:05:31.000Z">
-<meta property="article:modified_time" content="2023-04-18T02:18:14.744Z">
+<meta property="article:modified_time" content="2023-04-18T06:47:55.199Z">
 <meta property="article:author" content="yangpengbing">
 <meta property="article:tag" content="mysql5.7">
 <meta name="twitter:card" content="summary">
@@ -151,7 +154,7 @@
       <div class="sidebar-panel-container">
         <!--noindex-->
         <div class="post-toc-wrap sidebar-panel">
-            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">事务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%9A%84%E4%B8%BB%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">事务相关的主题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E4%B8%80%E4%B8%AA%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">开启一个事务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84ACID"><span class="nav-number">1.3.</span> <span class="nav-text">事务的ACID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">事务的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%BC%94%E7%A4%BA"><span class="nav-number">1.5.</span> <span class="nav-text">事务演示</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo"><span class="nav-number">2.</span> <span class="nav-text">redo</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#redo%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">2.1.</span> <span class="nav-text">redo的组成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log-buffer%E7%9A%84%E5%88%B7%E6%96%B0%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">redo log buffer的刷新条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E6%8F%90%E4%BA%A4"><span class="nav-number">2.3.</span> <span class="nav-text">组提交</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo%E6%97%A5%E5%BF%97%E5%86%85%E5%AE%B9"><span class="nav-number">2.4.</span> <span class="nav-text">redo日志内容</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#binlog"><span class="nav-number">3.</span> <span class="nav-text">binlog</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8Dbinlog%E7%8A%B6%E6%80%81"><span class="nav-number">3.1.</span> <span class="nav-text">查看当前binlog状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.2.</span> <span class="nav-text">binlog的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog-events"><span class="nav-number">3.3.</span> <span class="nav-text">binlog events</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8Dbinlog%E4%B8%AD%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">3.4.</span> <span class="nav-text">查看当前binlog中的内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog%E6%BC%94%E7%A4%BA"><span class="nav-number">3.5.</span> <span class="nav-text">binlog演示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mysqlbinlog"><span class="nav-number">3.6.</span> <span class="nav-text">mysqlbinlog</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo%E5%92%8Cbinlog%E7%9A%84%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">redo和binlog的总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo"><span class="nav-number">5.</span> <span class="nav-text">undo</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#purge"><span class="nav-number">6.</span> <span class="nav-text">purge</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">7.</span> <span class="nav-text">分布式事务</span></a></li></ol></div>
+            <div class="post-toc animated"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.</span> <span class="nav-text">事务</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9B%B8%E5%85%B3%E7%9A%84%E4%B8%BB%E9%A2%98"><span class="nav-number">1.1.</span> <span class="nav-text">事务相关的主题</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E5%BC%80%E5%90%AF%E4%B8%80%E4%B8%AA%E4%BA%8B%E5%8A%A1"><span class="nav-number">1.2.</span> <span class="nav-text">开启一个事务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84ACID"><span class="nav-number">1.3.</span> <span class="nav-text">事务的ACID</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">1.4.</span> <span class="nav-text">事务的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%BA%8B%E5%8A%A1%E6%BC%94%E7%A4%BA"><span class="nav-number">1.5.</span> <span class="nav-text">事务演示</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo"><span class="nav-number">2.</span> <span class="nav-text">redo</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#redo%E7%9A%84%E7%BB%84%E6%88%90"><span class="nav-number">2.1.</span> <span class="nav-text">redo的组成</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo-log-buffer%E7%9A%84%E5%88%B7%E6%96%B0%E6%9D%A1%E4%BB%B6"><span class="nav-number">2.2.</span> <span class="nav-text">redo log buffer的刷新条件</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E7%BB%84%E6%8F%90%E4%BA%A4"><span class="nav-number">2.3.</span> <span class="nav-text">组提交</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#redo%E6%97%A5%E5%BF%97%E5%86%85%E5%AE%B9"><span class="nav-number">2.4.</span> <span class="nav-text">redo日志内容</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#binlog"><span class="nav-number">3.</span> <span class="nav-text">binlog</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8Dbinlog%E7%8A%B6%E6%80%81"><span class="nav-number">3.1.</span> <span class="nav-text">查看当前binlog状态</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog%E7%9A%84%E7%B1%BB%E5%9E%8B"><span class="nav-number">3.2.</span> <span class="nav-text">binlog的类型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog-events"><span class="nav-number">3.3.</span> <span class="nav-text">binlog events</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E6%9F%A5%E7%9C%8B%E5%BD%93%E5%89%8Dbinlog%E4%B8%AD%E7%9A%84%E5%86%85%E5%AE%B9"><span class="nav-number">3.4.</span> <span class="nav-text">查看当前binlog中的内容</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#binlog%E6%BC%94%E7%A4%BA"><span class="nav-number">3.5.</span> <span class="nav-text">binlog演示</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#mysqlbinlog"><span class="nav-number">3.6.</span> <span class="nav-text">mysqlbinlog</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#redo%E5%92%8Cbinlog%E7%9A%84%E6%80%BB%E7%BB%93"><span class="nav-number">4.</span> <span class="nav-text">redo和binlog的总结</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#undo"><span class="nav-number">5.</span> <span class="nav-text">undo</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#checkpoint"><span class="nav-number">5.1.</span> <span class="nav-text">checkpoint</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undo%E5%AF%B9%E8%B1%A1"><span class="nav-number">5.2.</span> <span class="nav-text">undo对象</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#rollback-segment-%E5%9B%9E%E6%BB%9A%E6%AE%B5"><span class="nav-number">5.2.1.</span> <span class="nav-text">rollback segment(回滚段)</span></a></li></ol></li><li class="nav-item nav-level-4"><a class="nav-link" href="#undo-log"><span class="nav-number">5.3.</span> <span class="nav-text">undo log</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#purge"><span class="nav-number">6.</span> <span class="nav-text">purge</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%9D%A1%E4%BB%B6%E6%97%B6%E8%81%9A%E9%9B%86%E7%B4%A2%E5%BC%95"><span class="nav-number">6.1.</span> <span class="nav-text">过滤条件时聚集索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E8%BF%87%E6%BB%A4%E6%9D%A1%E4%BB%B6%E6%97%B6%E4%BA%8C%E7%BA%A7%E7%B4%A2%E5%BC%95"><span class="nav-number">6.2.</span> <span class="nav-text">过滤条件时二级索引</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%B2%A1%E6%9C%89insert"><span class="nav-number">6.3.</span> <span class="nav-text">为什么没有insert</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#purge%E6%AD%BB%E9%94%81"><span class="nav-number">6.4.</span> <span class="nav-text">purge死锁</span></a><ol class="nav-child"><li class="nav-item nav-level-5"><a class="nav-link" href="#%E5%9C%BA%E6%99%AF%E8%AF%B4%E6%98%8E"><span class="nav-number">6.4.1.</span> <span class="nav-text">场景说明</span></a></li><li class="nav-item nav-level-5"><a class="nav-link" href="#%E6%BC%94%E7%A4%BA"><span class="nav-number">6.4.2.</span> <span class="nav-text">演示</span></a></li></ol></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#%E5%88%86%E5%B8%83%E5%BC%8F%E4%BA%8B%E5%8A%A1"><span class="nav-number">7.</span> <span class="nav-text">分布式事务</span></a></li></ol></div>
         </div>
         <!--/noindex-->
 
@@ -647,7 +650,106 @@
 </ul>
 <img src="/mysql/learn-mysql-028/image-20230417163111697.png" alt="image-20230417163111697" style="zoom:50%;">
 
-<h3 id="undo"><a href="#undo" class="headerlink" title="undo"></a>undo</h3><h3 id="purge"><a href="#purge" class="headerlink" title="purge"></a>purge</h3><h3 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1</span></span><br><span class="line">mysql<span class="operator">&gt;</span> use db_tranction_test;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tbl_test_xa(a <span class="type">int</span> <span class="keyword">primary</span> key);</span><br></pre></td></tr></table></figure>
+<h3 id="undo"><a href="#undo" class="headerlink" title="undo"></a>undo</h3><h4 id="checkpoint"><a href="#checkpoint" class="headerlink" title="checkpoint"></a>checkpoint</h4><p>mysql的checkpoint是记录在redo log file(重做日志)的前2k字节中，(一个log block是512byte，所以是前四个log block)</p>
+<img src="/mysql/learn-mysql-028/image-20230418102806037.png" alt="image-20230418102806037" style="zoom:50%;">
+
+<p>存在两个checkpoint(CP1和CP2)，两个checkpoint循环写入</p>
+<blockquote>
+<ul>
+<li>所以说，redo log的写入其实不是完全顺序，因为还需要更新checkpoint中的内容</li>
+<li>通过判断两个checkpoint中的值大小，可以判断哪个checkpoint是最后写入的，即使使用小的checkpoint，也无非多恢复一些数据，多花一点时间而已</li>
+<li>设计层两个，主要是为了容灾考虑</li>
+</ul>
+</blockquote>
+<h4 id="undo对象"><a href="#undo对象" class="headerlink" title="undo对象"></a>undo对象</h4><ul>
+<li>rollback segment 回滚段</li>
+<li>undo log segment undo日志段</li>
+<li>undo page</li>
+<li>undo log</li>
+<li>undo log record</li>
+</ul>
+<h5 id="rollback-segment-回滚段"><a href="#rollback-segment-回滚段" class="headerlink" title="rollback segment(回滚段)"></a>rollback segment(回滚段)</h5><ul>
+<li>mysql5.5前只有1个rollback segment</li>
+<li>mysql5.5+有128个rollback segment</li>
+<li>不保存任何undo log</li>
+<li>仅保存undo log segment的位置</li>
+<li>含有1024个undo slot</li>
+</ul>
+<img src="/mysql/learn-mysql-028/image-20230418143254209.png" alt="image-20230418143254209" style="zoom:50%;">
+
+<blockquote>
+<ul>
+<li>mysql5.5中只有一个rollback segment，即只有1024个undo log segment，那就表示最多只能有1024个并发事务去执行undo</li>
+<li>如果用不到undo，其实是可以超过1024个线程的</li>
+<li>在mysql5.6中支持128*1024个并发执行undo的线程</li>
+</ul>
+</blockquote>
+<p>undo默认存放在ibdata1中，即系统表空间中</p>
+<blockquote>
+<p>系统表空间中的内容(ibdata1)</p>
+<ol>
+<li>double write</li>
+<li>元数据信息(数据字典)</li>
+<li>insert buffer&#x2F;change buffer</li>
+<li>undo信息(5.6后可以分离)，分开可避免竞争<ul>
+<li>innodb_undo_directory：表示undo存放的独立位置</li>
+<li>innodb_undo_logs：表示rollback segment的个数</li>
+<li>innodb_undo_tablespaces：存放到哪几个文件中去</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+<p>在mysql5.7以后，rollback segment从128个减小等6个，剩余的32个rollback segment预留给临时表空间(ibtmp1)使用</p>
+<h4 id="undo-log"><a href="#undo-log" class="headerlink" title="undo log"></a>undo log</h4><ul>
+<li>undo log header</li>
+<li>undo log records：undo log记录分为两种，insert的undo和update的undo<ul>
+<li>insert undo log record：记录insert</li>
+<li>update undo log record：记录update和delete</li>
+</ul>
+</li>
+</ul>
+<p>undo是逻辑记录，记录了每一行修改的值(前后项)</p>
+<img src="/mysql/learn-mysql-028/image-20230418144323657.png" alt="image-20230418144323657" style="zoom:50%;">
+
+<blockquote>
+<p>之前说到redo写prepare日志，其实就是把上面中TRX_UNDO_STATE修改为PREPARE状态。(redo记录的是页的变化，undo也是页)</p>
+</blockquote>
+<h3 id="purge"><a href="#purge" class="headerlink" title="purge"></a>purge</h3><ul>
+<li>真正的删除记录</li>
+<li>删除undo log</li>
+</ul>
+<p>举例：表tb1中有记录pk&#x3D;1,2,3; 此时delete from tb1 where pk &#x3D; 1;</p>
+<ol>
+<li>将pk&#x3D;1的记录标记删除(delete-mark, info bits), 数据库中pk&#x3D;1的记录此时还是存在的，空间并没有释放，是同步操作(sql执行完了，也就标记完了)</li>
+<li>purge，该部分为后台线程(purge线程)异步操作，会真正的删除该记录，且空间被释放，purge线程是系统自动的，无法人为控制。</li>
+</ol>
+<blockquote>
+<p>标记为删除的原因：</p>
+<ol>
+<li>该事务可能需要回滚，先做保留</li>
+<li>当事务1去删除pk&#x3D;1且没有提交时，事务2应该要能看到pk&#x3D;1的记录(事务的隔离性)</li>
+</ol>
+</blockquote>
+<h4 id="过滤条件时聚集索引"><a href="#过滤条件时聚集索引" class="headerlink" title="过滤条件时聚集索引"></a>过滤条件时聚集索引</h4><ol>
+<li>delete：将该记录标记为delete-mark</li>
+<li>update：将该记录先物理delete(聚集索引主键相同的行最多只有1个)，然后insert(或者可以原地更新in place update)，即使删除了，也可以通过undo进行还原</li>
+</ol>
+<h4 id="过滤条件时二级索引"><a href="#过滤条件时二级索引" class="headerlink" title="过滤条件时二级索引"></a>过滤条件时二级索引</h4><ol>
+<li>delete：将该记录标记为delete-mark</li>
+<li>update：将该记录标记为delete-mark(索引列时columns + pk，即使时唯一索引更新也是和原来的不一样)，然后insert</li>
+</ol>
+<h4 id="为什么没有insert"><a href="#为什么没有insert" class="headerlink" title="为什么没有insert"></a>为什么没有insert</h4><ol>
+<li>insert操作是不需要异步purge，因为insert的记录都是之前不存在的</li>
+<li>不存在记录(为提交)是没有别的事务能引用到的，所以insert以后，对于的undo可以直接删除，而不需要等待异步purge</li>
+</ol>
+<blockquote>
+<p>总结：</p>
+<ol>
+<li>delete-mark的记录最后会被purge线程回收，purge会检测记录上是否有其他事务在引用undo，如果没有就可以删除</li>
+<li>innodb_purge_threads(5.6版本以后)，可以设置的大一些，回收的速度快一些</li>
+</ol>
+</blockquote>
+<h4 id="purge死锁"><a href="#purge死锁" class="headerlink" title="purge死锁"></a>purge死锁</h4><h5 id="场景说明"><a href="#场景说明" class="headerlink" title="场景说明"></a>场景说明</h5><h5 id="演示"><a href="#演示" class="headerlink" title="演示"></a>演示</h5><h3 id="分布式事务"><a href="#分布式事务" class="headerlink" title="分布式事务"></a>分布式事务</h3><figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端1</span></span><br><span class="line">mysql<span class="operator">&gt;</span> use db_tranction_test;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">create</span> <span class="keyword">table</span> tbl_test_xa(a <span class="type">int</span> <span class="keyword">primary</span> key);</span><br></pre></td></tr></table></figure>
 
 <figure class="highlight sql"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">-- 终端2</span></span><br><span class="line">mysql<span class="operator">&gt;</span> xa <span class="keyword">start</span> <span class="string">&#x27;A&#x27;</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> <span class="keyword">insert</span> <span class="keyword">into</span> tbl_test_xa <span class="keyword">select</span> <span class="number">10</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> xa <span class="keyword">end</span> <span class="string">&#x27;A&#x27;</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> xa <span class="keyword">prepare</span> <span class="string">&#x27;A&#x27;</span>;</span><br><span class="line">mysql<span class="operator">&gt;</span> xa recover;</span><br><span class="line"><span class="operator">+</span><span class="comment">----------+--------------+--------------+------+</span></span><br><span class="line"><span class="operator">|</span> formatID <span class="operator">|</span> gtrid_length <span class="operator">|</span> bqual_length <span class="operator">|</span> data <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+--------------+--------------+------+</span></span><br><span class="line"><span class="operator">|</span> <span class="number">1</span>        <span class="operator">|</span> <span class="number">1</span>            <span class="operator">|</span> <span class="number">0</span>            <span class="operator">|</span> A    <span class="operator">|</span></span><br><span class="line"><span class="operator">+</span><span class="comment">----------+--------------+--------------+------+</span></span><br><span class="line">mysql<span class="operator">&gt;</span> xa <span class="keyword">commit</span> <span class="string">&#x27;A&#x27;</span>;</span><br></pre></td></tr></table></figure>
 
